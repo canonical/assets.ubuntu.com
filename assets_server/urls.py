@@ -1,6 +1,7 @@
-from django.conf.urls import patterns, include, url
-from rest_framework import routers
+# Installed packages
+from django.conf.urls import patterns, url
 
+# Local code
 from views import Asset, AssetList, AssetJson
 
 # Wire up our API using automatic URL routing.
