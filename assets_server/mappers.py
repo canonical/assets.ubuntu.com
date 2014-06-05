@@ -9,39 +9,6 @@ from swiftclient.client import ClientException as SwiftException
 from models import Asset
 
 
-class AssetManager:
-    """
-    Manage assets and data
-    """
-
-    file_manager = None
-    data_manager = None
-
-    def __init__(self, file_manager, data_manager):
-        self.file_manager = file_manager
-        self.data_manager = data_manager
-
-    def create(self, file_stream, extra_data):
-        """
-        Create asset file and data
-        """
-
-        filename = self.file_manager.create(file_stream)
-        return self.data_manager.update(filename, extra_data)
-
-    def delete(self, filename):
-        """
-        Delete file and data for asset
-        """
-
-        self.file_manager.delete(filename)
-        self.data_manager.delete(filename)
-
-    def find(self, queries):
-        for query in queries:
-            pass
-
-
 class FileManager:
     """
     Manage asset files:
@@ -208,10 +175,13 @@ class DataManager:
         if mimetype == "image/svg+xml":
             asset.png_filename = asset.filename + ".png"
 
-        return asset
+        return asset.__dict__
 
     def fetch(self, filenames):
         return [
             self.fetch_one(filename)
             for filename in filenames
         ]
+
+    def delete(self, filename):
+        self.data_collection.remove({'filename': filename})

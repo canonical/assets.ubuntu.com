@@ -82,8 +82,9 @@ class Asset(APIView):
         """
 
         try:
+            data_manager.delete(filename)
             file_manager.delete(filename)
-            return {"message": "Deleted"}, 204
+            return Response({"message": "Deleted {0}".format(filename)})
 
         except SwiftClientException as err:
             return error_response(err, filename)
