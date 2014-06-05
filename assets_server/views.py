@@ -18,7 +18,7 @@ from rest_framework.response import Response
 # Local
 from lib.processors import image_processor
 from lib.http_helpers import error_response, file_from_base64
-from lib.assets import FileManager, DataManager
+from mappers import FileManager, DataManager
 
 
 # MongoDB settings
