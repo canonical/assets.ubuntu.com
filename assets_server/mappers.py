@@ -1,9 +1,9 @@
 import re
 import mimetypes
 import urllib
+from hashlib import sha1
 
 from wand.image import Image
-from hashlib import sha1
 from swiftclient.client import ClientException as SwiftException
 
 from models import Asset
