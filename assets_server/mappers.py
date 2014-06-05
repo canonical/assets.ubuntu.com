@@ -6,7 +6,7 @@ from wand.image import Image
 from hashlib import sha1
 from swiftclient.client import ClientException as SwiftException
 
-from server.models import Asset
+from models import Asset
 
 
 class AssetManager:
