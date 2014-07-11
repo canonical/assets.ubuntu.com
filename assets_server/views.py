@@ -23,8 +23,7 @@ from mappers import FileManager, DataManager
 
 # MongoDB settings
 # ===
-mongo_hostname = os.environ.get('MONGODB_HOSTNAME', 'localhost')
-mongo_url = 'mongodb://{host}:27017/'.format(host=str(mongo_hostname))
+mongo_url = os.environ.get('DATABASE_URL', 'mongodb://localhost/')
 mongo_client = MongoClient(mongo_url)
 mongo_collection = mongo_client["assets"]["asset_data"]
 data_manager = DataManager(data_collection=mongo_collection)
