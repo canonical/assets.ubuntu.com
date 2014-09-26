@@ -6,8 +6,6 @@ from hashlib import sha1
 from wand.image import Image
 from swiftclient.client import ClientException as SwiftException
 
-from models import Asset
-
 
 class FileManager:
     """
@@ -163,19 +161,19 @@ class DataManager:
     def exists(self, filename):
         return bool(self.fetch_one(filename))
 
-    def format(self, asset_data):
-        asset = Asset(
-            filename=asset_data['filename'],
-            tags=asset_data["tags"],
-            created=asset_data["_id"].generation_time.ctime()
-        )
+    def format(self, asset_record):
+        asset_data = {
+            'filename': asset_record['filename'],
+            'tags': asset_record["tags"],
+            'created': asset_record["_id"].generation_time.ctime()
+        }
 
-        mimetype = mimetypes.guess_type(asset.filename)[0]
+        mimetype = mimetypes.guess_type(asset_data['filename'])[0]
 
         if mimetype == "image/svg+xml":
-            asset.png_filename = asset.filename + ".png"
+            asset_data['png_filename'] = asset_data['filename'] + ".png"
 
-        return asset.__dict__
+        return asset_data
 
     def fetch(self, filenames):
         return [
