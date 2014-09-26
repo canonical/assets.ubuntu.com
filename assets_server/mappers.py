@@ -199,7 +199,7 @@ class DataManager:
     def format(self, asset_record):
         asset_data = {
             'filename': asset_record['filename'],
-            'tags': asset_record["tags"],
+            'tags': asset_record["tags"] or "",
             'created': asset_record["_id"].generation_time.ctime()
         }
 

@@ -94,7 +94,7 @@ class Asset(APIView):
         Update metadata against an asset
         """
 
-        tags = request.DATA.get('tags')
+        tags = request.DATA.get('tags', '')
 
         data = data_manager.update(filename, tags)
 
@@ -113,7 +113,7 @@ class AssetList(APIView):
         Create a new asset
         """
 
-        tags = request.DATA.get('tags')
+        tags = request.DATA.get('tags', '')
 
         # Get file data
         file_stream = file_from_base64(request, 'asset', 'filename')
