@@ -175,3 +175,81 @@ class AssetJson(APIView):
         """
 
         return Response(data_manager.fetch_one(filename))
+
+
+class Tokens(APIView):
+    """
+    HTTP methods for managing the collection of authentication tokens
+    """
+
+    def get(self, request):
+        """
+        Get data for an asset by filename
+        """
+
+        return Response(settings.TOKEN_MANAGER.all())
+
+    def post(self, request):
+        """
+        Update metadata against an asset
+        """
+
+        name = request.DATA.get('name')
+        body = {'name': name}
+        status = 200
+        token = False
+
+        if not name:
+            body['message'] = 'To create a token, please specify a name'
+
+        elif settings.TOKEN_MANAGER.exists(name):
+            body['message'] = 'Another token by that name already exists'
+
+        else:
+            token = settings.TOKEN_MANAGER.create(name)
+
+            if token:
+                body['message'] = 'Created OK'
+                body['token'] = token['token']
+            else:
+                body['message'] = 'Creation failed'
+
+        if not token:
+            status = 400
+            body['code'] = status
+
+        return Response(body, status)
+
+
+class Token(APIView):
+    """
+    HTTP methods for managing a single authentication token
+    """
+
+    def get(self, request, name):
+        """
+        Get token data by name
+        """
+
+        token = settings.TOKEN_MANAGER.fetch(name)
+
+        if not token:
+            raise Http404
+
+        return Response(token)
+
+    def delete(self, request, name):
+        """
+        Delete a single named authentication token, 204 if successful
+        """
+
+        status = 200
+
+        body = settings.TOKEN_MANAGER.delete(name) or {}
+
+        if body:
+            body['message'] = "Successfully deleted."
+        else:
+            raise Http404
+
+        return Response(body, status)
