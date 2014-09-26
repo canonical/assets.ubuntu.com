@@ -6,8 +6,8 @@ from io import BytesIO
 
 # Packages
 from django.http import HttpResponse
+from django.conf import settings
 from pilbox.errors import PilboxError
-from pymongo import MongoClient
 from swiftclient.client import (
     Connection as SwiftConnection,
     ClientException as SwiftClientException
@@ -21,16 +21,9 @@ from lib.http_helpers import error_response, file_from_base64
 from mappers import FileManager, DataManager, DelayedConnection
 
 
-# MongoDB settings
+# Managers
 # ===
-mongo_url = os.environ.get('DATABASE_URL', 'mongodb://localhost/')
-mongo_client = MongoClient(mongo_url)
-mongo_collection = mongo_client["assets"]["asset_data"]
-data_manager = DataManager(data_collection=mongo_collection)
-mongo_connected = True
-
-# Setup file_manager with swift
-# ===
+data_manager = DataManager(settings.MONGO["assets"]["asset_data"])
 swift = DelayedConnection(
     manager_class=FileManager,
     connection_class=SwiftConnection,
