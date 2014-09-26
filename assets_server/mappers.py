@@ -7,6 +7,41 @@ from wand.image import Image
 from swiftclient.client import ClientException as SwiftException
 
 
+class DelayedConnection:
+    """
+    Get read to make a Connection, for the FileManager
+    but only actually make the connection when "manager" if first called
+    """
+
+    file_manager = False
+
+    def __init__(
+        self, manager_class, connection_class,
+        auth_url, username, password, auth_version, tenant_name
+    ):
+        self.manager_class = manager_class
+        self.connection_class = connection_class
+        self.auth_url = auth_url
+        self.username = username
+        self.password = password
+        self.auth_version = auth_version
+        self.tenant_name = tenant_name
+
+    def manager(self):
+        if not self.file_manager:
+            self.file_manager = self.manager_class(
+                self.connection_class(
+                    self.auth_url,
+                    self.username,
+                    self.password,
+                    auth_version=self.auth_version,
+                    os_options={'tenant_name': self.tenant_name}
+                )
+            )
+
+        return self.file_manager
+
+
 class FileManager:
     """
     Manage asset files:

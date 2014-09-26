@@ -18,7 +18,7 @@ from rest_framework.response import Response
 # Local
 from lib.processors import image_processor
 from lib.http_helpers import error_response, file_from_base64
-from mappers import FileManager, DataManager
+from mappers import FileManager, DataManager, DelayedConnection
 
 
 # MongoDB settings
@@ -30,15 +30,16 @@ data_manager = DataManager(data_collection=mongo_collection)
 mongo_connected = True
 
 # Setup file_manager with swift
-swift_connection = SwiftConnection(
-    os.environ.get('OS_AUTH_URL'),
-    os.environ.get('OS_USERNAME'),
-    os.environ.get('OS_PASSWORD'),
+# ===
+swift = DelayedConnection(
+    manager_class=FileManager,
+    connection_class=SwiftConnection,
+    auth_url=os.environ.get('OS_AUTH_URL'),
+    username=os.environ.get('OS_USERNAME'),
+    password=os.environ.get('OS_PASSWORD'),
     auth_version='2.0',
-    os_options={'tenant_name': os.environ.get('OS_TENANT_NAME')}
+    tenant_name=os.environ.get('OS_TENANT_NAME')
 )
-
-file_manager = FileManager(swift_connection)
 
 
 class Asset(APIView):
@@ -56,7 +57,7 @@ class Asset(APIView):
         mimetype = mimetypes.guess_type(filename)[0]
 
         try:
-            asset_stream = BytesIO(file_manager.fetch(filename))
+            asset_stream = BytesIO(swift.manager().fetch(filename))
         except SwiftClientException as error:
             return error_response(error, filename)
 
@@ -82,7 +83,7 @@ class Asset(APIView):
 
         try:
             data_manager.delete(filename)
-            file_manager.delete(filename)
+            swift.manager().delete(filename)
             return Response({"message": "Deleted {0}".format(filename)})
 
         except SwiftClientException as err:
@@ -117,6 +118,7 @@ class AssetList(APIView):
         # Get file data
         file_stream = file_from_base64(request, 'asset', 'filename')
         file_data = file_stream.read()
+        file_manager = swift.manager()
 
         # Generate the asset filename
         filename = file_manager.generate_asset_filename(
