@@ -5,7 +5,7 @@ import errno
 from io import BytesIO
 
 # Packages
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.conf import settings
 from pilbox.errors import PilboxError
 from swiftclient.client import (
@@ -18,6 +18,7 @@ from rest_framework.response import Response
 # Local
 from lib.processors import image_processor
 from lib.http_helpers import error_response, file_from_base64
+from auth import token_authorization
 from mappers import FileManager, DataManager, DelayedConnection
 
 
@@ -69,6 +70,7 @@ class Asset(APIView):
         # Return asset
         return HttpResponse(asset_stream.read(), mimetype)
 
+    @token_authorization
     def delete(self, request, filename):
         """
         Delete a single named asset, 204 if successful
@@ -82,6 +84,7 @@ class Asset(APIView):
         except SwiftClientException as err:
             return error_response(err, filename)
 
+    @token_authorization
     def put(self, request, filename):
         """
         Update metadata against an asset
@@ -101,6 +104,7 @@ class AssetList(APIView):
 
     base_name = 'asset_list'
 
+    @token_authorization
     def post(self, request):
         """
         Create a new asset
@@ -141,6 +145,7 @@ class AssetList(APIView):
         # Return the list of data for the created files
         return Response(data_manager.fetch_one(filename), 201)
 
+    @token_authorization
     def get(self, request):
         """
         Get all assets.
@@ -169,6 +174,7 @@ class AssetJson(APIView):
 
     base_name = 'asset_json'
 
+    @token_authorization
     def get(self, request, filename):
         """
         Get data for an asset by filename
@@ -182,6 +188,7 @@ class Tokens(APIView):
     HTTP methods for managing the collection of authentication tokens
     """
 
+    @token_authorization
     def get(self, request):
         """
         Get data for an asset by filename
@@ -189,6 +196,7 @@ class Tokens(APIView):
 
         return Response(settings.TOKEN_MANAGER.all())
 
+    @token_authorization
     def post(self, request):
         """
         Update metadata against an asset
@@ -226,6 +234,7 @@ class Token(APIView):
     HTTP methods for managing a single authentication token
     """
 
+    @token_authorization
     def get(self, request, name):
         """
         Get token data by name
@@ -238,6 +247,7 @@ class Token(APIView):
 
         return Response(token)
 
+    @token_authorization
     def delete(self, request, name):
         """
         Delete a single named authentication token, 204 if successful
