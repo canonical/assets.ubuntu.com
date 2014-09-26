@@ -105,6 +105,27 @@ class AssetList(APIView):
     base_name = 'asset_list'
 
     @token_authorization
+    def get(self, request):
+        """
+        Get all assets.
+
+        Filter asset by providing a query
+        /?q=<query>
+
+        Query parts should be space separated,
+        and results will match all parts
+
+        Currently, the query will only be matched against
+        filenames
+        """
+
+        queries = request.GET.get('q', '').split(' ')
+
+        regex_string = '({0})'.format('|'.join(queries))
+
+        return Response(data_manager.find(regex_string))
+
+    @token_authorization
     def post(self, request):
         """
         Create a new asset
@@ -144,27 +165,6 @@ class AssetList(APIView):
 
         # Return the list of data for the created files
         return Response(data_manager.fetch_one(filename), 201)
-
-    @token_authorization
-    def get(self, request):
-        """
-        Get all assets.
-
-        Filter asset by providing a query
-        /?q=<query>
-
-        Query parts should be space separated,
-        and results will match all parts
-
-        Currently, the query will only be matched against
-        filenames
-        """
-
-        queries = request.GET.get('q', '').split(' ')
-
-        regex_string = '({0})'.format('|'.join(queries))
-
-        return Response(data_manager.find(regex_string))
 
 
 class AssetJson(APIView):
