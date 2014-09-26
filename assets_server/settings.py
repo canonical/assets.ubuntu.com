@@ -13,22 +13,18 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 
-# SECURITY WARNING: keep the secret key used in production secret!
+# Keep it secret, keep it safe!
+# (Although it's probably irrelevent to this app)
 SECRET_KEY = 'a6f@ev$$r^@d4boc-gx^j3l@a=fr4rc^qq3my27zh)pn09$583'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+ALLOWED_HOSTS = [
+    '0.0.0.0', '127.0.0.1', 'localhost',
+    '*.ubuntu.qa', '*.ubuntu.com', 'ubuntu.com'
+]
 
-TEMPLATE_DEBUG = True
+INSTALLED_APPS = ['rest_framework']
 
-ALLOWED_HOSTS = []
-
-INSTALLED_APPS = (
-    'rest_framework',
-    'django_extensions'
-)
-
-MIDDLEWARE_CLASSES = ()
+MIDDLEWARE_CLASSES = []
 
 ROOT_URLCONF = 'assets_server.urls'
 
