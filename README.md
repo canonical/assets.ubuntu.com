@@ -13,6 +13,10 @@ You'll need to install some aptitude dependencies:
 ``` bash
 sudo apt-get install libjpeg-dev zlib1g-dev libpng12-dev libmagickwand-dev python-dev
 ```
+And mongodb, if you don't already have it.
+``` bash
+sudo apt-get install mongodb
+```
 
 In Ubuntu, `pillow 2.2.1` will likely fail due to not being able to find `fterrors.h`. To fix that:
 
