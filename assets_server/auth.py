@@ -23,6 +23,8 @@ def token_authorization(target_function):
             token = params.get('token')
 
         if not settings.TOKEN_MANAGER.authenticate(token):
-            raise AuthenticationFailed
+            raise AuthenticationFailed(
+                detail='Unauthorized: Please provide a valid API token.'
+            )
         return target_function(self, request, *args, **kwargs)
     return inner

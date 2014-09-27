@@ -14,6 +14,7 @@ from swiftclient.client import (
 )
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.exceptions import ParseError
 
 # Local
 from lib.processors import image_processor
@@ -204,29 +205,24 @@ class Tokens(APIView):
 
         name = request.DATA.get('name')
         body = {'name': name}
-        status = 200
         token = False
 
         if not name:
-            body['message'] = 'To create a token, please specify a name'
+            raise ParseError('To create a token, please specify a name')
 
         elif settings.TOKEN_MANAGER.exists(name):
-            body['message'] = 'Another token by that name already exists'
+            raise ParseError('Another token by that name already exists')
 
         else:
             token = settings.TOKEN_MANAGER.create(name)
 
             if token:
-                body['message'] = 'Created OK'
+                body['message'] = 'Token created'
                 body['token'] = token['token']
             else:
-                body['message'] = 'Creation failed'
+                raise ParseError('Failed to create a token')
 
-        if not token:
-            status = 400
-            body['code'] = status
-
-        return Response(body, status)
+        return Response(body)
 
 
 class Token(APIView):
