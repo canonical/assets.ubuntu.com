@@ -1,6 +1,7 @@
 import re
 import mimetypes
 import urllib
+import uuid
 from hashlib import sha1
 
 from wand.image import Image
@@ -218,3 +219,63 @@ class DataManager:
 
     def delete(self, filename):
         self.data_collection.remove({'filename': filename})
+
+
+class TokenManager:
+
+    def __init__(self, data_collection):
+        self.data_collection = data_collection
+
+    def exists(self, name):
+        """Check if a token already exists with a specified name"""
+
+        return bool(self.fetch(name))
+
+    def authenticate(self, token):
+        """Check if this authentication token is valid (i.e. exists)"""
+
+        return bool(
+            self.data_collection.find_one(
+                {'token': token}
+            )
+        )
+
+    def fetch(self, name):
+        """Get a token's data, by its name"""
+
+        token_record = self.data_collection.find_one(
+            {"name": name}
+        )
+        return self._format(token_record)
+
+    def create(self, name):
+        """Generate a random token, with a given name"""
+
+        data = {
+            'token': uuid.uuid4().get_hex(),  # Random UUID
+            'name': name
+        }
+
+        if not self.exists(name):
+            if self.data_collection.insert(data):
+                return data
+
+    def delete(self, name):
+        """Delete tokens with this name"""
+        token = self.fetch(name)
+
+        if token:
+            self.data_collection.remove({'name': name})
+            return token
+
+    def all(self):
+        """Get a list of all tokens"""
+
+        return [self._format(record) for record in self.data_collection.find()]
+
+    def _format(self, token_record):
+        if token_record:
+            return {
+                'token': token_record['token'],
+                'name': token_record['name']
+            }

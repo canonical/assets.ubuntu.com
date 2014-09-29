@@ -47,3 +47,12 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny'
     ]
 }
+
+# Mongo connection
+# ===
+from pymongo import MongoClient
+
+from mappers import TokenManager
+
+MONGO = MongoClient(os.environ.get('DATABASE_URL', 'mongodb://localhost/'))
+TOKEN_MANAGER = TokenManager(data_collection=MONGO["assets"]["tokens"])
