@@ -54,5 +54,5 @@ from pymongo import MongoClient
 
 from mappers import TokenManager
 
-MONGO = MongoClient(os.environ.get('DATABASE_URL', 'mongodb://localhost/'))
+MONGO = MongoClient(os.environ.get('MONGO_URL', 'mongodb://localhost/'))
 TOKEN_MANAGER = TokenManager(data_collection=MONGO["assets"]["tokens"])
