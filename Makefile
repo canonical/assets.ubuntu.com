@@ -21,6 +21,8 @@ ifeq ($(PORT),)
 	PORT=8012
 endif
 
+.PHONY:pip-cache
+
 ##
 # Prepare the project
 ##
@@ -42,3 +44,6 @@ rebuild-dependencies-cache:
 	bzr commit pip-cache/ --unchanged -m 'automatically updated partners requirements'
 	bzr push --directory pip-cache lp:~webteam-backend/assets-server/dependencies
 	rm -rf pip-cache src
+
+pip-cache:
+	(cd pip-cache && bzr pull && bzr up) || bzr branch lp:~webteam-backend/assets-server/dependencies pip-cache
