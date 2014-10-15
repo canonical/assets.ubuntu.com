@@ -31,7 +31,7 @@ setup:
 	-[ -z ${VIRTUAL_ENV} ] && virtualenv ${ENVPATH}
 
 	# Install requirements into virtual env
-	${VEX} pip install -r requirements/dev.txt
+	${VEX} pip install -r requirements/standard.txt
 
 develop:
 	${VEX} python manage.py runserver_plus 0.0.0.0:${PORT}
@@ -40,7 +40,7 @@ develop:
 rebuild-dependencies-cache:
 	rm -rf pip-cache
 	bzr branch lp:~webteam-backend/assets-server/dependencies pip-cache
-	pip install --exists-action=w --download pip-cache/ -r requirements.txt
+	pip install --exists-action=w --download pip-cache/ -r requirements/standard.txt
 	bzr commit pip-cache/ --unchanged -m 'automatically updated partners requirements'
 	bzr push --directory pip-cache lp:~webteam-backend/assets-server/dependencies
 	rm -rf pip-cache src
