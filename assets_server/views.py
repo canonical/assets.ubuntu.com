@@ -25,7 +25,7 @@ from mappers import FileManager, DataManager, DelayedConnection
 
 # Managers
 # ===
-data_manager = DataManager(settings.MONGO["assets"]["asset_data"])
+data_manager = DataManager(settings.MONGO_DB["asset_data"])
 swift = DelayedConnection(
     manager_class=FileManager,
     connection_class=SwiftConnection,
