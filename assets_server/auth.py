@@ -10,6 +10,7 @@ def token_authorization(target_function):
     """
 
     def inner(self, request, *args, **kwargs):
+        # Only if both DEBUG and is_secure() are false should we redirect
         if not (settings.DEBUG or request.is_secure()):
             url = request.build_absolute_uri(request.get_full_path())
             secure_url = url.replace("http://", "https://")
