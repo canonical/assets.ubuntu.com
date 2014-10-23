@@ -17,10 +17,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 # (Although it's probably irrelevent to this app)
 SECRET_KEY = 'a6f@ev$$r^@d4boc-gx^j3l@a=fr4rc^qq3my27zh)pn09$583'
 
-ALLOWED_HOSTS = [
-    '0.0.0.0', '127.0.0.1', 'localhost',
-    '*.ubuntu.qa', '*.ubuntu.com', 'ubuntu.com'
-]
+ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = ['rest_framework']
 
