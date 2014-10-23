@@ -1,3 +1,4 @@
 .bzr/
 *.pyc
 env/
+pip-cache/
