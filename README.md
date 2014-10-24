@@ -13,7 +13,9 @@ You'll need to install some aptitude dependencies:
 ``` bash
 sudo apt-get install libjpeg-dev zlib1g-dev libpng12-dev libmagickwand-dev python-dev
 ```
+
 And mongodb, if you don't already have it.
+
 ``` bash
 sudo apt-get install mongodb
 ```
