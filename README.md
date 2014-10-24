@@ -32,6 +32,9 @@ Then you can install the Python dependencies:
 pip install -r requirements.txt
 ```
 
+Local development
+---
+
 And run the service:
 
 ``` bash
