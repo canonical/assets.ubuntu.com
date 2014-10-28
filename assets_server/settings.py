@@ -48,6 +48,7 @@ REST_FRAMEWORK = {
 # Mongo connection
 # ===
 from pymongo import MongoClient
+from pymongo.errors import ConfigurationError
 
 from mappers import TokenManager
 
@@ -56,8 +57,14 @@ MONGO_URL = os.environ.get(
     'MONGO_URL',
     'mongodb://localhost/{0}'.format(DEFAULT_DATABASE)
 )
+
 MONGO = MongoClient(MONGO_URL)
-MONGO_DB = MONGO.get_default_database()
+
+try:
+    MONGO_DB = MONGO.get_default_database()
+except ConfigurationError:
+    MONGO_DB = MONGO[DEFAULT_DATABASE]
+
 TOKEN_MANAGER = TokenManager(data_collection=MONGO_DB["tokens"])
 
 LOGGING = {
