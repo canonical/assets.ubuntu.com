@@ -19,6 +19,8 @@ SECRET_KEY = 'a6f@ev$$r^@d4boc-gx^j3l@a=fr4rc^qq3my27zh)pn09$583'
 
 ALLOWED_HOSTS = ['*']
 
+DEBUG = os.environ.get('WSGI_DEBUG', "").lower() == 'true'
+
 INSTALLED_APPS = ['rest_framework']
 
 MIDDLEWARE_CLASSES = []
@@ -74,7 +76,7 @@ LOGGING = {
         'error_file': {
             'level': 'ERROR',
             'filename': os.path.join(BASE_DIR, 'django-error.log'),
-            'class':'logging.handlers.RotatingFileHandler',
+            'class': 'logging.handlers.RotatingFileHandler',
             'maxBytes': 1 * 1024 * 1024,
             'backupCount': 2
         }
