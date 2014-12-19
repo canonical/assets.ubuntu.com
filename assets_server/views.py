@@ -3,6 +3,7 @@ import os
 import mimetypes
 import errno
 from io import BytesIO
+from base64 import b64decode
 
 # Packages
 from django.http import HttpResponse, Http404
@@ -18,7 +19,7 @@ from rest_framework.exceptions import ParseError
 
 # Local
 from lib.processors import image_processor
-from lib.http_helpers import error_response, file_from_base64
+from lib.http_helpers import error_response
 from auth import token_authorization
 from mappers import FileManager, DataManager
 
@@ -135,8 +136,7 @@ class AssetList(APIView):
         tags = request.DATA.get('tags', '')
 
         # Get file data
-        file_stream = file_from_base64(request, 'asset', 'filename')
-        file_data = file_stream.read()
+        file_data = b64decode(asset)
 
         # Generate the asset filename
         filename = file_manager.generate_asset_filename(
