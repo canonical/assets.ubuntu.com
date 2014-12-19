@@ -27,28 +27,28 @@ class FileManager:
     def __init__(self, swift_connection):
         self.swift_connection = swift_connection
 
-    def create(self, file_data, filename):
+    def create(self, file_data, file_path):
         """
-        Create a new asset and return its filename
+        Create a new asset and return its file_path
         If it already exists,
-        return the filename for the existing asset
+        return the file_path for the existing asset
         (don't create it again)
         """
 
         # Create object
         self.swift_connection.put_object(
             self.container_name,
-            urllib.quote(filename),
+            urllib.quote(file_path),
             file_data
         )
 
-    def exists(self, filename):
+    def exists(self, file_path):
         file_exists = True
 
         try:
             self.swift_connection.head_object(
                 self.container_name,
-                urllib.quote(filename)
+                urllib.quote(file_path)
             )
         except SwiftException as error:
             if error.http_status == 404:
@@ -56,56 +56,53 @@ class FileManager:
 
         return file_exists
 
-    def fetch(self, filename):
-        sub_filename = filename[:-4]
-        mimetype = mimetypes.guess_type(filename)[0]
-        sub_mimetype = mimetypes.guess_type(sub_filename)[0]
+    def fetch(self, file_path):
+        sub_path = file_path[:-4]
+        mimetype = mimetypes.guess_type(file_path)[0]
+        sub_mimetype = mimetypes.guess_type(sub_path)[0]
         svg_to_png = False
         asset_data = None
 
         if (
             mimetype == self.mimes["png"] and
             sub_mimetype == self.mimes["svg"] and
-            not self.exists(filename)
+            not self.exists(file_path)
         ):
             # Remove extra ".png" extension
-            filename = sub_filename
+            file_path = sub_path
             svg_to_png = True
 
-        encoded_filename = urllib.quote(filename)
+        encoded_path = urllib.quote(file_path)
 
         asset = self.swift_connection.get_object(
             self.container_name,
-            encoded_filename
+            encoded_path
         )
         asset_data = asset[1]
 
         # Convert to png (if applicable)
         if svg_to_png:
-            with Image(
-                blob=asset_data,
-                format="svg"
-            ) as image:
+            with Image(blob=asset_data, format="svg") as image:
                 asset_data = image.make_blob("png")
 
         return asset_data
 
-    def delete(self, filename):
+    def delete(self, file_path):
         self.swift_connection.delete_object(
             self.container_name,
-            urllib.quote(filename)
+            urllib.quote(file_path)
         )
         return True
 
-    def generate_asset_filename(self, file_data, filename):
+    def generate_asset_path(self, file_data, friendly_name):
         """
-        Generate a unique asset filename
-        based on the old filename
+        Generate a unique asset file_path
+        based on a friendly name
         """
 
         return '{0}-{1}'.format(
             sha1(file_data).hexdigest()[:8],
-            filename
+            friendly_name
         )
 
 
@@ -120,21 +117,21 @@ class DataManager:
     def __init__(self, data_collection):
         self.data_collection = data_collection
 
-    def update(self, filename, tags):
-        search = {"filename": filename}
+    def update(self, file_path, tags):
+        search = {"file_path": file_path}
 
         data = {
-            "filename": filename,
+            "file_path": file_path,
             "tags": tags
         }
 
         self.data_collection.update(search, data, True)
 
-        return self.fetch_one(filename)
+        return self.fetch_one(file_path)
 
-    def fetch_one(self, filename):
+    def fetch_one(self, file_path):
         asset_data = self.data_collection.find_one(
-            {"filename": filename}
+            {"file_path": file_path}
         )
 
         return self.format(asset_data) if asset_data else None
@@ -145,7 +142,7 @@ class DataManager:
         results = self.data_collection.find(
             {
                 '$or': [
-                    {'filename': match},
+                    {'file_path': match},
                     {'tags': match}
                 ]
             }
@@ -156,31 +153,31 @@ class DataManager:
             for asset_data in results
         ]
 
-    def exists(self, filename):
-        return bool(self.fetch_one(filename))
+    def exists(self, file_path):
+        return bool(self.fetch_one(file_path))
 
     def format(self, asset_record):
         asset_data = {
-            'filename': asset_record['filename'],
+            'file_path': asset_record['file_path'],
             'tags': asset_record["tags"] or "",
             'created': asset_record["_id"].generation_time.ctime()
         }
 
-        mimetype = mimetypes.guess_type(asset_data['filename'])[0]
+        mimetype = mimetypes.guess_type(asset_data['file_path'])[0]
 
         if mimetype == "image/svg+xml":
-            asset_data['png_filename'] = asset_data['filename'] + ".png"
+            asset_data['png_file_path'] = asset_data['file_path'] + ".png"
 
         return asset_data
 
-    def fetch(self, filenames):
+    def fetch(self, file_paths):
         return [
-            self.fetch_one(filename)
-            for filename in filenames
+            self.fetch_one(file_path)
+            for file_path in file_paths
         ]
 
-    def delete(self, filename):
-        self.data_collection.remove({'filename': filename})
+    def delete(self, file_path):
+        self.data_collection.remove({'file_path': file_path})
 
 
 class TokenManager:
