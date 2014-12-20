@@ -136,7 +136,7 @@ class AssetList(APIView):
         tags = request.DATA.get('tags', '')
         asset = request.DATA.get('asset')
         friendly_name = request.DATA.get('friendly-name')
-        url_path = request.DATA.get('url-path').strip('/')
+        url_path = request.DATA.get('url-path', '').strip('/')
 
         # Get file data
         file_data = b64decode(asset)

@@ -100,10 +100,11 @@ class FileManager:
         based on a friendly name
         """
 
-        return '{0}-{1}'.format(
-            sha1(file_data).hexdigest()[:8],
-            friendly_name
-        )
+        path = sha1(file_data).hexdigest()[:8]
+        if friendly_name:
+            path += '-' + friendly_name
+
+        return path
 
 
 class DataManager:
