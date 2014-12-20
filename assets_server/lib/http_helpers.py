@@ -2,7 +2,7 @@ import errno
 from rest_framework.response import Response
 
 
-def error_response(error, filename=''):
+def error_response(error, file_path=''):
     """
     Given an IO error,
     generate the correct HTTP and JSON response:
@@ -15,7 +15,7 @@ def error_response(error, filename=''):
     """
 
     status = 500  # Default to "server error"
-    filename = filename or error.filename
+    file_path = file_path or error.filename
 
     if hasattr(error, 'errno'):
         if error.errno in [errno.EPERM, errno.EACCES]:
@@ -42,7 +42,7 @@ def error_response(error, filename=''):
 
     return Response(
         {
-            "filename": filename,
+            "file_path": file_path,
             "error_class": error.__class__.__name__,
             "message": message,
             "code": status
