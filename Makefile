@@ -47,3 +47,6 @@ rebuild-dependencies-cache:
 
 pip-cache:
 	(cd pip-cache && bzr pull && bzr up) || bzr branch lp:~webteam-backend/assets-server/dependencies pip-cache
+
+upload-healthcheck:
+	scripts/upload-healthtest.sh

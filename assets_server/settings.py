@@ -8,8 +8,16 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.6/ref/settings/
 """
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+# System
 import os
+
+# Modules
+
+# Local
+from mappers import TokenManager
+from lib.db_helpers import mongo_db_from_url
+
+# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 
@@ -47,25 +55,10 @@ REST_FRAMEWORK = {
     ]
 }
 
-# Mongo connection
-# ===
-from pymongo import MongoClient
-from pymongo.errors import ConfigurationError
-
-from mappers import TokenManager
-
-DEFAULT_DATABASE = 'assets'
-MONGO_URL = os.environ.get(
-    'MONGO_URL',
-    'mongodb://localhost/{0}'.format(DEFAULT_DATABASE)
+MONGO_DB = mongo_db_from_url(
+    mongo_url=os.environ.get('MONGO_URL'),
+    default_database='assets'
 )
-
-MONGO = MongoClient(MONGO_URL)
-
-try:
-    MONGO_DB = MONGO.get_default_database()
-except ConfigurationError:
-    MONGO_DB = MONGO[DEFAULT_DATABASE]
 
 TOKEN_MANAGER = TokenManager(data_collection=MONGO_DB["tokens"])
 

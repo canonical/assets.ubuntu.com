@@ -1,13 +1,21 @@
 import errno
-from io import BytesIO
-from base64 import b64decode
-from werkzeug.datastructures import FileStorage
 from rest_framework.response import Response
 
 
-def error_response(error, filename=''):
+def error_response(error, file_path=''):
+    """
+    Given an IO error,
+    generate the correct HTTP and JSON response:
+
+    403: EPERM, EACCES
+    404: ENOENT, ENXIO
+    409: EEXIST
+    413: E2BIG
+    500: Anything else
+    """
+
     status = 500  # Default to "server error"
-    filename = filename or error.filename
+    file_path = file_path or error.filename
 
     if hasattr(error, 'errno'):
         if error.errno in [errno.EPERM, errno.EACCES]:
@@ -34,38 +42,10 @@ def error_response(error, filename=''):
 
     return Response(
         {
-            "filename": filename,
+            "file_path": file_path,
             "error_class": error.__class__.__name__,
             "message": message,
             "code": status
         },
         status=status
     )
-
-
-def file_from_base64(request, file_key, filename_key):
-    """
-    Given a request containing a file submitted as base64 data
-    e.g.:
-        requests.post(
-            url,
-            data={
-                '<key>': b64encode(file_data),
-            }
-        )
-    Extract and return the file
-    """
-
-    file_object = None
-
-    base64_file = request.DATA.get(file_key)
-    filename = request.DATA.get(filename_key) or 'asset'
-
-    if base64_file:
-        file_data = b64decode(base64_file)
-        file_object = FileStorage(
-            stream=BytesIO(file_data),
-            filename=filename
-        )
-
-    return file_object

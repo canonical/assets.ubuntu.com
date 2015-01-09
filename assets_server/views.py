@@ -3,6 +3,7 @@ import os
 import mimetypes
 import errno
 from io import BytesIO
+from base64 import b64decode
 
 # Packages
 from django.http import HttpResponse, Http404
@@ -18,7 +19,7 @@ from rest_framework.exceptions import ParseError
 
 # Local
 from lib.processors import image_processor
-from lib.http_helpers import error_response, file_from_base64
+from lib.http_helpers import error_response
 from auth import token_authorization
 from mappers import FileManager, DataManager
 
@@ -44,17 +45,17 @@ class Asset(APIView):
 
     base_name = 'asset'
 
-    def get(self, request, filename):
+    def get(self, request, file_path):
         """
         Get a single asset, 404ing if we get an OSError.
         """
 
-        mimetype = mimetypes.guess_type(filename)[0]
+        mimetype = mimetypes.guess_type(file_path)[0]
 
         try:
-            asset_stream = BytesIO(file_manager.fetch(filename))
+            asset_stream = BytesIO(file_manager.fetch(file_path))
         except SwiftClientException as error:
-            return error_response(error, filename)
+            return error_response(error, file_path)
 
         image_types = ["image/png", "image/jpeg"]
 
@@ -66,34 +67,34 @@ class Asset(APIView):
                     request.GET
                 )
             except PilboxError as error:
-                return error_response(error, filename)
+                return error_response(error, file_path)
 
         # Return asset
         return HttpResponse(asset_stream.read(), mimetype)
 
     @token_authorization
-    def delete(self, request, filename):
+    def delete(self, request, file_path):
         """
         Delete a single named asset, 204 if successful
         """
 
         try:
-            data_manager.delete(filename)
-            file_manager.delete(filename)
-            return Response({"message": "Deleted {0}".format(filename)})
+            data_manager.delete(file_path)
+            file_manager.delete(file_path)
+            return Response({"message": "Deleted {0}".format(file_path)})
 
         except SwiftClientException as err:
-            return error_response(err, filename)
+            return error_response(err, file_path)
 
     @token_authorization
-    def put(self, request, filename):
+    def put(self, request, file_path):
         """
         Update metadata against an asset
         """
 
         tags = request.DATA.get('tags', '')
 
-        data = data_manager.update(filename, tags)
+        data = data_manager.update(file_path, tags)
 
         return Response(data)
 
@@ -117,7 +118,7 @@ class AssetList(APIView):
         and results will match all parts
 
         Currently, the query will only be matched against
-        filenames
+        file paths
         """
 
         queries = request.GET.get('q', '').split(' ')
@@ -133,38 +134,41 @@ class AssetList(APIView):
         """
 
         tags = request.DATA.get('tags', '')
+        asset = request.DATA.get('asset')
+        friendly_name = request.DATA.get('friendly-name')
+        url_path = request.DATA.get('url-path', '').strip('/')
 
         # Get file data
-        file_stream = file_from_base64(request, 'asset', 'filename')
-        file_data = file_stream.read()
+        file_data = b64decode(asset)
 
-        # Generate the asset filename
-        filename = file_manager.generate_asset_filename(
-            file_data,
-            file_stream.filename
-        )
+        # Generate the asset path
+        if not url_path:
+            url_path = file_manager.generate_asset_path(
+                file_data,
+                friendly_name
+            )
 
         # Error if it exists
-        if data_manager.exists(filename):
+        if data_manager.exists(url_path):
             return error_response(
                 IOError(
                     errno.EEXIST,
                     "Asset already exists",
-                    filename
+                    url_path
                 )
             )
 
         # Create file metadata
-        data_manager.update(filename, tags)
+        data_manager.update(url_path, tags)
 
         # Create file
         try:
-            file_manager.create(file_data, filename)
+            file_manager.create(file_data, url_path)
         except SwiftClientException as error:
-            return error_response(error, filename)
+            return error_response(error, url_path)
 
         # Return the list of data for the created files
-        return Response(data_manager.fetch_one(filename), 201)
+        return Response(data_manager.fetch_one(url_path), 201)
 
 
 class AssetJson(APIView):
@@ -175,12 +179,12 @@ class AssetJson(APIView):
     base_name = 'asset_json'
 
     @token_authorization
-    def get(self, request, filename):
+    def get(self, request, file_path):
         """
-        Get data for an asset by filename
+        Get data for an asset by path
         """
 
-        return Response(data_manager.fetch_one(filename))
+        return Response(data_manager.fetch_one(file_path))
 
 
 class Tokens(APIView):
@@ -191,7 +195,7 @@ class Tokens(APIView):
     @token_authorization
     def get(self, request):
         """
-        Get data for an asset by filename
+        Get data for an asset by path
         """
 
         return Response(settings.TOKEN_MANAGER.all())

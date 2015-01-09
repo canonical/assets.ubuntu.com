@@ -14,6 +14,6 @@ urlpatterns = patterns(
     url(r'^v1/?$', AssetList.as_view()),
     url(r'^v1/tokens/?$', Tokens.as_view()),
     url(r'^v1/tokens/(?P<name>.+)$', Token.as_view()),
-    url(r'^v1/(?P<filename>.+)\.json$', AssetJson.as_view()),
-    url(r'^v1/(?P<filename>.+)$', Asset.as_view()),
+    url(r'^v1/(?P<file_path>.+)\.json$', AssetJson.as_view()),
+    url(r'^v1/(?P<file_path>.+)$', Asset.as_view()),
 )
