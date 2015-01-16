@@ -31,7 +31,7 @@ setup:
 	-[ -z ${VIRTUAL_ENV} ] && virtualenv ${ENVPATH}
 
 	# Install requirements into virtual env
-	${VEX} pip install -r requirements/standard.txt
+	${VEX} pip install -r requirements/dev.txt
 
 develop:
 	${VEX} python manage.py runserver_plus 0.0.0.0:${PORT}
