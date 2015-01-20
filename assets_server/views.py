@@ -9,10 +9,8 @@ from base64 import b64decode
 from django.http import HttpResponse, Http404
 from django.conf import settings
 from pilbox.errors import PilboxError
-from swiftclient.client import (
-    Connection as SwiftConnection,
-    ClientException as SwiftClientException
-)
+from swiftclient.client import Connection as SwiftConnection
+from swiftclient.exceptions import ClientException as SwiftClientException
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import ParseError
@@ -158,14 +156,14 @@ class AssetList(APIView):
                 )
             )
 
-        # Create file metadata
-        data_manager.update(url_path, tags)
-
-        # Create file
         try:
+            # Create file
             file_manager.create(file_data, url_path)
         except SwiftClientException as error:
             return error_response(error, url_path)
+
+        # Once the file is created, create file metadata
+        data_manager.update(url_path, tags)
 
         # Return the list of data for the created files
         return Response(data_manager.fetch_one(url_path), 201)
