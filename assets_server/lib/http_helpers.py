@@ -14,9 +14,10 @@ def error_response(error, file_path=''):
     500: Anything else
     """
 
-    status = 500  # Default to "server error"
     file_path = file_path or error.filename
 
+    # Get the status from either .errno or .http_status
+    status = 500  # Default to "server error"
     if hasattr(error, 'errno'):
         if error.errno in [errno.EPERM, errno.EACCES]:
             status = 403  # Forbidden
@@ -31,13 +32,20 @@ def error_response(error, file_path=''):
             status = 413  # Request Entity Too Large
 
     if hasattr(error, 'http_status'):
-        status = error.http_status
+        if error.http_status > 99:
+            status = error.http_status
+        elif hasattr(error, 'msg') and error.msg[:12] == 'Unauthorised':
+            # Special case for swiftclient.exceptions.ClientException
+            status = 511
 
-    message = error.message
-
-    if not message and hasattr(error, "strerror"):
+    # Get the message from somewhere
+    if hasattr(error, 'msg'):
+        message = error.msg
+    elif hasattr(error, 'message'):
+        message = error.message
+    elif hasattr(error, "strerror"):
         message = error.strerror
-    elif not message and hasattr(error, "log_message"):
+    elif hasattr(error, "log_message"):
         message = error.log_message
 
     return Response(
