@@ -5,7 +5,7 @@ import uuid
 from hashlib import sha1
 
 from wand.image import Image
-from swiftclient.client import ClientException as SwiftException
+from swiftclient.exceptions import ClientException as SwiftException
 
 
 class FileManager:
@@ -35,12 +35,27 @@ class FileManager:
         (don't create it again)
         """
 
-        # Create object
-        self.swift_connection.put_object(
-            self.container_name,
-            urllib.quote(file_path),
-            file_data
-        )
+        try:
+            # Create object
+            self.swift_connection.put_object(
+                self.container_name,
+                urllib.quote(file_path),
+                file_data
+            )
+        except SwiftException as swift_error:
+            if swift_error.http_status == 404:
+                # Not found, assuming container doesn't exist
+                self.swift_connection.put_container(self.container_name)
+
+                # And try to create again
+                self.swift_connection.put_object(
+                    self.container_name,
+                    urllib.quote(file_path),
+                    file_data
+                )
+            else:
+                # Otherwise, throw the exception again
+                raise swift_error
 
     def exists(self, file_path):
         file_exists = True
