@@ -30,4 +30,3 @@ And run the service:
 ``` bash
 python manage.py runserver
 ```
-
