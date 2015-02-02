@@ -24,6 +24,12 @@ endif
 .PHONY:pip-cache
 
 ##
+# Print help text
+##
+help:
+	$(info ${HELP_TEXT})
+
+##
 # Prepare the project
 ##
 setup:
