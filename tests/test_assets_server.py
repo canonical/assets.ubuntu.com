@@ -4,10 +4,14 @@ BASE_URL = "https://assets.staging.ubuntu.com/v1/"
 
 
 def get(params={}):
+    "convienince function for making simple GETs"
     return requests.get(BASE_URL, params=params)
 
 
 class TestAssetsAPI:
+    """
+    API tests of the assets server.
+    """
 
     def test_no_token(self):
         assert get().status_code == 403
