@@ -1,5 +1,4 @@
 # System
-import os
 import mimetypes
 import errno
 from io import BytesIO
@@ -9,7 +8,6 @@ from base64 import b64decode
 from django.http import HttpResponse, Http404
 from django.conf import settings
 from pilbox.errors import PilboxError
-from swiftclient.client import Connection as SwiftConnection
 from swiftclient.exceptions import ClientException as SwiftClientException
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -18,22 +16,8 @@ from rest_framework.exceptions import ParseError
 # Local
 from lib.processors import image_processor
 from lib.http_helpers import error_response
+from lib.file_helpers import create_asset
 from auth import token_authorization
-from mappers import FileManager, DataManager
-
-
-# Managers
-# ===
-data_manager = DataManager(data_collection=settings.MONGO_DB['asset_data'])
-file_manager = FileManager(
-    SwiftConnection(
-        os.environ.get('OS_AUTH_URL'),
-        os.environ.get('OS_USERNAME'),
-        os.environ.get('OS_PASSWORD'),
-        auth_version='2.0',
-        os_options={'tenant_name': os.environ.get('OS_TENANT_NAME')}
-    )
-)
 
 
 class Asset(APIView):
@@ -51,7 +35,7 @@ class Asset(APIView):
         mimetype = mimetypes.guess_type(file_path)[0]
 
         try:
-            asset_stream = BytesIO(file_manager.fetch(file_path))
+            asset_stream = BytesIO(settings.FILE_MANAGER.fetch(file_path))
         except SwiftClientException as error:
             return error_response(error, file_path)
 
@@ -77,8 +61,8 @@ class Asset(APIView):
         """
 
         try:
-            data_manager.delete(file_path)
-            file_manager.delete(file_path)
+            settings.DATA_MANAGER.delete(file_path)
+            settings.FILE_MANAGER.delete(file_path)
             return Response({"message": "Deleted {0}".format(file_path)})
 
         except SwiftClientException as err:
@@ -92,7 +76,7 @@ class Asset(APIView):
 
         tags = request.DATA.get('tags', '')
 
-        data = data_manager.update(file_path, tags)
+        data = settings.DATA_MANAGER.update(file_path, tags)
 
         return Response(data)
 
@@ -123,7 +107,7 @@ class AssetList(APIView):
 
         regex_string = '({0})'.format('|'.join(queries))
 
-        return Response(data_manager.find(regex_string))
+        return Response(settings.DATA_MANAGER.find(regex_string))
 
     @token_authorization
     def post(self, request):
@@ -136,37 +120,24 @@ class AssetList(APIView):
         friendly_name = request.DATA.get('friendly-name')
         url_path = request.DATA.get('url-path', '').strip('/')
 
-        # Get file data
-        file_data = b64decode(asset)
-
-        # Generate the asset path
-        if not url_path:
-            url_path = file_manager.generate_asset_path(
-                file_data,
-                friendly_name
-            )
-
-        # Error if it exists
-        if data_manager.exists(url_path):
-            return error_response(
-                IOError(
-                    errno.EEXIST,
-                    "Asset already exists",
-                    url_path
-                )
-            )
-
         try:
-            # Create file
-            file_manager.create(file_data, url_path)
-        except SwiftClientException as error:
-            return error_response(error, url_path)
-
-        # Once the file is created, create file metadata
-        data_manager.update(url_path, tags)
+            url_path = create_asset(
+                file_data=b64decode(asset),
+                friendly_name=friendly_name,
+                tags=tags,
+                url_path=url_path
+            )
+        except IOError as create_error:
+            if create_error.errno == errno.EEXIST:
+                return error_response(create_error)
+            else:
+                raise create_error
+        except SwiftClientException as swift_error:
+            return error_response(swift_error, url_path)
 
         # Return the list of data for the created files
-        return Response(data_manager.fetch_one(url_path), 201)
+        import ipdb; ipdb.set_trace()
+        return Response(settings.DATA_MANAGER.fetch_one(url_path), 201)
 
 
 class AssetJson(APIView):
@@ -182,7 +153,17 @@ class AssetJson(APIView):
         Get data for an asset by path
         """
 
-        return Response(data_manager.fetch_one(file_path))
+        if settings.DATA_MANAGER.exists(file_path):
+            response = Response(settings.DATA_MANAGER.fetch_one(file_path))
+        else:
+            asset_error = file_error(
+                error_number=errno.ENOENT,
+                message="No JSON data found for file {0}".format(file_path),
+                filename=file_path
+            )
+            response = error_response(asset_error)
+
+        return response
 
 
 class Tokens(APIView):

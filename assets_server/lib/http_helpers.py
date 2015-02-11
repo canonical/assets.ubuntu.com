@@ -14,7 +14,7 @@ def error_response(error, file_path=''):
     500: Anything else
     """
 
-    file_path = file_path or error.filename
+    file_path = file_path or error.filename or ''
 
     # Get the status from either .errno or .http_status
     status = 500  # Default to "server error"
@@ -39,13 +39,14 @@ def error_response(error, file_path=''):
             status = 511
 
     # Get the message from somewhere
-    if hasattr(error, 'msg'):
+    message = ''
+    if hasattr(error, 'msg') and error.msg:
         message = error.msg
-    elif hasattr(error, 'message'):
+    elif hasattr(error, 'message') and error.message:
         message = error.message
-    elif hasattr(error, "strerror"):
+    elif hasattr(error, "strerror") and error.strerror:
         message = error.strerror
-    elif hasattr(error, "log_message"):
+    elif hasattr(error, "log_message") and error.log_message:
         message = error.log_message
 
     return Response(
