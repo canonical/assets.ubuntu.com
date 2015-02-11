@@ -3,6 +3,7 @@
 # System packages
 import argparse
 import os
+import sys
 
 # Modules
 from swiftclient.client import Connection as SwiftConnection
@@ -63,13 +64,19 @@ with open(file_path) as upload_file:
     if not url_path:
         url_path = file_manager.generate_asset_path(
             file_data,
-            friendly_name
+            upload_file.name
         )
+
+    if data_manager.exists(url_path):
+        print "Error: Asset already exists at {0}".format(url_path)
+
+        sys.exit(73)
 
     # Create file
     file_manager.create(file_data, url_path)
 
-    # Once the file is created, create file metadata
-    data_manager.update(url_path, tags)
+# Once the file is created, create file metadata
+data_manager.update(url_path, tags)
+
 
 print data_manager.fetch_one(url_path)
