@@ -136,7 +136,6 @@ class AssetList(APIView):
             return error_response(swift_error, url_path)
 
         # Return the list of data for the created files
-        import ipdb; ipdb.set_trace()
         return Response(settings.DATA_MANAGER.fetch_one(url_path), 201)
 
 
