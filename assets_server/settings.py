@@ -12,9 +12,10 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 import os
 
 # Modules
+from swiftclient.client import Connection as SwiftConnection
 
 # Local
-from mappers import TokenManager
+from mappers import DataManager, FileManager, TokenManager
 from lib.db_helpers import mongo_db_from_url
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -60,7 +61,18 @@ MONGO_DB = mongo_db_from_url(
     default_database='assets'
 )
 
-TOKEN_MANAGER = TokenManager(data_collection=MONGO_DB["tokens"])
+TOKEN_MANAGER = TokenManager(data_collection=MONGO_DB['tokens'])
+DATA_MANAGER = DataManager(data_collection=MONGO_DB['asset_data'])
+FILE_MANAGER = FileManager(
+    SwiftConnection(
+        os.environ.get('OS_AUTH_URL'),
+        os.environ.get('OS_USERNAME'),
+        os.environ.get('OS_PASSWORD'),
+        auth_version='2.0',
+        os_options={'tenant_name': os.environ.get('OS_TENANT_NAME')}
+    )
+)
+
 
 LOGGING = {
     'version': 1,
