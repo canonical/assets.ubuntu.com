@@ -36,6 +36,9 @@ setup:
 	# Create virtual env folder, if not already in one
 	-[ -z ${VIRTUAL_ENV} ] && virtualenv ${ENVPATH}
 
+	# Install vex
+	type ${VEX} &> /dev/null || pip install vex
+
 	# Install requirements into virtual env
 	${VEX} pip install -r requirements/dev.txt
 
