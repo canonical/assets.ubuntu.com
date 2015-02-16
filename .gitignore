@@ -4,3 +4,4 @@ env/
 .bzr/
 pip-cache/
 test_token.py
+tests/fixtures/api-token
