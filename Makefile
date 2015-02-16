@@ -33,6 +33,11 @@ help:
 # Prepare the project
 ##
 setup:
+	# Install missing dependencies
+	if ! dpkg -s mongodb libjpeg-dev zlib1g-dev libpng12-dev libmagickwand-dev python-dev &> /dev/null; then \
+		sudo apt update && sudo apt install -y mongodb libjpeg-dev zlib1g-dev libpng12-dev libmagickwand-dev python-dev; \
+	fi
+
 	# Create virtual env folder, if not already in one
 	-[ -z ${VIRTUAL_ENV} ] && virtualenv ${ENVPATH}
 
