@@ -31,3 +31,8 @@ And run the service:
 python manage.py runserver
 ```
 
+Run the tests with pytest:
+
+``` bash
+py.test
+```
