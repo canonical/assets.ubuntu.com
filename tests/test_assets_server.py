@@ -1,6 +1,6 @@
 import requests
 
-BASE_URL = "https://assets.staging.ubuntu.com/v1/"
+BASE_URL = "http://localhost:8012/v1/"
 
 
 def get(params={}):
