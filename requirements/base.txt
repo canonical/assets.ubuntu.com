@@ -14,7 +14,7 @@ itsdangerous==0.24
 netaddr==0.7.11
 pilbox==0.9.18
 prettytable==0.7.2
-py==1.4.20
+py==1.4.26
 pymongo==2.7
 pytz==2014.2
 requests==2.3.0
