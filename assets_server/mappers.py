@@ -1,3 +1,4 @@
+import errno
 import re
 import mimetypes
 import urllib
@@ -6,6 +7,8 @@ from hashlib import sha1
 
 from wand.image import Image
 from swiftclient.exceptions import ClientException as SwiftException
+
+from lib.file_helpers import file_error
 
 
 class FileManager:

@@ -3,3 +3,4 @@ django-error.log
 env/
 .bzr/
 pip-cache/
+test_token.py
