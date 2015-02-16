@@ -13,9 +13,11 @@ DB_RUN="mongo assets --quiet --eval"
 
 if [[ $(${DB_RUN} "db.tokens.find({'name': '${TOKEN_NAME}'}).size()") -ne '0' ]]; then
     TOKEN=$(${DB_RUN} "db.tokens.find({'name': '${TOKEN_NAME}'})[0].token")
-    echo "Existing '${TOKEN_NAME}' token: ${TOKEN}"
+    >&2 echo "Token '${TOKEN_NAME}' exists"
 else
     TOKEN=`uuidgen -r | sed 's/-//g'`
     ${DB_RUN} "db.tokens.insert({'token': '${TOKEN}', 'name': '${TOKEN_NAME}'})"
-    echo "Token '${TOKEN_NAME}' created: ${TOKEN}"
+    >&2 echo "Token '${TOKEN_NAME}' created"
 fi
+
+echo "${TOKEN}"
