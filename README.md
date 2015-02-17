@@ -1,11 +1,7 @@
 Assets server
 ===
 
-This is a Restful API service for creating and serving assets.
-
-It's built using [Django REST framework](http://www.django-rest-framework.org/).
-
-Commits will be synced from the [Github project](https://github.com/CanonicalLtd/assets-server) to the [Launchpad project](https://launchpad.net/assets-server) using [bzr-sync](https://wiki.canonical.com/ProjectsSyncedFromGitToBzr). You can and should only push your changes to Github, and let `bzr-sync` take care of the rest.
+This is a Restful API service for creating and serving binary assets over HTTP, built with [Django REST framework](http://www.django-rest-framework.org/).
 
 Usage
 ---
@@ -19,7 +15,7 @@ make develop  # Run development server on port 8012
 
 ### Tokens
 
-To interact with the assets server, you'll need to generate a token:
+To interact with the assets server, you'll need to generate an authentication token:
 
 ``` bash
 $ scripts/get-token.sh your-name  # Generate a new token called "your-name"
@@ -33,8 +29,14 @@ You can now pass this token in your requests to the assets server API. E.g.:
 http://localhost:8012/v1/?token=3fe479a6b8184be4a4cdf42085f19f9a  # List all existing assets in JSON format
 ```
 
+You can also list all tokens with [list-tokens.sh](scripts/list-tokens.sh) or delete them with [delete-token.sh](scripts/delete-token.sh).
+
 Advanced usage
 ---
+
+### Security
+
+As the server only uses a basic token for authentication, it is paramount that in a production setting, the API functions are only accessed over HTTPS, to keep the API token secret. For this reason, when `DEBUG==false` the server will force a redirect to HTTPS for all API calls.
 
 ### Python environment
 
@@ -54,6 +56,10 @@ You can tell the development server to run on any port using the `PORT` environm
 ``` bash
 PORT=9001 make develop  # Run the development server on port 9001
 ```
+
+### Assets manager
+
+You may want to setup the [assets-manager](/ubuntudesign/assets-manager) to easily upload assets to your assets server.
 
 Tests
 ---
