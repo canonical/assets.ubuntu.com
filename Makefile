@@ -35,11 +35,11 @@ help:
 setup:
 	# Install missing dependencies
 	if ! dpkg -s mongodb libjpeg-dev zlib1g-dev libpng12-dev libmagickwand-dev python-pip &> /dev/null; then \
-		sudo apt update && sudo apt install -y mongodb libjpeg-dev zlib1g-dev libpng12-dev libmagickwand-dev python-pip; \
+		sudo apt update && sudo apt install -y mongodb libjpeg-dev zlib1g-dev libpng12-dev libmagickwand-dev python-pip build-essential; \
 	fi
 
 	# Install vex globally (also installs virtualenv)
-	type ${VEX} &> /dev/null || sudo pip install vex
+	type vex &> /dev/null || sudo pip install vex
 
 	# Create virtual env folder, if not already in one
 	if [ -z ${VIRTUAL_ENV} ]; then virtualenv ${ENVPATH}; fi
