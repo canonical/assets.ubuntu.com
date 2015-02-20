@@ -1,7 +1,7 @@
 SHELL := /bin/bash # Use bash syntax
 
 define HELP_TEXT
-Ubuntu http assets server
+HTTP assets server
 ===
 
 Usage:
@@ -13,6 +13,7 @@ endef
 
 ENVPATH=${VIRTUAL_ENV}
 VEX=vex --path ${ENVPATH}
+
 ifeq ($(ENVPATH),)
 	ENVPATH=env
 endif
@@ -21,7 +22,6 @@ ifeq ($(PORT),)
 	PORT=8012
 endif
 
-.PHONY:pip-cache
 
 ##
 # Print help text
@@ -33,26 +33,25 @@ help:
 # Prepare the project
 ##
 setup:
-	# Create virtual env folder, if not already in one
-	-[ -z ${VIRTUAL_ENV} ] && virtualenv ${ENVPATH}
+	# Install missing dependencies
+	if ! dpkg -s mongodb libjpeg-dev zlib1g-dev libpng12-dev libmagickwand-dev python-pip &> /dev/null; then \
+		sudo apt update && sudo apt install -y mongodb libjpeg-dev zlib1g-dev libpng12-dev libmagickwand-dev python-pip; \
+	fi
 
-	# Install vex
-	type ${VEX} &> /dev/null || pip install vex
+	# Install vex globally (also installs virtualenv)
+	type ${VEX} &> /dev/null || sudo pip install vex
+
+	# Create virtual env folder, if not already in one
+	if [ -z ${VIRTUAL_ENV} ]; then virtualenv ${ENVPATH}; fi
 
 	# Install requirements into virtual env
 	${VEX} pip install -r requirements/dev.txt
 
+##
+# Start the development server
+##
 develop:
 	${VEX} python manage.py runserver_plus 0.0.0.0:${PORT}
 
-
-rebuild-dependencies-cache:
-	rm -rf pip-cache
-	bzr branch lp:~webteam-backend/assets-server/dependencies pip-cache
-	pip install --exists-action=w --download pip-cache/ -r requirements/standard.txt
-	bzr commit pip-cache/ --unchanged -m 'automatically updated partners requirements'
-	bzr push --directory pip-cache lp:~webteam-backend/assets-server/dependencies
-	rm -rf pip-cache src
-
-pip-cache:
-	(cd pip-cache && bzr pull && bzr up) || bzr branch lp:~webteam-backend/assets-server/dependencies pip-cache
+# Non-file make targets (https://www.gnu.org/software/make/manual/html_node/Phony-Targets.html)
+.PHONY: help setup develop
