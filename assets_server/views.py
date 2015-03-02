@@ -3,9 +3,10 @@ import mimetypes
 import errno
 from io import BytesIO
 from base64 import b64decode
+from datetime import datetime
 
 # Packages
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, HttpResponseNotModified, Http404
 from django.conf import settings
 from pilbox.errors import PilboxError
 from swiftclient.exceptions import ClientException as SwiftClientException
@@ -40,6 +41,17 @@ class Asset(APIView):
             return error_response(error, file_path)
 
         image_types = ["image/png", "image/jpeg"]
+        asset_headers = settings.FILE_MANAGER.headers(file_path)
+        time_format = '%a, %d %b %Y %H:%M:%S %Z'
+        make_datetime = lambda x: datetime.strptime(x, time_format)
+        last_modified = asset_headers['last-modified']
+        if_modified_since = request.META.get(
+            'HTTP_IF_MODIFIED_SINCE',
+            'Mon, 1 Jan 1980 00:00:00 GMT'
+        )
+
+        if make_datetime(last_modified) <= make_datetime(if_modified_since):
+            return HttpResponseNotModified()
 
         # Run images through processor
         if request.GET and mimetype in image_types:
@@ -51,8 +63,16 @@ class Asset(APIView):
             except PilboxError as error:
                 return error_response(error, file_path)
 
+        response = HttpResponse(
+            asset_stream.read(),
+            content_type=mimetype
+        )
+        # Cache all genuine assets forever
+        response['Cache-Control'] = 'max-age=31556926'
+        response['Last-Modified'] = last_modified
+
         # Return asset
-        return HttpResponse(asset_stream.read(), mimetype)
+        return response
 
     @token_authorization
     def delete(self, request, file_path):
@@ -107,7 +127,10 @@ class AssetList(APIView):
 
         regex_string = '({0})'.format('|'.join(queries))
 
-        return Response(settings.DATA_MANAGER.find(regex_string))
+        return Response(
+            settings.DATA_MANAGER.find(regex_string),
+            headers={'Cache-Control': 'no-cache'}
+        )
 
     @token_authorization
     def post(self, request):
@@ -153,7 +176,10 @@ class AssetJson(APIView):
         """
 
         if settings.DATA_MANAGER.exists(file_path):
-            response = Response(settings.DATA_MANAGER.fetch_one(file_path))
+            response = Response(
+                settings.DATA_MANAGER.fetch_one(file_path),
+                headers={'Cache-Control': 'no-cache'}
+            )
         else:
             asset_error = file_error(
                 error_number=errno.ENOENT,
@@ -176,7 +202,10 @@ class Tokens(APIView):
         Get data for an asset by path
         """
 
-        return Response(settings.TOKEN_MANAGER.all())
+        return Response(
+            settings.TOKEN_MANAGER.all(),
+            headers={'Cache-Control': 'no-cache'}
+        )
 
     @token_authorization
     def post(self, request):

@@ -105,6 +105,12 @@ class FileManager:
 
         return asset_data
 
+    def headers(self, file_path):
+        return self.swift_connection.head_object(
+            self.container_name,
+            file_path
+        )
+
     def delete(self, file_path):
         self.swift_connection.delete_object(
             self.container_name,
