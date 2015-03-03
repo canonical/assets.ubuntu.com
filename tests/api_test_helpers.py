@@ -8,6 +8,13 @@ def get(params={}, server_url="http://localhost:8012/v1/"):
     Convienince function for making simple GETs
     """
 
+    try:
+        requests.get(server_url)
+    except:
+        sys.exit(
+            'No server found on {0}'.format(server_url)
+        )
+
     return requests.get(server_url, params=params)
 
 def get_token(fixtures_path=None):
