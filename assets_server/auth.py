@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.http import HttpResponseRedirect
 from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.renderers import JSONRenderer, YAMLRenderer
 
 
 def token_authorization(target_function):
@@ -36,8 +37,16 @@ def token_authorization(target_function):
             token = params.get('token')
 
         if not settings.TOKEN_MANAGER.authenticate(token):
+            message = 'Unauthorized: Please provide a valid API token.'
+
+            renderer_classes = (JSONRenderer, )
+
+            if token and token.replace(' ', '').lower() == 'correcthorsebatterystaple':
+                with open('correct.txt') as correct_file:
+                    message = correct_file.read().splitlines()
+
             raise AuthenticationFailed(
-                detail='Unauthorized: Please provide a valid API token.'
+                detail=message
             )
         return target_function(self, request, *args, **kwargs)
     return inner
