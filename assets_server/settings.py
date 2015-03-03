@@ -44,10 +44,12 @@ USE_I18N = False
 USE_L10N = False
 USE_TZ = False
 
+DEFAULT_JSON_INDENT = 4
+
 REST_FRAMEWORK = {
     # Default format is JSON
     'DEFAULT_RENDERER_CLASSES': (
-        'rest_framework.renderers.JSONRenderer',
+        'assets_server.renderers.PrettyJSONRenderer',
     ),
 
     # No complex permissions
