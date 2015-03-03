@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.http import HttpResponseRedirect
 from rest_framework.exceptions import AuthenticationFailed
+from assets_server.exceptions import PrettyAuthenticationFailed
 from rest_framework.renderers import JSONRenderer, YAMLRenderer
 
 
@@ -45,7 +46,7 @@ def token_authorization(target_function):
                 with open('correct.txt') as correct_file:
                     message = correct_file.read().splitlines()
 
-            raise AuthenticationFailed(
+            raise PrettyAuthenticationFailed(
                 detail=message
             )
         return target_function(self, request, *args, **kwargs)
