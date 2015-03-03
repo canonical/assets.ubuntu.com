@@ -70,7 +70,7 @@ First create a new token for the tests to use:
 scripts/get-token.sh tests > tests/fixtures/api-token
 ```
 
-Run the tests with [pytest](http://pytest.org/:
+Run the tests with [pytest](http://pytest.org/):
 
 ``` bash
 py.test
