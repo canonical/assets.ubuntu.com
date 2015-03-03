@@ -17,7 +17,7 @@ def get(params={}, server_url="http://localhost:8012/v1/"):
 
     return requests.get(server_url, params=params)
 
-def get_token(fixtures_path=None):
+def token_fixture(fixtures_path=None):
     """
     Get the token from the fixture file
     """

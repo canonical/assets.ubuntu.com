@@ -1,11 +1,11 @@
-from api_test_helpers import get, get_token
+from api_test_helpers import get, token_fixture
 
 class TestAssetsAPI:
     """
     API tests of the assets server.
     """
 
-    token = get_token()
+    token = token_fixture()
 
     def test_no_token(self):
         assert get().status_code == 403

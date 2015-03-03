@@ -73,5 +73,5 @@ scripts/get-token.sh tests > tests/fixtures/api-token
 Run the tests with [pytest](http://pytest.org/):
 
 ``` bash
-py.test
+py.test tests/
 ```
