@@ -13,10 +13,12 @@ def content_404():
         return chbs_file.read().splitlines()
 
 
-def error_404():
+def error_404(url_path):
     return Response(
         {
-            "message": content_404()
+            "message": content_404(),
+            "requested_path": url_path,
+            "code": 404
         },
         status=404
     )
@@ -75,9 +77,9 @@ def error_response(error, file_path=''):
 
     return Response(
         {
+            "message": message,
             "file_path": file_path,
             "error_class": error.__class__.__name__,
-            "message": message,
             "code": status
         },
         status=status

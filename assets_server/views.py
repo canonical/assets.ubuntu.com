@@ -249,7 +249,7 @@ class Token(APIView):
         token = settings.TOKEN_MANAGER.fetch(name)
 
         if not token:
-            return error_404()
+            return error_404(request.path)
 
         return Response(token)
 
@@ -266,6 +266,6 @@ class Token(APIView):
         if body:
             body['message'] = "Successfully deleted."
         else:
-            return error_404()
+            return error_404(request.path)
 
         return Response(body, status)
