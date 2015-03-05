@@ -1,5 +1,27 @@
+import os
 import errno
+from django.http import Http404
 from rest_framework.response import Response
+
+
+def content_404():
+    this_dir = os.path.dirname(os.path.realpath(__file__))
+    app_dir = os.path.dirname(this_dir)
+    chbs_art_path = '{0}/art/404.ascii'.format(app_dir)
+
+    with open(chbs_art_path) as chbs_file:
+        return chbs_file.read().splitlines()
+
+
+def error_404(url_path):
+    return Response(
+        {
+            "message": content_404(),
+            "requested_path": url_path,
+            "code": 404
+        },
+        status=404
+    )
 
 
 def error_response(error, file_path=''):
@@ -49,11 +71,15 @@ def error_response(error, file_path=''):
     elif hasattr(error, "log_message") and error.log_message:
         message = error.log_message
 
+    if status == 404:
+        message = [message, '']
+        message += content_404()
+
     return Response(
         {
+            "message": message,
             "file_path": file_path,
             "error_class": error.__class__.__name__,
-            "message": message,
             "code": status
         },
         status=status

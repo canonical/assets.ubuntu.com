@@ -6,7 +6,7 @@ from base64 import b64decode
 from datetime import datetime
 
 # Packages
-from django.http import HttpResponse, HttpResponseNotModified, Http404
+from django.http import HttpResponse, HttpResponseNotModified
 from django.conf import settings
 from pilbox.errors import PilboxError
 from swiftclient.exceptions import ClientException as SwiftClientException
@@ -16,7 +16,7 @@ from rest_framework.exceptions import ParseError
 
 # Local
 from lib.processors import image_processor
-from lib.http_helpers import error_response
+from lib.http_helpers import error_response, error_404
 from lib.file_helpers import create_asset
 from auth import token_authorization
 
@@ -249,7 +249,7 @@ class Token(APIView):
         token = settings.TOKEN_MANAGER.fetch(name)
 
         if not token:
-            raise Http404
+            return error_404(request.path)
 
         return Response(token)
 
@@ -266,6 +266,6 @@ class Token(APIView):
         if body:
             body['message'] = "Successfully deleted."
         else:
-            raise Http404
+            return error_404(request.path)
 
         return Response(body, status)
