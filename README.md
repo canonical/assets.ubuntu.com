@@ -59,7 +59,7 @@ PORT=9001 make develop  # Run the development server on port 9001
 
 ### Assets manager
 
-You may want to setup the [assets-manager](/ubuntudesign/assets-manager) to easily upload assets to your assets server.
+You may want to setup the [assets-manager](https://github.com/ubuntudesign/assets-server/) to easily upload assets to your assets server.
 
 Tests
 ---
