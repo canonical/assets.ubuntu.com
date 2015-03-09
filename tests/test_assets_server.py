@@ -1,5 +1,6 @@
 from api_test_helpers import get, token_fixture
 
+
 class TestAssetsAPI:
     """
     API tests of the assets server.
