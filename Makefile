@@ -45,7 +45,7 @@ setup:
 	if [ -z ${VIRTUAL_ENV} ]; then virtualenv ${ENVPATH}; fi
 
 	# Install requirements into virtual env
-	${VEX} pip install -r requirements/dev.txt
+	${VEX} pip install --upgrade -r requirements/dev.txt
 
 ##
 # Start the development server
