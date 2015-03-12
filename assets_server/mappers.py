@@ -106,9 +106,11 @@ class FileManager:
         return asset_data
 
     def headers(self, file_path):
+        encoded_path = urllib.quote(file_path)
+
         return self.swift_connection.head_object(
             self.container_name,
-            file_path
+            encoded_path
         )
 
     def delete(self, file_path):
