@@ -40,6 +40,10 @@ def error_response(error, file_path=''):
 
     # Get the status from either .errno or .http_status
     status = 500  # Default to "server error"
+
+    if hasattr(error, 'status_code'):
+        status = error.status_code
+
     if hasattr(error, 'errno'):
         if error.errno in [errno.EPERM, errno.EACCES]:
             status = 403  # Forbidden
