@@ -5,6 +5,11 @@ from rest_framework.response import Response
 
 
 def content_404():
+    """
+    Render the 404 ASCII art as a nice array
+    of strings, so it will render nicely in JSON
+    """
+
     this_dir = os.path.dirname(os.path.realpath(__file__))
     app_dir = os.path.dirname(this_dir)
     chbs_art_path = '{0}/art/404.ascii'.format(app_dir)
@@ -14,6 +19,11 @@ def content_404():
 
 
 def error_404(url_path):
+    """
+    Produce our standard 404 Response object
+    Which will contain "Hex" the owl as ASCII
+    """
+
     return Response(
         {
             "message": content_404(),
