@@ -1,3 +1,5 @@
+from copy import deepcopy
+from PIL import Image as PILImage
 from pilbox.image import Image
 from pilbox.errors import PilboxError
 
@@ -26,8 +28,6 @@ def image_processor(image_stream, params):
     The params follow Pilbox's API
     """
 
-    image = Image(image_stream)
-
     op = params.get("op")
 
     resize_operations = ['w', 'h', 'mode', 'filter', 'bg', 'pos']
@@ -35,6 +35,7 @@ def image_processor(image_stream, params):
 
     if op == "region":
         try:
+            image = Image(image_stream)
             image.region(
                 params.get("rect").split(',')
             )
@@ -43,6 +44,7 @@ def image_processor(image_stream, params):
 
     elif op == "rotate":
         try:
+            image = Image(image_stream)
             image.rotate(
                 deg=params.get("deg"),
                 expand=params.get("expand")
@@ -50,10 +52,30 @@ def image_processor(image_stream, params):
         except TypeError as rotate_error:
             catch_missing_param_error(rotate_error, 'rotate', ['deg', 'expand'])
     elif op == "resize" or used_operations:
+        resize_width = int(params.get("w")) if params.get("w") else None
+        resize_height = int(params.get("h")) if params.get("h") else None
+
+        if resize_width or resize_height:
+            # Don't allow expanding of images
+            image_stream_2 = deepcopy(image_stream)
+            (width, height) = PILImage.open(image_stream_2).size
+
+            if resize_width > width or resize_height > height:
+                expand_message = (
+                    "Resize error: Maximum dimensions for this image "
+                    "are {0}px wide by {1}px high."
+                ).format(width, height)
+
+                raise PilboxError(
+                    400,
+                    log_message=expand_message
+                )
+
         try:
+            image = Image(image_stream)
             image.resize(
-                width=params.get("w"),
-                height=params.get("h"),
+                width=resize_width,
+                height=resize_height,
                 mode=params.get("mode"),
                 filter=params.get("filter"),
                 background=params.get("bg"),
