@@ -1,14 +1,12 @@
-import errno
 import re
 import mimetypes
-import urllib
 import uuid
 from hashlib import sha1
 
 from wand.image import Image
 from swiftclient.exceptions import ClientException as SwiftException
 
-from lib.file_helpers import file_error
+from lib.url_helpers import normalize
 
 
 class FileManager:
@@ -42,7 +40,7 @@ class FileManager:
             # Create object
             self.swift_connection.put_object(
                 self.container_name,
-                urllib.quote(file_path),
+                normalize(file_path),
                 file_data
             )
         except SwiftException as swift_error:
@@ -53,7 +51,7 @@ class FileManager:
                 # And try to create again
                 self.swift_connection.put_object(
                     self.container_name,
-                    urllib.quote(file_path),
+                    normalize(file_path),
                     file_data
                 )
             else:
@@ -66,7 +64,7 @@ class FileManager:
         try:
             self.swift_connection.head_object(
                 self.container_name,
-                urllib.quote(file_path)
+                normalize(file_path)
             )
         except SwiftException as error:
             if error.http_status == 404:
@@ -90,11 +88,9 @@ class FileManager:
             file_path = sub_path
             svg_to_png = True
 
-        encoded_path = urllib.quote(file_path)
-
         asset = self.swift_connection.get_object(
             self.container_name,
-            encoded_path
+            normalize(file_path)
         )
         asset_data = asset[1]
 
@@ -106,17 +102,15 @@ class FileManager:
         return asset_data
 
     def headers(self, file_path):
-        encoded_path = urllib.quote(file_path)
-
         return self.swift_connection.head_object(
             self.container_name,
-            encoded_path
+            normalize(file_path)
         )
 
     def delete(self, file_path):
         self.swift_connection.delete_object(
             self.container_name,
-            urllib.quote(file_path)
+            normalize(file_path)
         )
         return True
 
@@ -145,10 +139,10 @@ class DataManager:
         self.data_collection = data_collection
 
     def update(self, file_path, tags):
-        search = {"file_path": file_path}
+        search = {"file_path": normalize(file_path)}
 
         data = {
-            "file_path": file_path,
+            "file_path": normalize(file_path),
             "tags": tags
         }
 
@@ -158,7 +152,7 @@ class DataManager:
 
     def fetch_one(self, file_path):
         asset_data = self.data_collection.find_one(
-            {"file_path": file_path}
+            {"file_path": normalize(file_path)}
         )
 
         return self.format(asset_data) if asset_data else None
