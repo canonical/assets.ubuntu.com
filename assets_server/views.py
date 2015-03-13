@@ -37,11 +37,10 @@ class Asset(APIView):
 
         try:
             asset_stream = BytesIO(settings.FILE_MANAGER.fetch(file_path))
+            asset_headers = settings.FILE_MANAGER.headers(file_path)
         except SwiftClientException as error:
             return error_response(error, file_path)
 
-        image_types = ["image/png", "image/jpeg"]
-        asset_headers = settings.FILE_MANAGER.headers(file_path)
         time_format = '%a, %d %b %Y %H:%M:%S %Z'
         make_datetime = lambda x: datetime.strptime(x, time_format)
         last_modified = asset_headers['last-modified']
@@ -54,7 +53,7 @@ class Asset(APIView):
             return HttpResponseNotModified()
 
         # Run images through processor
-        if request.GET and mimetype in image_types:
+        if request.GET and mimetype in ["image/png", "image/jpeg"]:
             try:
                 asset_stream = image_processor(
                     asset_stream,
