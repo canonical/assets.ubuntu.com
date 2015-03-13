@@ -16,7 +16,8 @@ def catch_missing_param_error(error, operation_name, operation_params):
 
         raise PilboxError(400, log_message=message)
     else:
-        raise resize_error
+        raise error
+
 
 def image_processor(image_stream, params):
     """
@@ -48,8 +49,6 @@ def image_processor(image_stream, params):
             )
         except TypeError as rotate_error:
             catch_missing_param_error(rotate_error, 'rotate', ['deg', 'expand'])
-
-
     elif op == "resize" or used_operations:
         try:
             image.resize(
