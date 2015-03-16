@@ -3,7 +3,6 @@ import mimetypes
 import uuid
 from hashlib import sha1
 
-from wand.image import Image
 from swiftclient.exceptions import ClientException as SwiftException
 
 from lib.url_helpers import normalize
@@ -20,10 +19,6 @@ class FileManager:
 
     container_name = "assets"
     swift_connection = None
-    mimes = {
-        "png": "image/png",
-        "svg": "image/svg+xml"
-    }
 
     def __init__(self, swift_connection):
         self.swift_connection = swift_connection
@@ -73,31 +68,13 @@ class FileManager:
         return file_exists
 
     def fetch(self, file_path):
-        sub_path = file_path[:-4]
-        mimetype = mimetypes.guess_type(file_path)[0]
-        sub_mimetype = mimetypes.guess_type(sub_path)[0]
-        svg_to_png = False
         asset_data = None
-
-        if (
-            mimetype == self.mimes["png"] and
-            sub_mimetype == self.mimes["svg"] and
-            not self.exists(file_path)
-        ):
-            # Remove extra ".png" extension
-            file_path = sub_path
-            svg_to_png = True
 
         asset = self.swift_connection.get_object(
             self.container_name,
             normalize(file_path)
         )
         asset_data = asset[1]
-
-        # Convert to png (if applicable)
-        if svg_to_png:
-            with Image(blob=asset_data, format="svg") as image:
-                asset_data = image.make_blob("png")
 
         return asset_data
 

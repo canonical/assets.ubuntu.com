@@ -6,6 +6,7 @@ from base64 import b64decode
 from datetime import datetime
 
 # Packages
+from wand.image import Image
 from django.http import HttpResponse, HttpResponseNotModified
 from django.conf import settings
 from pilbox.errors import PilboxError
@@ -52,7 +53,13 @@ class Asset(APIView):
         if make_datetime(last_modified) <= make_datetime(if_modified_since):
             return HttpResponseNotModified()
 
-        # Run images through processor
+        # Convert SVG to PNG if instructed
+        if request.GET.get('fmt') == 'png' and mimetype == "image/svg+xml":
+            with Image(file=asset_stream, format="svg") as image:
+                asset_stream = BytesIO(image.make_blob("png"))
+                mimetype = "image/png"
+
+        # Run PNGs or JPGs through Pilbox
         if request.GET and mimetype in ["image/png", "image/jpeg"]:
             try:
                 asset_stream, converted_to = image_processor(
