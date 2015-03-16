@@ -55,10 +55,12 @@ class Asset(APIView):
         # Run images through processor
         if request.GET and mimetype in ["image/png", "image/jpeg"]:
             try:
-                asset_stream = image_processor(
+                asset_stream, converted_to = image_processor(
                     asset_stream,
                     request.GET
                 )
+                if converted_to:
+                    mimetype = mimetypes.guess_type('file.'+converted_to)[0]
             except PilboxError as error:
                 return error_response(error, file_path)
 
@@ -66,6 +68,7 @@ class Asset(APIView):
             asset_stream.read(),
             content_type=mimetype
         )
+
         # Cache all genuine assets forever
         response['Cache-Control'] = 'max-age=31556926'
         response['Last-Modified'] = last_modified
