@@ -3,21 +3,6 @@ import os
 import sys
 
 
-def get(params={}, server_url="http://localhost:8012/v1/"):
-    """
-    Convienince function for making simple GETs
-    """
-
-    try:
-        requests.get(server_url)
-    except:
-        sys.exit(
-            'No server found on {0}'.format(server_url)
-        )
-
-    return requests.get(server_url, params=params)
-
-
 def token_fixture(fixtures_path=None):
     """
     Get the token from the fixture file
@@ -39,3 +24,39 @@ def token_fixture(fixtures_path=None):
         sys.exit('Please add a valid token in {0}'.format(token_path))
 
     return token
+
+
+def exit_if_server_not_found(server_url):
+    try:
+        requests.get(server_url)
+    except:
+        sys.exit(
+            'No server found on {0}'.format(server_url)
+        )
+
+
+def get(path="", params={}, server_url="http://localhost:8012/v1/"):
+    """
+    Convienince function for making simple GETs
+    """
+    exit_if_server_not_found(server_url)
+
+    return requests.get(server_url + path, params=params)
+
+
+def post(data={}, path="", params={}, server_url="http://localhost:8012/v1/"):
+    """
+    Convienince function for making simple POSTs
+    """
+    exit_if_server_not_found(server_url)
+
+    return requests.post(server_url + path, params=params, data=data)
+
+
+def delete(path="", params={}, server_url="http://localhost:8012/v1/"):
+    """
+    Convienince function for making simple DELETEs
+    """
+    exit_if_server_not_found(server_url)
+
+    return requests.delete(server_url + path, params=params)
