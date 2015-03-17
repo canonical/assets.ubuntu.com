@@ -83,8 +83,15 @@ def image_processor(image_stream, params):
             )
         except TypeError as resize_error:
             catch_missing_param_error(resize_error, 'resize', resize_operations)
+    else:
+        image = Image(image_stream)
 
-    return image.save(
-        format=params.get("fmt"),
-        quality=params.get("q")
+    convert_to = params.get("fmt")
+
+    return (
+        image.save(
+            format=convert_to,
+            quality=params.get("q")
+        ),
+        convert_to
     )
