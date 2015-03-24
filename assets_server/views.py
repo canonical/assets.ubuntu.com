@@ -1,24 +1,29 @@
 # System
-import mimetypes
 import errno
 from io import BytesIO
 from base64 import b64decode
 from datetime import datetime
 
 # Packages
-from wand.image import Image
-from django.http import HttpResponse, HttpResponseNotModified
 from django.conf import settings
+from django.http import (
+    HttpResponse,
+    HttpResponseNotModified
+)
+import magic
 from pilbox.errors import PilboxError
-from swiftclient.exceptions import ClientException as SwiftClientException
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from rest_framework.exceptions import ParseError
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from swiftclient.exceptions import ClientException as SwiftClientException
 
 # Local
-from lib.processors import image_processor
-from lib.http_helpers import error_response, error_404
-from lib.file_helpers import create_asset
+from lib.processors import ImageProcessor
+from lib.http_helpers import (
+    error_404,
+    error_response
+)
+from lib.file_helpers import create_asset, file_error
 from auth import token_authorization
 
 
@@ -34,10 +39,8 @@ class Asset(APIView):
         Get a single asset, 404ing if we get an OSError.
         """
 
-        mimetype = mimetypes.guess_type(file_path)[0]
-
         try:
-            asset_stream = BytesIO(settings.FILE_MANAGER.fetch(file_path))
+            asset_data = settings.FILE_MANAGER.fetch(file_path)
             asset_headers = settings.FILE_MANAGER.headers(file_path)
         except SwiftClientException as error:
             return error_response(error, file_path)
@@ -53,27 +56,22 @@ class Asset(APIView):
         if make_datetime(last_modified) <= make_datetime(if_modified_since):
             return HttpResponseNotModified()
 
-        # Convert SVG to PNG if instructed
-        if request.GET.get('fmt') == 'png' and mimetype == "image/svg+xml":
-            with Image(file=asset_stream, format="svg") as image:
-                asset_stream = BytesIO(image.make_blob("png"))
-                mimetype = "image/png"
+        # Run image processor
+        try:
+            image = ImageProcessor(
+                asset_data,
+                request.GET
+            )
+            image.process()
+            asset_data = image.data
 
-        # Run PNGs or JPGs through Pilbox
-        if request.GET and mimetype in ["image/png", "image/jpeg"]:
-            try:
-                asset_stream, converted_to = image_processor(
-                    asset_stream,
-                    request.GET
-                )
-                if converted_to:
-                    mimetype = mimetypes.guess_type('file.'+converted_to)[0]
-            except PilboxError as error:
-                return error_response(error, file_path)
+        except (PilboxError, ValueError) as error:
+            return error_response(error, file_path)
 
+        # Start response, guessing mime type
         response = HttpResponse(
-            asset_stream.read(),
-            content_type=mimetype
+            asset_data,
+            content_type=magic.Magic(mime=True).from_buffer(asset_data)
         )
 
         # Cache all genuine assets forever
@@ -148,6 +146,7 @@ class AssetList(APIView):
         """
 
         tags = request.DATA.get('tags', '')
+        optimize = request.DATA.get('optimize', False)
         asset = request.DATA.get('asset')
         friendly_name = request.DATA.get('friendly-name')
         url_path = request.DATA.get('url-path', '').strip('/')
@@ -157,7 +156,8 @@ class AssetList(APIView):
                 file_data=b64decode(asset),
                 friendly_name=friendly_name,
                 tags=tags,
-                url_path=url_path
+                url_path=url_path,
+                optimize=optimize
             )
         except IOError as create_error:
             if create_error.errno == errno.EEXIST:
