@@ -1,97 +1,178 @@
-from copy import deepcopy
-from PIL import Image as PILImage
-from pilbox.image import Image
+# System
+from io import BytesIO
+
+# Modules
 from pilbox.errors import PilboxError
+from pilbox.image import Image as PilboxImage
+from scour.scour import scourString
+from sh import jpegtran, optipng
+from wand.image import Image as WandImage
+from uuid import uuid4
+import magic
+
+# Local
+from python_helpers import shared_items
 
 
-def catch_missing_param_error(error, operation_name, operation_params):
-    expected_errors = [
-        "int() argument must be a string or a number, not 'NoneType'",
-        "'NoneType' object has no attribute 'split'"
-    ]
+class ImageProcessor:
+    operation_parameters = {
+        'region': ['rect'],
+        'rotate': ['deg', 'expand'],
+        'resize': ['w', 'h', 'mode', 'filter', 'bg', 'pos']
+    }
 
-    if error.message in expected_errors:
-        message = "Image operation '{0}' requires one of: {1}".format(
-            operation_name,
-            ', '.join(operation_params)
-        )
+    def __init__(self, image_contents, options={}):
+        self.data = image_contents
+        self.options = options
 
-        raise PilboxError(400, log_message=message)
-    else:
-        raise error
+    def process(self):
+        """
+        Reformat, optimize or transform an image
+        """
 
+        target_format = self.options.get('fmt')
+        optimize = self.options.get("opt", False)
 
-def image_processor(image_stream, params):
-    """
-    Perform transformations on an image
-    Using Pilbox: https://github.com/nottrobin/pilbox
-    The params follow Pilbox's API
-    """
+        # Reformat images
+        if target_format:
+            self.convert(target_format)
 
-    op = params.get("op")
+        # Optimize images
+        if self.transform() or optimize is not False:
+            self.optimize()
 
-    resize_operations = ['w', 'h', 'mode', 'filter', 'bg', 'pos']
-    used_operations = [x for x in params.keys() if x in resize_operations]
+    def optimize(self):
+        """
+        Optimize SVGs, PNGs or Jpegs
+        Unfortunately, this needs to write temporary files
+        by making use of the /tmp directory
+        """
 
-    if op == "region":
-        try:
-            image = Image(image_stream)
+        mimetype = magic.Magic(mime=True).from_buffer(self.data)
+        tmp_filename = '/tmp/' + uuid4().get_hex()
+
+        if mimetype == 'image/svg+xml':
+            self.data = str(scourString(self.data))
+
+        elif mimetype == 'image/jpeg':
+            with open(tmp_filename, 'w') as tmp:
+                self.data = jpegtran("-optimize", _in=self.data, _out=tmp)
+            with open(tmp_filename) as tmp:
+                self.data = tmp.read()
+
+        elif mimetype == 'image/png':
+            with open(tmp_filename, 'w') as tmp:
+                tmp.write(self.data)
+            optipng(tmp_filename)
+            with open(tmp_filename) as tmp:
+                self.data = tmp.read()
+
+    def convert(self, target_format):
+        # Do conversion with wand
+        with WandImage(blob=self.data) as image:
+            return image.make_blob(target_format)
+
+    def transform(self):
+        """
+        Perform transformations on an image
+        Using Pilbox: https://github.com/nottrobin/pilbox
+        The self.options follow Pilbox's API
+
+        Return True if transformation happened
+        """
+
+        # Operations (region, rotate, resize...)
+        # ---
+
+        mimetype = magic.Magic(mime=True).from_buffer(self.data)
+
+        if mimetype in ['image/png', 'image/jpeg', 'image/gif']:
+            operation = self.options.get('op')
+
+            if (
+                not operation and
+                shared_items(self.options, self.operation_parameters['resize'])
+            ):
+                operation = "resize"
+
+            if operation or 'q' in self.options:
+                try:
+                    self._pilbox_operation(operation)
+                except (TypeError, AttributeError) as operation_error:
+                    self._missing_param_error(operation_error, operation)
+
+                return True
+
+    # Private helper methods
+    # ===
+
+    def _pilbox_operation(self, operation):
+        """
+        Use Pilbox to transform an image
+        """
+
+        image = PilboxImage(BytesIO(self.data))
+
+        if operation == "region":
             image.region(
-                params.get("rect").split(',')
+                self.options.get("rect").split(',')
             )
-        except AttributeError as region_error:
-            catch_missing_param_error(region_error, 'rotate', ['rect'])
 
-    elif op == "rotate":
-        try:
-            image = Image(image_stream)
+        elif operation == "rotate":
             image.rotate(
-                deg=params.get("deg"),
-                expand=params.get("expand")
+                deg=self.options.get("deg"),
+                expand=self.options.get("expand")
             )
-        except TypeError as rotate_error:
-            catch_missing_param_error(rotate_error, 'rotate', ['deg', 'expand'])
-    elif op == "resize" or used_operations:
-        resize_width = int(params.get("w")) if params.get("w") else None
-        resize_height = int(params.get("h")) if params.get("h") else None
+        elif operation == "resize":
+            resize_width = self.options.get("w")
+            resize_height = self.options.get("h")
 
-        if resize_width or resize_height:
-            # Don't allow expanding of images
-            image_stream_2 = deepcopy(image_stream)
-            (width, height) = PILImage.open(image_stream_2).size
+            # Make sure widths and heights are integers
+            if resize_width:
+                resize_width = int(resize_width)
+            if resize_height:
+                resize_height = int(resize_height)
 
-            if resize_width > width or resize_height > height:
-                expand_message = (
-                    "Resize error: Maximum dimensions for this image "
-                    "are {0}px wide by {1}px high."
-                ).format(width, height)
+            if resize_width or resize_height:
+                # Don't allow expanding of images
+                with WandImage(blob=self.data) as image_info:
+                    if (
+                        resize_width > image_info.width or
+                        resize_height > image_info.height
+                    ):
+                        expand_message = (
+                            "Resize error: Maximum dimensions for this image "
+                            "are {0}px wide by {1}px high."
+                        ).format(image_info.width, image_info.height)
 
-                raise PilboxError(
-                    400,
-                    log_message=expand_message
-                )
+                        raise PilboxError(
+                            400,
+                            log_message=expand_message
+                        )
 
-        try:
-            image = Image(image_stream)
             image.resize(
                 width=resize_width,
                 height=resize_height,
-                mode=params.get("mode"),
-                filter=params.get("filter"),
-                background=params.get("bg"),
-                position=params.get("pos")
+                mode=self.options.get("mode"),
+                filter=self.options.get("filter"),
+                background=self.options.get("bg"),
+                position=self.options.get("pos")
             )
-        except TypeError as resize_error:
-            catch_missing_param_error(resize_error, 'resize', resize_operations)
-    else:
-        image = Image(image_stream)
 
-    convert_to = params.get("fmt")
+        self.data = image.save(quality=self.options.get("q")).read()
 
-    return (
-        image.save(
-            format=convert_to,
-            quality=params.get("q")
-        ),
-        convert_to
-    )
+    def _missing_param_error(self, error, operation):
+        expected_errors = [
+            "int() argument must be a string or a number, not 'NoneType'",
+            "'NoneType' object has no attribute 'split'"
+        ]
+
+        if error.message in expected_errors:
+            message = "Image operation '{0}' requires one of: {1}".format(
+                operation,
+                ', '.join(self.operation_parameters[operation])
+            )
+
+            raise PilboxError(400, log_message=message)
+        else:
+            raise error
