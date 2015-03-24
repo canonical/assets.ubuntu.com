@@ -70,7 +70,7 @@ class ImageProcessor:
     def convert(self, target_format):
         # Do conversion with wand
         with WandImage(blob=self.data) as image:
-            return image.make_blob(target_format)
+            self.data = image.make_blob(target_format)
 
     def transform(self):
         """
