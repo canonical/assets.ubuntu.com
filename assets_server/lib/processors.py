@@ -68,9 +68,15 @@ class ImageProcessor:
                 self.data = tmp.read()
 
     def convert(self, target_format):
-        # Do conversion with wand
-        with WandImage(blob=self.data) as image:
-            self.data = image.make_blob(target_format)
+        if target_format in ['png', 'jpg', 'gif']:
+            # Do conversion with wand
+            with WandImage(blob=self.data) as image:
+                self.data = image.make_blob(target_format)
+        else:
+            raise PilboxError(
+                400,
+                log_message="Cannot convert to '{}'".format(target_format)
+            )
 
     def transform(self):
         """
