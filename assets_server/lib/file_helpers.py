@@ -4,7 +4,18 @@ import errno
 # Packages
 from django.conf import settings
 
-def create_asset(file_data, friendly_name, tags='', url_path=''):
+# Local
+from processors import ImageProcessor
+
+
+def create_asset(
+    file_data, friendly_name, tags='', url_path='', optimize=False
+):
+    if optimize:
+        image = ImageProcessor(file_data)
+        image.optimize()
+        file_data = image.data
+
     if not url_path:
         url_path = settings.FILE_MANAGER.generate_asset_path(
             file_data,
@@ -26,11 +37,12 @@ def create_asset(file_data, friendly_name, tags='', url_path=''):
 
     return url_path
 
+
 def file_error(error_number, message, filename):
     """
     Create an IOError
     """
-    
+
     file_error = IOError(
         error_number,
         message
