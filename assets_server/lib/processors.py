@@ -19,7 +19,7 @@ class ImageProcessor:
     operation_parameters = {
         'region': ['rect'],
         'rotate': ['deg', 'expand'],
-        'resize': ['w', 'h', 'mode', 'filter', 'bg', 'pos']
+        'resize': ['w', 'h', 'mode', 'filter', 'bg', 'pos', 'retain']
     }
 
     def __init__(self, image_contents, options={}):
@@ -175,6 +175,7 @@ class ImageProcessor:
                 mode=self.options.get("mode"),
                 filter=self.options.get("filter"),
                 background=self.options.get("bg"),
+                retain=self.options.get("retain"),
                 position=self.options.get("pos")
             )
 
@@ -187,7 +188,7 @@ class ImageProcessor:
         ]
 
         if error.message in expected_errors:
-            message = "Image operation '{0}' requires one of: {1}".format(
+            message = "Invalid image operation. '{0}' accepts: {1}".format(
                 operation,
                 ', '.join(self.operation_parameters[operation])
             )
