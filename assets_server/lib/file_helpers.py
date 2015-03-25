@@ -13,7 +13,7 @@ def create_asset(
 ):
     if optimize:
         image = ImageProcessor(file_data)
-        image.optimize()
+        image.optimize(allow_svg_errors=True)
         file_data = image.data
 
     if not url_path:

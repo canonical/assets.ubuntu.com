@@ -6,8 +6,9 @@ from pilbox.errors import PilboxError
 from pilbox.image import Image as PilboxImage
 from scour.scour import scourString
 from sh import jpegtran, optipng
-from wand.image import Image as WandImage
 from uuid import uuid4
+from wand.image import Image as WandImage
+from xml.parsers.expat import ExpatError
 import magic
 
 # Local
@@ -41,9 +42,9 @@ class ImageProcessor:
 
         # Optimize images
         if converted or transformed or optimize:
-            self.optimize()
+            self.optimize(allow_svg_errors=converted or transformed)
 
-    def optimize(self):
+    def optimize(self, allow_svg_errors=False):
         """
         Optimize SVGs, PNGs or Jpegs
         Unfortunately, this needs to write temporary files
@@ -54,7 +55,14 @@ class ImageProcessor:
         tmp_filename = '/tmp/' + uuid4().get_hex()
 
         if mimetype == 'image/svg+xml':
-            self.data = str(scourString(self.data))
+            try:
+                self.data = str(scourString(self.data))
+            except ExpatError as optimize_error:
+                if optimize_error.code == 27 and allow_svg_errors:
+                    # Invalid SVG. Let's just not optimize it
+                    pass
+                else:
+                    raise optimize_error
 
         elif mimetype == 'image/jpeg':
             with open(tmp_filename, 'w') as tmp:
