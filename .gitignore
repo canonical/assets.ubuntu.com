@@ -4,3 +4,4 @@ env/
 pip-cache/
 test_token.py
 tests/fixtures/api-token
+django-error.log
