@@ -1,3 +1,4 @@
 -r standard.txt
 vex==0.0.18
 pytest==2.6.4
+ipdb

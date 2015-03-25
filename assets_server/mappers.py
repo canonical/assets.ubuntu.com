@@ -1,5 +1,4 @@
 import re
-import mimetypes
 import uuid
 from hashlib import sha1
 
@@ -160,11 +159,6 @@ class DataManager:
             'tags': asset_record["tags"] or "",
             'created': asset_record["_id"].generation_time.ctime()
         }
-
-        mimetype = mimetypes.guess_type(asset_data['file_path'])[0]
-
-        if mimetype == "image/svg+xml":
-            asset_data['png_file_path'] = asset_data['file_path'] + ".png"
 
         return asset_data
 

@@ -13,6 +13,7 @@ endef
 
 ENVPATH=${VIRTUAL_ENV}
 VEX=vex --path ${ENVPATH}
+SYSTEM_DEPENDENCIES=mongodb libjpeg-dev zlib1g-dev libpng12-dev libmagickwand-dev python-pip libjpeg-progs optipng
 
 ifeq ($(ENVPATH),)
 	ENVPATH=env
@@ -34,8 +35,8 @@ help:
 ##
 setup:
 	# Install missing dependencies
-	if ! dpkg -s mongodb libjpeg-dev zlib1g-dev libpng12-dev libmagickwand-dev python-pip &> /dev/null; then \
-		sudo apt update && sudo apt install -y mongodb libjpeg-dev zlib1g-dev libpng12-dev libmagickwand-dev python-pip build-essential; \
+	if ! dpkg -s ${SYSTEM_DEPENDENCIES} &> /dev/null; then \
+		sudo apt update && sudo apt install -y ${SYSTEM_DEPENDENCIES}; \
 	fi
 
 	# Install vex globally (also installs virtualenv)
