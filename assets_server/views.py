@@ -1,29 +1,23 @@
 # System
-import errno
 from base64 import b64decode
 from datetime import datetime
+import errno
 
 # Packages
 from django.conf import settings
-from django.http import (
-    HttpResponse,
-    HttpResponseNotModified
-)
-import magic
+from django.http import HttpResponse, HttpResponseNotModified
 from pilbox.errors import PilboxError
 from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from swiftclient.exceptions import ClientException as SwiftClientException
+import magic
 
 # Local
-from lib.processors import ImageProcessor
-from lib.http_helpers import (
-    error_404,
-    error_response
-)
-from lib.file_helpers import create_asset, file_error
 from auth import token_authorization
+from lib.file_helpers import create_asset, file_error
+from lib.http_helpers import error_response, error_404
+from lib.processors import ImageProcessor
 
 
 class Asset(APIView):
@@ -170,7 +164,7 @@ class AssetList(APIView):
         return Response(settings.DATA_MANAGER.fetch_one(url_path), 201)
 
 
-class AssetJson(APIView):
+class AssetInfo(APIView):
     """
     Data about an asset
     """
