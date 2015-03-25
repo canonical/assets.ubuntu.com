@@ -56,7 +56,7 @@ class ImageProcessor:
 
         elif mimetype == 'image/jpeg':
             with open(tmp_filename, 'w') as tmp:
-                self.data = jpegtran("-optimize", _in=self.data, _out=tmp)
+                jpegtran("-optimize", _in=self.data, _out=tmp)
             with open(tmp_filename) as tmp:
                 self.data = tmp.read()
 
