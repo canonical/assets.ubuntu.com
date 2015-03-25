@@ -40,6 +40,11 @@ parser.add_argument(
     help='The URL of the server',
     default='http://localhost:8080/v1/'
 )
+parser.add_argument(
+    '--optimize',
+    help='Perform image optimization',
+    default=False
+)
 
 cmd_args = vars(parser.parse_args())
 
@@ -47,6 +52,7 @@ file_path = cmd_args['file-path']
 url_path = cmd_args['url_path']
 tags = cmd_args['tags']
 server_url = cmd_args['server_url']
+optimize = cmd_args['optimize']
 
 with open(file_path) as upload_file:
     try:
@@ -58,7 +64,7 @@ with open(file_path) as upload_file:
         )
     except IOError, create_error:
         if create_error.errno == errno.EEXIST:
-            print "Error: Asset already exists at {0}".format(url_path)
+            print create_error.message
 
             sys.exit(73)
         else:
