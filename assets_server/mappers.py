@@ -169,7 +169,8 @@ class DataManager:
         ]
 
     def delete(self, file_path):
-        self.data_collection.remove({'file_path': file_path})
+        if self.exists(file_path):
+            return self.data_collection.remove({'file_path': file_path})
 
 
 class TokenManager:
