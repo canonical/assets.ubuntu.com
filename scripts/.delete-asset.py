@@ -28,7 +28,10 @@ cmd_args = vars(parser.parse_args())
 
 asset_path = cmd_args['asset-path']
 
-if settings.DATA_MANAGER.delete(asset_path):
+if (
+    settings.FILE_MANAGER.delete(asset_path) and
+    settings.DATA_MANAGER.delete(asset_path)
+):
     print "Asset {0} deleted".format(asset_path)
 else:
     print "Asset {0} not deleted. does it exists?".format(asset_path)

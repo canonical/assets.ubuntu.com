@@ -84,11 +84,12 @@ class FileManager:
         )
 
     def delete(self, file_path):
-        self.swift_connection.delete_object(
-            self.container_name,
-            normalize(file_path)
-        )
-        return True
+        if self.exists(file_path):
+            self.swift_connection.delete_object(
+                self.container_name,
+                normalize(file_path)
+            )
+            return True
 
     def generate_asset_path(self, file_data, friendly_name):
         """
