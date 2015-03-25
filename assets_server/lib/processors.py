@@ -31,14 +31,16 @@ class ImageProcessor:
         """
 
         target_format = self.options.get('fmt')
-        optimize = self.options.get("opt", False)
+        optimize = self.options.get("opt") is not None
 
         # Reformat images
-        if target_format:
-            self.convert(target_format)
+        converted = self.convert(target_format)
+
+        # Do transformations
+        transformed = self.transform()
 
         # Optimize images
-        if self.transform() or optimize is not False:
+        if converted or transformed or optimize:
             self.optimize()
 
     def optimize(self):
@@ -68,10 +70,13 @@ class ImageProcessor:
                 self.data = tmp.read()
 
     def convert(self, target_format):
+        if not target_format:
+            return False
         if target_format in ['png', 'jpg', 'gif']:
             # Do conversion with wand
             with WandImage(blob=self.data) as image:
                 self.data = image.make_blob(target_format)
+                return True
         else:
             raise PilboxError(
                 400,
