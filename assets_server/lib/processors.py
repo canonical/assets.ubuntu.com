@@ -1,5 +1,6 @@
 # System
 from io import BytesIO
+import os
 
 # Modules
 from pilbox.errors import PilboxError
@@ -65,10 +66,7 @@ class ImageProcessor:
                     raise optimize_error
 
         elif mimetype == 'image/jpeg':
-            with open(tmp_filename, 'w') as tmp:
-                jpegtran("-optimize", _in=self.data, _out=tmp)
-            with open(tmp_filename) as tmp:
-                self.data = tmp.read()
+            self.data = jpegtran("-optimize", _in=self.data).stdout
 
         elif mimetype == 'image/png':
             with open(tmp_filename, 'w') as tmp:
@@ -76,6 +74,7 @@ class ImageProcessor:
             optipng(tmp_filename)
             with open(tmp_filename) as tmp:
                 self.data = tmp.read()
+            os.remove(tmp_filename)
 
     def convert(self, target_format):
         if not target_format:
