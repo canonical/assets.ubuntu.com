@@ -38,10 +38,10 @@ class TestAssetsAPI:
         post_response = post(
             params=self.params,
             data={
-                'asset': "Test",
-                'friendly-name': "test_friendly_name",
-                'tags': "tags",
-                'type': 'base64'
+                "asset": "Test",
+                "friendly-name": "test_friendly_name",
+                "tags": "tags",
+                "type": "base64"
             }
         )
         assert post_response.status_code == 201, (
