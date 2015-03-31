@@ -6,9 +6,7 @@ class TestAssetsAPI:
     API tests of the assets server.
     """
 
-    params = {
-        'token': token_fixture()
-    }
+    token = token_fixture()
 
     def test_no_token(self):
         """
@@ -27,7 +25,7 @@ class TestAssetsAPI:
         """
         Tests a good token returns a 200 at the root.
         """
-        assert get(params=self.params).status_code == 200, (
+        assert get(params={'token': self.token}).status_code == 200, (
             "Token '{0}' failed to authenticate correctly".format(self.token)
         )
 
@@ -36,7 +34,7 @@ class TestAssetsAPI:
         Tests uploading an asset, getting that asset and deleting it.
         """
         post_response = post(
-            params=self.params,
+            params={'token': self.token},
             data={
                 "asset": "Test",
                 "friendly-name": "test_friendly_name",
@@ -50,10 +48,10 @@ class TestAssetsAPI:
 
         file_path = post_response.json()['file_path']
 
-        assert get(path=file_path, params=self.params).status_code == 200, (
+        assert get(path=file_path, params={'token': self.token}).status_code == 200, (
             "Asset not downloaded correctly"
         )
 
-        assert delete(path=file_path, params=self.params).status_code == 200, (
+        assert delete(path=file_path, params={'token': self.token}).status_code == 200, (
             "Asset not deleted successfully."
         )
