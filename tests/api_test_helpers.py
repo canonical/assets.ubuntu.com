@@ -1,6 +1,9 @@
 import requests
 import os
 import sys
+from functools import wraps
+
+default_server_url = "http://localhost:8012/v1/"
 
 
 def token_fixture(fixtures_path=None):
@@ -26,16 +29,19 @@ def token_fixture(fixtures_path=None):
     return token
 
 
-def exit_if_server_not_found(server_url):
-    try:
-        requests.get(server_url)
-    except:
-        sys.exit(
-            'No server found on {0}'.format(server_url)
-        )
+def exit_if_server_not_found(f):
+    def wrapper(*args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except:
+            sys.exit(
+                'No server found'
+            )
+    return wrapper
 
 
-def get(path="", params={}, server_url="http://localhost:8012/v1/"):
+@exit_if_server_not_found
+def get(path="", params={}, server_url=default_server_url):
     """
     Convienince function for making simple GETs
     """
@@ -44,7 +50,8 @@ def get(path="", params={}, server_url="http://localhost:8012/v1/"):
     return requests.get(server_url + path, params=params)
 
 
-def post(data={}, path="", params={}, server_url="http://localhost:8012/v1/"):
+@exit_if_server_not_found
+def post(data={}, path="", params={}, server_url=default_server_url):
     """
     Convienince function for making simple POSTs
     """
@@ -53,7 +60,8 @@ def post(data={}, path="", params={}, server_url="http://localhost:8012/v1/"):
     return requests.post(server_url + path, params=params, data=data)
 
 
-def delete(path="", params={}, server_url="http://localhost:8012/v1/"):
+@exit_if_server_not_found
+def delete(path="", params={}, server_url=default_server_url):
     """
     Convienince function for making simple DELETEs
     """
