@@ -35,9 +35,9 @@ def exit_if_server_not_found(f):
     def wrapper(*args, **kwargs):
         try:
             return f(*args, **kwargs)
-        except ConnectionError:
+        except ConnectionError as e:
             sys.exit(
-                'No server found'
+                'No server found: {0}'.format(e)
             )
     return wrapper
 
