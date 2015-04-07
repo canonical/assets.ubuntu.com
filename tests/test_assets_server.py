@@ -34,7 +34,9 @@ class TestAssetsAPI:
         Tests uploading an asset, getting that asset and deleting it.
         """
         post_response = post(
-            params={'token': self.token},
+            params={
+                'token': self.token
+            },
             data={
                 "asset": "Test",
                 "friendly-name": "test_friendly_name",
