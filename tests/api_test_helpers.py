@@ -1,7 +1,7 @@
 import requests
 import os
 import sys
-from functools import wraps
+from errno import ECONNREFUSED
 
 from requests import ConnectionError
 
@@ -36,8 +36,13 @@ def exit_if_server_not_found(f):
         try:
             return f(*args, **kwargs)
         except ConnectionError as e:
+            errno = e.args[0].reason.errno
+            lookup_error = {
+                111: "No server found: ",
+                -2: "Unknown error: "
+            }
             sys.exit(
-                'No server found: {0}'.format(e)
+                '{0}{1}'.format(lookup_error[errno], e)
             )
     return wrapper
 
