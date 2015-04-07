@@ -3,6 +3,8 @@ import os
 import sys
 from functools import wraps
 
+from requests import ConnectionError
+
 default_server_url = "http://localhost:8012/v1/"
 
 
@@ -33,7 +35,7 @@ def exit_if_server_not_found(f):
     def wrapper(*args, **kwargs):
         try:
             return f(*args, **kwargs)
-        except:
+        except ConnectionError:
             sys.exit(
                 'No server found'
             )
