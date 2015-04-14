@@ -15,7 +15,7 @@ import os
 from swiftclient.client import Connection as SwiftConnection
 
 # Local
-from mappers import DataManager, FileManager, TokenManager
+from mappers import DataManager, FileManager, TokenManager, RedirectManager
 from lib.db_helpers import mongo_db_from_url
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -64,6 +64,7 @@ MONGO_DB = mongo_db_from_url(
 )
 
 TOKEN_MANAGER = TokenManager(data_collection=MONGO_DB['tokens'])
+REDIRECT_MANAGER = RedirectManager(data_collection=MONGO_DB['redirects'])
 DATA_MANAGER = DataManager(data_collection=MONGO_DB['asset_data'])
 FILE_MANAGER = FileManager(
     SwiftConnection(
