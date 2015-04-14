@@ -6,7 +6,7 @@ from django.views.generic.base import RedirectView
 from views import (
     Asset, AssetList, AssetInfo,
     Tokens, Token,
-    RedirectRecords, RedirectRecord
+    RedirectRecords, RedirectRecord, Redirects
 )
 
 urlpatterns = patterns(
@@ -19,4 +19,5 @@ urlpatterns = patterns(
     url(r'^v1/redirects/(?P<redirect_path>.+)$', RedirectRecord.as_view()),
     url(r'^v1/(?P<file_path>.+)/info$', AssetInfo.as_view()),
     url(r'^v1/(?P<file_path>.+)$', Asset.as_view()),
+    url(r'^(?P<request_path>.+)$', Redirects.as_view())
 )
