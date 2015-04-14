@@ -2,11 +2,14 @@
 from base64 import b64decode
 from datetime import datetime
 from urllib import unquote
+from urllib2 import urlparse
 import errno
 
 # Packages
 from django.conf import settings
-from django.http import HttpResponse, HttpResponseNotModified
+from django.http import (
+    HttpResponse, HttpResponseNotModified, HttpResponsePermanentRedirect
+)
 from pilbox.errors import PilboxError
 from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
@@ -381,3 +384,17 @@ class RedirectRecord(APIView):
             return error_404(request.path)
 
         return Response(body, 204)
+
+
+class Redirects(APIView):
+    """
+    Do 301 redirect for any redirects found in the MongoDB
+    """
+
+    def get(self, request, request_path):
+        redirect_record = settings.REDIRECT_MANAGER.fetch(request_path)
+
+        if not redirect_record:
+            return error_404(request.path)
+
+        return HttpResponsePermanentRedirect(redirect_record['target_url'])
