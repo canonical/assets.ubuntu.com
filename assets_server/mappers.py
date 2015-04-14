@@ -175,6 +175,10 @@ class DataManager:
 
 
 class TokenManager:
+    """
+    A class for maintaining authentication tokens
+    in a MongoDB database
+    """
 
     def __init__(self, data_collection):
         self.data_collection = data_collection
