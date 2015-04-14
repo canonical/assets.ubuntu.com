@@ -201,7 +201,7 @@ class Tokens(APIView):
     @token_authorization
     def get(self, request):
         """
-        Get data for an asset by path
+        Get a list of tokens
         """
 
         return Response(
@@ -212,7 +212,7 @@ class Tokens(APIView):
     @token_authorization
     def post(self, request):
         """
-        Update metadata against an asset
+        Create a new token
         """
 
         name = request.DATA.get('name')
