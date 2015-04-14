@@ -236,3 +236,71 @@ class TokenManager:
                 'token': token_record['token'],
                 'name': token_record['name']
             }
+
+
+class RedirectManager:
+    """
+    Manage 301 redirects stored in a MongoDB database
+    """
+
+    def __init__(self, data_collection):
+        self.data_collection = data_collection
+
+    def exists(self, redirect_path):
+        """
+        Check if a redirect URL already exists with a specified name
+        """
+
+        return bool(self.fetch(redirect_path))
+
+    def fetch(self, redirect_path):
+        """
+        Get a redirect's data, by its URL path
+        """
+
+        redirect_record = self.data_collection.find_one(
+            {"redirect_path": redirect_path}
+        )
+        return self._format(redirect_record)
+
+    def update(self, redirect_path, target_url):
+        """
+        Create or update redirect, by setting a target URL
+        for a local URL path
+        """
+
+        search = {"redirect_path": redirect_path}
+
+        data = {
+            "redirect_path": redirect_path,
+            "target_url": target_url
+        }
+
+        self.data_collection.update(search, data, True)
+
+        return self.fetch(redirect_path)
+
+    def delete(self, redirect_path):
+        """
+        Delete redirect with this URL path
+        """
+
+        redirect_record = self.fetch(redirect_path)
+
+        if redirect_record:
+            self.data_collection.remove({'redirect_path': redirect_path})
+            return redirect_record
+
+    def all(self):
+        """
+        Get a list of all redirect
+        """
+
+        return [self._format(record) for record in self.data_collection.find()]
+
+    def _format(self, redirect_record):
+        if redirect_record:
+            return {
+                'redirect_path': redirect_record['redirect_path'],
+                'target_url': redirect_record['target_url']
+            }
