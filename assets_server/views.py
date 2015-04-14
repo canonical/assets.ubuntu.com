@@ -261,8 +261,6 @@ class Token(APIView):
         Delete a single named authentication token, 204 if successful
         """
 
-        status = 200
-
         body = settings.TOKEN_MANAGER.delete(name) or {}
 
         if body:
@@ -270,4 +268,4 @@ class Token(APIView):
         else:
             return error_404(request.path)
 
-        return Response(body, status)
+        return Response(body, 204)
