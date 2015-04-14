@@ -9,9 +9,6 @@ from views import (
     RedirectRecords, RedirectRecord
 )
 
-# Wire up our API using automatic URL routing.
-# Additionally, we include login URLs for the browseable API.
-
 urlpatterns = patterns(
     '',
     url(r'^$', RedirectView.as_view(url='/v1/', permanent=False)),
