@@ -1,4 +1,5 @@
 -r standard.txt
 vex==0.0.18
 pytest==2.6.4
+mongomock==2.0.0
 ipdb
