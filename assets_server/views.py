@@ -2,7 +2,6 @@
 from base64 import b64decode
 from datetime import datetime
 from urllib import unquote
-from urllib2 import urlparse
 import errno
 
 # Packages
