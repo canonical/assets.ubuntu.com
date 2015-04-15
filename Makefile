@@ -13,7 +13,7 @@ endef
 
 ENVPATH=${VIRTUAL_ENV}
 VEX=vex --path ${ENVPATH}
-SYSTEM_DEPENDENCIES=mongodb libjpeg-dev zlib1g-dev libpng12-dev libmagickwand-dev python-pip libjpeg-progs optipng
+SYSTEM_DEPENDENCIES=mongodb python-swiftclient libjpeg-dev zlib1g-dev libpng12-dev libmagickwand-dev python-pip libjpeg-progs optipng
 
 ifeq ($(ENVPATH),)
 	ENVPATH=env
