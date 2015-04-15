@@ -1,5 +1,6 @@
 import re
 import uuid
+from copy import copy
 from hashlib import sha1
 
 from swiftclient.exceptions import ClientException as SwiftException
@@ -214,7 +215,8 @@ class TokenManager:
         }
 
         if not self.exists(name):
-            if self.data_collection.insert(data):
+            # Insert a copy, so we don't modify the original record
+            if self.data_collection.insert(copy(data)):
                 return data
 
     def delete(self, name):
