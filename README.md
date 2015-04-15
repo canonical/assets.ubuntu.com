@@ -6,7 +6,16 @@ This is a Restful API service for creating and serving binary assets over HTTP, 
 Usage
 ---
 
-### Development
+First you have to have access to an [openstack swift](http://docs.openstack.org/developer/swift/) installation. Then make your details available as environment variables:
+
+``` bash
+export OS_USERNAME=my_username
+export OS_PASSWORD=x345sftn33f
+export OS_AUTH_URL="https://swift.example.com/v2/"
+export OS_TENANT_NAME=my_project
+```
+
+Then, to run the server locally:
 
 ``` bash
 make setup    # Install dependencies
