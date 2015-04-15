@@ -1,5 +1,6 @@
 import urllib
 
+
 def normalize(url_to_normalize):
     """
     Given a URL, it will unquote it and requote it

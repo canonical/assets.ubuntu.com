@@ -1,11 +1,14 @@
 # System
 from base64 import b64decode
 from datetime import datetime
+from urllib import unquote
 import errno
 
 # Packages
 from django.conf import settings
-from django.http import HttpResponse, HttpResponseNotModified
+from django.http import (
+    HttpResponse, HttpResponseNotModified, HttpResponsePermanentRedirect
+)
 from pilbox.errors import PilboxError
 from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
@@ -201,7 +204,7 @@ class Tokens(APIView):
     @token_authorization
     def get(self, request):
         """
-        Get data for an asset by path
+        Get a list of tokens
         """
 
         return Response(
@@ -212,7 +215,7 @@ class Tokens(APIView):
     @token_authorization
     def post(self, request):
         """
-        Update metadata against an asset
+        Create a new token
         """
 
         name = request.DATA.get('name')
@@ -261,8 +264,6 @@ class Token(APIView):
         Delete a single named authentication token, 204 if successful
         """
 
-        status = 200
-
         body = settings.TOKEN_MANAGER.delete(name) or {}
 
         if body:
@@ -270,4 +271,129 @@ class Token(APIView):
         else:
             return error_404(request.path)
 
-        return Response(body, status)
+        return Response(body, 204)
+
+
+class RedirectRecords(APIView):
+    """
+    HTTP methods for managing the collection of redirect records
+    """
+
+    @token_authorization
+    def get(self, request):
+        """
+        Get data for a redirect by path
+        """
+
+        return Response(
+            settings.REDIRECT_MANAGER.all(),
+            headers={'Cache-Control': 'no-cache'}
+        )
+
+    @token_authorization
+    def post(self, request):
+        """
+        Create a redirect record
+        """
+
+        redirect_path = request.DATA.get('redirect_path')
+        target_url = request.DATA.get('target_url')
+
+        body = {
+            'redirect_path': redirect_path,
+            'target_url': target_url
+        }
+
+        redirect_record = False
+
+        if not redirect_path:
+            raise ParseError(
+                'To create a new redirect, please specify a '
+                'redirect_path and a target_url'
+            )
+
+        elif settings.REDIRECT_MANAGER.exists(redirect_path):
+            raise ParseError('Another redirect with that path already exists')
+
+        else:
+            redirect_record = settings.REDIRECT_MANAGER.update(
+                redirect_path,
+                target_url
+            )
+
+            if redirect_record:
+                body['message'] = 'Redirect created'
+            else:
+                raise ParseError('Failed to create redirect')
+
+        return Response(body)
+
+
+class RedirectRecord(APIView):
+    """
+    HTTP methods for managing a single redirect record
+    """
+
+    @token_authorization
+    def get(self, request, redirect_path):
+        """
+        Get redirect data by name
+        """
+
+        redirect_record = settings.REDIRECT_MANAGER.fetch(
+            unquote(redirect_path)
+        )
+
+        if not redirect_record:
+            return error_404(request.path)
+
+        return Response(redirect_record)
+
+    @token_authorization
+    def put(self, request, redirect_path):
+        """
+        Update target URL for a redirect
+        """
+
+        target_url = request.DATA.get('target_url')
+
+        if not target_url:
+            raise ParseError('To update a redirect, please supply a target_url')
+
+        if target_url:
+            redirect_record = settings.REDIRECT_MANAGER.update(
+                unquote(redirect_path),
+                target_url
+            )
+
+        return Response(redirect_record)
+
+    @token_authorization
+    def delete(self, request, redirect_path):
+        """
+        Delete a single redirect by its request URL path,
+        204 if successful
+        """
+
+        body = settings.REDIRECT_MANAGER.delete(unquote(redirect_path)) or {}
+
+        if body:
+            body['message'] = "Successfully deleted."
+        else:
+            return error_404(request.path)
+
+        return Response(body, 204)
+
+
+class Redirects(APIView):
+    """
+    Do 301 redirect for any redirects found in the MongoDB
+    """
+
+    def get(self, request, request_path):
+        redirect_record = settings.REDIRECT_MANAGER.fetch(request_path)
+
+        if not redirect_record:
+            return error_404(request.path)
+
+        return HttpResponsePermanentRedirect(redirect_record['target_url'])
