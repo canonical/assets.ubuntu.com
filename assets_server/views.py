@@ -1,6 +1,7 @@
 # System
 from base64 import b64decode
 from datetime import datetime
+import mimetypes
 from urllib import unquote
 import errno
 
@@ -64,10 +65,15 @@ class Asset(APIView):
         except (PilboxError, ValueError) as error:
             return error_response(error, file_path)
 
+        content_type = magic.Magic(mime=True).from_buffer(asset_data)
+
+        if not content_type or content_type == 'text/plain':
+            content_type = mimetypes.guess_type(file_path)[0]
+
         # Start response, guessing mime type
         response = HttpResponse(
             asset_data,
-            content_type=magic.Magic(mime=True).from_buffer(asset_data)
+            content_type=content_type
         )
 
         # Cache all genuine assets forever
