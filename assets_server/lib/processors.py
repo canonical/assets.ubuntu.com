@@ -64,7 +64,7 @@ class ImageProcessor:
                     pass
                 else:
                     raise optimize_error
-            except UnicodeError:
+            except UnicodeEncodeError:
                 # SVG contains binary data, we can't optimise it
                 pass
 
