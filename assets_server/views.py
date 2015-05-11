@@ -319,7 +319,14 @@ class RedirectRecords(APIView):
             )
 
         elif settings.REDIRECT_MANAGER.exists(redirect_path):
-            raise ParseError('Another redirect with that path already exists')
+            return Response(
+                {
+                    "message": 'Another redirect with that path already exists',
+                    "redirect_path": redirect_path,
+                    "code": 409
+                },
+                status=409
+            )
 
         else:
             redirect_record = settings.REDIRECT_MANAGER.update(
