@@ -64,6 +64,9 @@ class ImageProcessor:
                     pass
                 else:
                     raise optimize_error
+            except UnicodeError:
+                # SVG contains binary data, we can't optimise it
+                pass
 
         elif mimetype == 'image/jpeg':
             self.data = jpegtran("-optimize", _in=self.data).stdout
