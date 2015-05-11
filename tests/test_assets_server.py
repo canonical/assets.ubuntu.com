@@ -1,4 +1,6 @@
-from api_test_helpers import get, token_fixture, post, delete
+from api_test_helpers import get, token_fixture, post, delete, exit_if_server_not_found
+
+exit_if_server_not_found()
 
 
 class TestAssetsAPI:
