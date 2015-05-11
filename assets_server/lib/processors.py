@@ -58,14 +58,8 @@ class ImageProcessor:
         if mimetype == 'image/svg+xml':
             try:
                 self.data = str(scourString(self.data))
-            except ExpatError as optimize_error:
-                if optimize_error.code == 27 and allow_svg_errors:
-                    # Invalid SVG. Let's just not optimize it
-                    pass
-                else:
-                    raise optimize_error
-            except UnicodeEncodeError:
-                # SVG contains binary data, we can't optimise it
+            except:
+                # SVG contains bad data, we can't optimise it
                 pass
 
         elif mimetype == 'image/jpeg':
