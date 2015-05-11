@@ -67,7 +67,7 @@ class Asset(APIView):
 
         content_type = magic.Magic(mime=True).from_buffer(asset_data)
 
-        if not content_type or content_type == 'text/plain':
+        if not content_type or content_type[:5] == 'text/':
             content_type = mimetypes.guess_type(file_path)[0]
 
         # Start response, guessing mime type
