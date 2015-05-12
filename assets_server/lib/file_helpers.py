@@ -38,6 +38,33 @@ def create_asset(
     return url_path
 
 
+def is_hex(hex_string):
+    """
+    Check if a string is hexadecimal
+    """
+
+    try:
+        int(hex_string, 16)
+        return True
+    except ValueError:
+        return False
+
+
+def remove_filename_hash(filename):
+    """
+    Remove the 8-digit unique hexadecimal hash
+    from a filename
+    """
+
+    if is_hex(filename[:8]) and filename[8] == '-':
+        filename = filename[9:]
+
+    return filename
+
+
+# def filename
+
+
 def file_error(error_number, message, filename):
     """
     Create an IOError

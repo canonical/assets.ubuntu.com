@@ -44,6 +44,8 @@ class ImageProcessor:
         if converted or transformed or optimize:
             self.optimize(allow_svg_errors=converted or transformed)
 
+        return target_format
+
     def optimize(self, allow_svg_errors=False):
         """
         Optimize SVGs, PNGs or Jpegs

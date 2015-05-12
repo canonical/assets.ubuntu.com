@@ -1,9 +1,10 @@
 # System
 from base64 import b64decode
 from datetime import datetime
-import mimetypes
 from urllib import unquote
 import errno
+import mimetypes
+import os
 
 # Packages
 from django.conf import settings
@@ -19,7 +20,7 @@ import magic
 
 # Local
 from auth import token_authorization
-from lib.file_helpers import create_asset, file_error
+from lib.file_helpers import create_asset, file_error, remove_filename_hash
 from lib.http_helpers import error_response, error_404
 from lib.processors import ImageProcessor
 
@@ -59,22 +60,24 @@ class Asset(APIView):
                 asset_data,
                 request.GET
             )
-            image.process()
+            converted_type = image.process()
             asset_data = image.data
-
         except (PilboxError, ValueError) as error:
             return error_response(error, file_path)
 
-        content_type = magic.Magic(mime=True).from_buffer(asset_data)
-
-        if not content_type or content_type[:5] == 'text/':
-            content_type = mimetypes.guess_type(file_path)[0]
+        # Get a sensible filename, including a converted extension
+        filename = remove_filename_hash(file_path)
+        if converted_type:
+            filename = '{0}.{1}'.format(filename, converted_type)
 
         # Start response, guessing mime type
         response = HttpResponse(
             asset_data,
-            content_type=content_type
+            content_type=mimetypes.guess_type(filename)[0]
         )
+
+        # Set download filename
+        response['Content-Disposition'] = "filename={}".format(filename)
 
         # Cache all genuine assets forever
         response['Cache-Control'] = 'max-age=31556926'
