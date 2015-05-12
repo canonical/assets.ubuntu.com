@@ -9,7 +9,6 @@ from scour.scour import scourString
 from sh import jpegtran, optipng
 from uuid import uuid4
 from wand.image import Image as WandImage
-from xml.parsers.expat import ExpatError
 import magic
 
 # Local
@@ -20,7 +19,7 @@ class ImageProcessor:
     operation_parameters = {
         'region': ['rect'],
         'rotate': ['deg'],
-        'resize': ['w', 'h']
+        'resize': ['w', 'h', 'max-width', 'max-height']
     }
 
     def __init__(self, image_contents, options={}):
@@ -139,6 +138,9 @@ class ImageProcessor:
                 expand=self.options.get("expand")
             )
         elif operation == "resize":
+            max_width = self.options.get("max-width")
+            max_height = self.options.get("max-height")
+
             resize_width = self.options.get("w")
             resize_height = self.options.get("h")
 
@@ -147,14 +149,19 @@ class ImageProcessor:
                 resize_width = int(resize_width)
             if resize_height:
                 resize_height = int(resize_height)
+            if max_width:
+                max_width = int(max_width)
+            if max_height:
+                max_height = int(max_height)
 
-            if resize_width or resize_height:
+            # Image size management
+            with WandImage(blob=self.data) as image_info:
                 # Don't allow expanding of images
-                with WandImage(blob=self.data) as image_info:
-                    if (
-                        resize_width > image_info.width or
-                        resize_height > image_info.height
-                    ):
+                if resize_width or resize_height:
+                    width_oversize = resize_width > image_info.width
+                    height_oversize = resize_height > image_info.height
+
+                    if (width_oversize or height_oversize):
                         expand_message = (
                             "Resize error: Maximum dimensions for this image "
                             "are {0}px wide by {1}px high."
@@ -164,6 +171,15 @@ class ImageProcessor:
                             400,
                             log_message=expand_message
                         )
+
+                # Process max_width and max_height
+                if not resize_width and max_width:
+                    if max_width < image_info.width:
+                        resize_width = max_width
+
+                if not resize_height and max_height:
+                    if max_height < image_info.height:
+                        resize_height = max_height
 
             image.resize(
                 width=resize_width,
