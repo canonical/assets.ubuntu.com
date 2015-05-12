@@ -305,7 +305,7 @@ class RedirectRecords(APIView):
         Create a redirect record
         """
 
-        redirect_path = request.DATA.get('redirect_path')
+        redirect_path = request.DATA.get('redirect_path').lstrip('/')
         target_url = request.DATA.get('target_url')
 
         body = {
