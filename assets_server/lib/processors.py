@@ -183,15 +183,16 @@ class ImageProcessor:
                     if max_height < image_info.height:
                         resize_height = max_height
 
-            image.resize(
-                width=resize_width,
-                height=resize_height,
-                mode=self.options.get("mode"),
-                filter=self.options.get("filter"),
-                background=self.options.get("bg"),
-                retain=self.options.get("retain"),
-                position=self.options.get("pos")
-            )
+            if resize_height or resize_width:
+                image.resize(
+                    width=resize_width,
+                    height=resize_height,
+                    mode=self.options.get("mode"),
+                    filter=self.options.get("filter"),
+                    background=self.options.get("bg"),
+                    retain=self.options.get("retain"),
+                    position=self.options.get("pos")
+                )
 
         self.data = image.save(quality=self.options.get("q")).read()
 

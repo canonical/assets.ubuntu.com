@@ -4,7 +4,6 @@ from datetime import datetime
 from urllib import unquote
 import errno
 import mimetypes
-import os
 
 # Packages
 from django.conf import settings
@@ -16,7 +15,6 @@ from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from swiftclient.exceptions import ClientException as SwiftClientException
-import magic
 
 # Local
 from auth import token_authorization
