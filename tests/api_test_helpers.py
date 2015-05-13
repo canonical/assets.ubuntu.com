@@ -1,21 +1,11 @@
 import requests
 import os
 import sys
+from errno import ECONNREFUSED
 
+from requests import ConnectionError
 
-def get(params={}, server_url="http://localhost:8012/v1/"):
-    """
-    Convienince function for making simple GETs
-    """
-
-    try:
-        requests.get(server_url)
-    except:
-        sys.exit(
-            'No server found on {0}'.format(server_url)
-        )
-
-    return requests.get(server_url, params=params)
+default_server_url = "http://localhost:8012/v1/"
 
 
 def token_fixture(fixtures_path=None):
@@ -39,3 +29,41 @@ def token_fixture(fixtures_path=None):
         sys.exit('Please add a valid token in {0}'.format(token_path))
 
     return token
+
+
+def exit_if_server_not_found():
+    try:
+        requests.get(default_server_url)
+    except ConnectionError as e:
+        errno = e.args[0].reason.errno
+        lookup_error = {
+            ECONNREFUSED: "No server found: ",
+            -2: "Unknown error: "
+        }
+        sys.exit(
+            '{0}{1}'.format(lookup_error.get(errno), e)
+        )
+
+
+def get(path="", params={}, server_url=default_server_url):
+    """
+    Convienince function for making simple GETs
+    """
+
+    return requests.get(server_url + path, params=params)
+
+
+def post(data={}, path="", params={}, server_url=default_server_url):
+    """
+    Convienince function for making simple POSTs
+    """
+
+    return requests.post(server_url + path, params=params, data=data)
+
+
+def delete(path="", params={}, server_url=default_server_url):
+    """
+    Convienince function for making simple DELETEs
+    """
+
+    return requests.delete(server_url + path, params=params)
