@@ -4,6 +4,7 @@ from datetime import datetime
 from urllib import unquote
 import errno
 import mimetypes
+import re
 
 # Packages
 from django.conf import settings
@@ -306,6 +307,9 @@ class RedirectRecords(APIView):
         redirect_path = request.DATA.get('redirect_path').lstrip('/')
         target_url = request.DATA.get('target_url')
 
+        # Remove multiple-slashes
+        redirect_path = re.sub("//+", "/", redirect_path)
+
         body = {
             'redirect_path': redirect_path,
             'target_url': target_url
@@ -405,6 +409,9 @@ class Redirects(APIView):
     """
 
     def get(self, request, request_path):
+        # Remove multiple slashes from path, to make sure things match
+        request_path = re.sub("//+", "/", request_path)
+
         redirect_record = settings.REDIRECT_MANAGER.fetch(request_path)
 
         if not redirect_record:
