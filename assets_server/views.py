@@ -3,7 +3,6 @@ from base64 import b64decode
 from datetime import datetime
 from urllib import unquote
 import errno
-import mimetypes
 import re
 
 # Packages
@@ -19,7 +18,12 @@ from swiftclient.exceptions import ClientException as SwiftClientException
 
 # Local
 from auth import token_authorization
-from lib.file_helpers import create_asset, file_error, remove_filename_hash
+from lib.file_helpers import (
+    create_asset,
+    file_error,
+    remove_filename_hash,
+    get_mimetype
+)
 from lib.http_helpers import (
     error_response,
     error_404,
@@ -76,7 +80,7 @@ class Asset(APIView):
         # Start response, guessing mime type
         response = HttpResponse(
             asset_data,
-            content_type=mimetypes.guess_type(filename)[0]
+            content_type=get_mimetype(filename)
         )
 
         # Set download filename
