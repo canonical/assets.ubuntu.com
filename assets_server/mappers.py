@@ -136,7 +136,7 @@ class DataManager:
         return self.format(asset_data) if asset_data else None
 
     def find(self, query):
-        match = re.compile(query)
+        match = re.compile(query, re.IGNORECASE)
 
         results = self.data_collection.find(
             {
