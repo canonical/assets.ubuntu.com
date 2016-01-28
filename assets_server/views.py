@@ -330,7 +330,10 @@ class RedirectRecords(APIView):
         elif settings.REDIRECT_MANAGER.exists(redirect_path):
             return Response(
                 {
-                    "message": 'Another redirect with that path already exists',
+                    "message": (
+                        'Another redirect with that path '
+                        'already exists'
+                    ),
                     "redirect_path": redirect_path,
                     "code": 409
                 },
@@ -380,7 +383,10 @@ class RedirectRecord(APIView):
         target_url = request.DATA.get('target_url')
 
         if not target_url:
-            raise ParseError('To update a redirect, please supply a target_url')
+            raise ParseError((
+                'To update a redirect, '
+                'please supply a target_url'
+            ))
 
         if target_url:
             redirect_record = settings.REDIRECT_MANAGER.update(
