@@ -20,7 +20,11 @@ from swiftclient.exceptions import ClientException as SwiftClientException
 # Local
 from auth import token_authorization
 from lib.file_helpers import create_asset, file_error, remove_filename_hash
-from lib.http_helpers import error_response, error_404
+from lib.http_helpers import (
+    error_response,
+    error_404,
+    set_headers_for_type
+)
 from lib.processors import ImageProcessor
 
 
@@ -83,7 +87,7 @@ class Asset(APIView):
         response['Last-Modified'] = last_modified
 
         # Return asset
-        return response
+        return set_headers_for_type(response)
 
     @token_authorization
     def delete(self, request, file_path):
