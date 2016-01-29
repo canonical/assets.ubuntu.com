@@ -3,7 +3,6 @@ from base64 import b64decode
 from datetime import datetime
 from urllib import unquote
 import errno
-import mimetypes
 import re
 
 # Packages
@@ -19,7 +18,12 @@ from swiftclient.exceptions import ClientException as SwiftClientException
 
 # Local
 from auth import token_authorization
-from lib.file_helpers import create_asset, file_error, remove_filename_hash
+from lib.file_helpers import (
+    create_asset,
+    file_error,
+    remove_filename_hash,
+    get_mimetype
+)
 from lib.http_helpers import (
     error_response,
     error_404,
@@ -76,7 +80,7 @@ class Asset(APIView):
         # Start response, guessing mime type
         response = HttpResponse(
             asset_data,
-            content_type=mimetypes.guess_type(filename)[0]
+            content_type=get_mimetype(filename)
         )
 
         # Set download filename
@@ -330,7 +334,10 @@ class RedirectRecords(APIView):
         elif settings.REDIRECT_MANAGER.exists(redirect_path):
             return Response(
                 {
-                    "message": 'Another redirect with that path already exists',
+                    "message": (
+                        'Another redirect with that path '
+                        'already exists'
+                    ),
                     "redirect_path": redirect_path,
                     "code": 409
                 },
@@ -380,7 +387,10 @@ class RedirectRecord(APIView):
         target_url = request.DATA.get('target_url')
 
         if not target_url:
-            raise ParseError('To update a redirect, please supply a target_url')
+            raise ParseError((
+                'To update a redirect, '
+                'please supply a target_url'
+            ))
 
         if target_url:
             redirect_record = settings.REDIRECT_MANAGER.update(

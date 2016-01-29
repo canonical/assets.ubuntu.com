@@ -1,5 +1,7 @@
 # System
 import errno
+import mimetypes
+import re
 
 # Packages
 from django.conf import settings
@@ -62,7 +64,25 @@ def remove_filename_hash(filename):
     return filename
 
 
-# def filename
+def get_mimetype(filename):
+    """
+    Get mimetype by file extension.
+    If we have set an explicit mimetype, use that,
+    otherwise ask Python to guess.
+    """
+
+    extra_mappings = {
+        'woff2': 'font/woff2'
+    }
+
+    extension = re.search(r"(?<=\.)[^.]+$", filename).group(0)
+
+    mime = extra_mappings.get(extension)
+
+    if not mime:
+        mime = mimetypes.guess_type(filename)[0]
+
+    return mime
 
 
 def file_error(error_number, message, filename):
