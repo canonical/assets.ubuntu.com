@@ -14,9 +14,13 @@ def create_asset(
     file_data, friendly_name, tags='', url_path='', optimize=False
 ):
     if optimize:
-        image = ImageProcessor(file_data)
-        image.optimize(allow_svg_errors=True)
-        file_data = image.data
+        try:
+            image = ImageProcessor(file_data)
+            image.optimize(allow_svg_errors=True)
+            file_data = image.data
+        except:
+            # If optimisation failed, just don't bother optimising
+            optimize = False
 
     if not url_path:
         url_path = settings.FILE_MANAGER.generate_asset_path(
