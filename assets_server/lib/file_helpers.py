@@ -39,7 +39,7 @@ def create_asset(
     settings.FILE_MANAGER.create(file_data, url_path)
 
     # Once the file is created, create file metadata
-    settings.DATA_MANAGER.update(url_path, tags)
+    settings.DATA_MANAGER.update(url_path, tags, optimize)
 
     return url_path
 

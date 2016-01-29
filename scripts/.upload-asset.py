@@ -60,7 +60,8 @@ with open(file_path) as upload_file:
             file_data=upload_file.read(),
             friendly_name=os.path.basename(upload_file.name),
             tags=tags,
-            url_path=url_path
+            url_path=url_path,
+            optimize=optimize
         )
     except IOError, create_error:
         if create_error.errno == errno.EEXIST:

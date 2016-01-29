@@ -116,13 +116,16 @@ class DataManager:
     def __init__(self, data_collection):
         self.data_collection = data_collection
 
-    def update(self, file_path, tags):
+    def update(self, file_path, tags, optimized=None):
         search = {"file_path": normalize(file_path)}
 
         data = {
             "file_path": normalize(file_path),
             "tags": tags
         }
+
+        if optimized is not None:
+            data['optimized'] = optimized
 
         self.data_collection.update(search, data, True)
 
@@ -161,6 +164,9 @@ class DataManager:
             'tags': asset_record["tags"] or "",
             'created': asset_record["_id"].generation_time.ctime()
         }
+
+        if 'optimized' in asset_record:
+            asset_data['optimized'] = str(asset_record['optimized'])
 
         return asset_data
 
