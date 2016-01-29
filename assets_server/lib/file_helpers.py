@@ -66,6 +66,9 @@ def remove_filename_hash(filename):
 
 def get_mimetype(filename):
     """
+    Get mimetype by file extension.
+    If we have set an explicit mimetype, use that,
+    otherwise ask Python to guess.
     """
 
     extra_mappings = {
