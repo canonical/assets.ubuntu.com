@@ -81,6 +81,8 @@ def get_mimetype(filename):
 
     extension_match = re.search(r"(?<=\.)[^.]+$", filename)
 
+    mime = None
+
     if extension_match:
         extension = extension_match.group(0)
         mime = extra_mappings.get(extension)
