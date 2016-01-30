@@ -79,9 +79,11 @@ def get_mimetype(filename):
         'woff2': 'font/woff2'
     }
 
-    extension = re.search(r"(?<=\.)[^.]+$", filename).group(0)
+    extension_match = re.search(r"(?<=\.)[^.]+$", filename)
 
-    mime = extra_mappings.get(extension)
+    if extension_match:
+        extension = extension_match.group(0)
+        mime = extra_mappings.get(extension)
 
     if not mime:
         mime = mimetypes.guess_type(filename)[0]
