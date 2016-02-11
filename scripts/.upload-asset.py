@@ -43,7 +43,7 @@ parser.add_argument(
 parser.add_argument(
     '--optimize',
     help='Perform image optimization',
-    default=False
+    default="False"
 )
 
 cmd_args = vars(parser.parse_args())
@@ -52,7 +52,9 @@ file_path = cmd_args['file-path']
 url_path = cmd_args['url_path']
 tags = cmd_args['tags']
 server_url = cmd_args['server_url']
-optimize = cmd_args['optimize']
+optimize = cmd_args['optimize'] in map(
+    str.lower, ['true', '1', 't', 'y', 'yes']
+)
 
 with open(file_path) as upload_file:
     try:
