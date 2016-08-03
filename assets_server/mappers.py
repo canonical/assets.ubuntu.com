@@ -135,14 +135,12 @@ class DataManager:
 
         return self.format(asset_data) if asset_data else None
 
-    def build_tag_search(self, tags):
+    def find(self, tags, file_type):
         """
-        Given a list of tags, build a mongo search object that will
-        find objects that contain all tags across the `file_path` and
-        `tags` fields
+        Find all objects that contain all the supplied tags
         """
 
-        tags_search = []
+        conditions = []
 
         for tag in tags:
             # Only match fields that contain the tag bounded by word delimeters
@@ -150,7 +148,7 @@ class DataManager:
             tag_regex = re.compile(r'\b{}\b'.format(tag), re.IGNORECASE)
 
             # Look for the tag in either file_path or tags fields
-            tags_search.append({
+            conditions.append({
                 '$or': [
                     {'file_path': tag_regex},
                     {'tags': tag_regex}
@@ -158,18 +156,17 @@ class DataManager:
             })
 
         # Only return object that contain all tags
+
+        if file_type:
+            extension_search = re.compile(
+                r'\.{}$'.format(file_type),
+                re.IGNORECASE
+            )
+            conditions.append({'file_path': extension_search})
+
         mongo_search = {
-            '$and': tags_search
+            '$and': conditions
         }
-
-        return mongo_search
-
-    def find(self, tags):
-        """
-        Find all objects that contain all the supplied tags
-        """
-
-        mongo_search = self.build_tag_search(tags)
 
         results = self.data_collection.find(mongo_search)
 
