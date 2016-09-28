@@ -104,7 +104,7 @@ $ echo "asset=$(base64 -w 0 MY-IMAGE.png)" | curl  \
 
 ### Assets manager
 
-You may want to setup the [assets-manager](https://github.com/ubuntudesign/assets-manager/) to easily upload assets to your assets server.
+You may wish to setup the [assets-manager](https://github.com/ubuntudesign/assets-manager/), a simple web interface for managing assets on your assets server.
 
 Tests
 ---
