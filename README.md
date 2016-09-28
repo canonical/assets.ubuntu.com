@@ -75,7 +75,7 @@ You can list all tokens with [scripts/list-tokens.sh](scripts/list-tokens.sh) or
 
 ### Uploading assets via the command-line
 
-There exists an [asset-uploader project](https://github.com/ubuntudesign/asset-uploader) to with uploading assets from the command-line:
+The [asset-uploader project](https://github.com/ubuntudesign/asset-uploader) helps you upload assets from the command-line:
 
 ``` bash
 $ ./upload-asset.py  \
