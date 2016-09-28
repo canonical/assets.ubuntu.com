@@ -85,7 +85,7 @@ $ ./upload-asset.py  \
 {'url': u'https://assets.EXAMPLE.com/v1/xxxxx-MY-IMAGE.png', 'image': True, 'created': u'Tue Sep 27 16:13:22 2016', 'file_path': u'xxxxx-MY-IMAGE.png', 'tags': u''}
 ```
 
-You can use [curl](https://curl.haxx.se/docs/manpage.html):
+You can also use [curl](https://curl.haxx.se/docs/manpage.html):
 
 ``` bash
 $ echo "asset=$(base64 -w 0 MY-IMAGE.png)" | curl  \
