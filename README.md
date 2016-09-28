@@ -50,7 +50,7 @@ As the server only uses a basic token for authentication, it is paramount that i
 
 ### Caching
 
-The server is intended to be run in production behind a caching layer (e.g. [squid cache](http://www.squid-cache.org/)). And as the server stores assets by default with a unique hash corresponding to the file's contents (e.g. <code>https://assets.example.com/v1/<b>a2f56da4</b>-some-image.png</code>), the cache expiration time should be as long as possible to maximise performance.
+The server is intended to be run in production behind a caching layer (e.g. [squid cache](http://www.squid-cache.org/)). And as the server stores assets by default with a unique hash corresponding to the file's contents (e.g. <code><b>a2f56da4</b>-some-image.png</code>), the cache expiration time should be as long as possible to maximise performance.
 
 Using the server
 ---
