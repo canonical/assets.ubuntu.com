@@ -88,17 +88,13 @@ $ ./upload-asset.py  \
 You can also use [curl](https://curl.haxx.se/docs/manpage.html):
 
 ``` bash
-$ echo "asset=$(base64 -w 0 MY-IMAGE.png)" | curl  \
-    --data "tags=some tags"  \
-    --data "optimize=yes" \
-    --data "friendly-name=MY-IMAGE.png"  \
-    --data @-  \
-    "https://assets.EXAMPLE.com/v1/?token=XXXXXX"
+$ echo "asset=$(base64 -w 0 MY-IMAGE.png)" | \
+  curl --data @- --data "friendly-name=MY-IMAGE.png" "https://assets.EXAMPLE.com/v1/?token=XXXXXX"
 {
-    "optimized": "yes", 
+    "optimized": false, 
     "created": "Wed Sep 28 11:07:33 2016", 
     "file_path": "xxxxxxxx-MY-IMAGE.png", 
-    "tags": "some tags"
+    "tags": ""
 }
 ```
 
