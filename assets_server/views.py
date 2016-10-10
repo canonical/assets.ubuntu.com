@@ -7,9 +7,8 @@ import re
 
 # Packages
 from django.conf import settings
-from django.http import (
-    HttpResponse, HttpResponseNotModified, HttpResponsePermanentRedirect
-)
+from django.http import HttpResponse, HttpResponseNotModified
+from django.shortcuts import redirect
 from pilbox.errors import PilboxError
 from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
@@ -314,13 +313,17 @@ class RedirectRecords(APIView):
 
         redirect_path = request.DATA.get('redirect_path').lstrip('/')
         target_url = request.DATA.get('target_url')
+        permanent = request.DATA.get(
+            'permanent', 'false'
+        ).lower() in ('true', 'yes', 'on')
 
         # Remove multiple-slashes
         redirect_path = re.sub("//+", "/", redirect_path)
 
         body = {
             'redirect_path': redirect_path,
-            'target_url': target_url
+            'target_url': target_url,
+            'permanent': permanent
         }
 
         redirect_record = False
@@ -347,7 +350,8 @@ class RedirectRecords(APIView):
         else:
             redirect_record = settings.REDIRECT_MANAGER.update(
                 redirect_path,
-                target_url
+                target_url,
+                permanent
             )
 
             if redirect_record:
@@ -386,13 +390,12 @@ class RedirectRecord(APIView):
 
         target_url = request.DATA.get('target_url')
 
-        if not target_url:
-            raise ParseError((
-                'To update a redirect, '
-                'please supply a target_url'
-            ))
+        if not settings.REDIRECT_MANAGER.exists(redirect_path):
+            return error_404(request.path)
 
-        if target_url:
+        if not target_url:
+            raise ParseError('To update a redirect, supply a target_url')
+        else:
             redirect_record = settings.REDIRECT_MANAGER.update(
                 unquote(redirect_path),
                 target_url
@@ -419,7 +422,7 @@ class RedirectRecord(APIView):
 
 class Redirects(APIView):
     """
-    Do 301 redirect for any redirects found in the MongoDB
+    Do redirect for any redirects found in the MongoDB
     """
 
     def get(self, request, request_path):
@@ -431,4 +434,7 @@ class Redirects(APIView):
         if not redirect_record:
             return error_404(request.path)
 
-        return HttpResponsePermanentRedirect(redirect_record['target_url'])
+        return redirect(
+            redirect_record['target_url'],
+            permanent=redirect_record.get('permanent', False)
+        )
