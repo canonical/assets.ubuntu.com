@@ -1,6 +1,3 @@
-# Base packages
-import os
-
 # Modules
 from pymongo import MongoClient
 from pymongo.errors import ConfigurationError
