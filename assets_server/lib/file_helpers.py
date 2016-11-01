@@ -1,6 +1,7 @@
 # System
 import errno
 import mimetypes
+import os
 import re
 
 # Packages
@@ -101,29 +102,20 @@ def remove_filename_hash(filename):
     return filename
 
 
-def get_mimetype(filename):
+def get_mimetype(filepath):
     """
     Get mimetype by file extension.
     If we have set an explicit mimetype, use that,
     otherwise ask Python to guess.
     """
 
-    extra_mappings = {
-        'woff2': 'font/woff2'
+    mappings = {
+        '.woff2': 'font/woff2'
     }
 
-    extension_match = re.search(r"(?<=\.)[^.]+$", filename)
+    extension = os.path.splitext(filepath)[1]
 
-    mime = None
-
-    if extension_match:
-        extension = extension_match.group(0)
-        mime = extra_mappings.get(extension)
-
-    if not mime:
-        mime = mimetypes.guess_type(filename)[0]
-
-    return mime
+    return mappings.get(extension) or mimetypes.guess_type(filepath)[0]
 
 
 def file_error(error_number, message, filename):

@@ -99,12 +99,15 @@ def error_response(error, file_path=''):
     )
 
 
-def set_headers_for_type(response):
+def set_headers_for_type(response, content_type=None):
     """
     Setup all requires response headers appropriate for this file
     """
 
-    if "font" in response["Content-Type"]:
+    if not content_type:
+        content_type = response["Content-Type"]
+
+    if "font" in content_type:
         response['Access-Control-Allow-Origin'] = '*'
 
     return response
