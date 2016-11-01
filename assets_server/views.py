@@ -1,9 +1,9 @@
 # System
+import errno
+import re
 from base64 import b64decode
 from datetime import datetime
 from urllib import unquote
-import errno
-import re
 
 # Packages
 from django.conf import settings
@@ -431,4 +431,6 @@ class Redirects(APIView):
         if not redirect_record:
             return error_404(request.path)
 
-        return HttpResponsePermanentRedirect(redirect_record['target_url'])
+        response = HttpResponsePermanentRedirect(redirect_record['target_url'])
+
+        return set_headers_for_type(response, get_mimetype(request_path))
