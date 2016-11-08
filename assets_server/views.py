@@ -50,7 +50,10 @@ class Asset(APIView):
             return error_response(error, file_path)
 
         time_format = '%a, %d %b %Y %H:%M:%S %Z'
-        make_datetime = lambda x: datetime.strptime(x, time_format)
+
+        def make_datetime(x):
+            datetime.strptime(x, time_format)
+
         last_modified = asset_headers['last-modified']
         if_modified_since = request.META.get(
             'HTTP_IF_MODIFIED_SINCE',

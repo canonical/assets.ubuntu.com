@@ -16,4 +16,7 @@ class PrettyJSONRenderer(JSONRenderer):
         ):
             renderer_context['indent'] = settings.DEFAULT_JSON_INDENT
 
-        return super(PrettyJSONRenderer, self).get_indent(accepted_media_type, renderer_context)
+        return super(PrettyJSONRenderer, self).get_indent(
+            accepted_media_type,
+            renderer_context
+        )

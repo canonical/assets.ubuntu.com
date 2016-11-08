@@ -1,5 +1,6 @@
 from rest_framework.exceptions import AuthenticationFailed
 
+
 class PrettyAuthenticationFailed(AuthenticationFailed):
     """
     A fork of the djangorestframework AuthenticationFailed exception
@@ -11,4 +12,4 @@ class PrettyAuthenticationFailed(AuthenticationFailed):
         if detail is not None:
             self.detail = detail
         else:
-            self.detail = force_text(self.default_detail)
+            self.detail = self.default_detail
