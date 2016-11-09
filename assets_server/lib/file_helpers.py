@@ -2,7 +2,6 @@
 import errno
 import mimetypes
 import os
-import re
 
 # Packages
 from django.conf import settings
