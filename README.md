@@ -1,6 +1,8 @@
 Assets server
 ===
 
+[![Build Status](https://travis-ci.org/ubuntudesign/assets-server.svg?branch=master)](https://travis-ci.org/ubuntudesign/assets-server)
+
 This is a Restful API service for creating and serving binary assets over HTTP, built with [Django REST framework](http://www.django-rest-framework.org/).
 
 Running the server
@@ -91,9 +93,9 @@ You can also use [curl](https://curl.haxx.se/docs/manpage.html):
 $ echo "asset=$(base64 -w 0 MY-IMAGE.png)" | \
   curl --data @- --data "friendly-name=MY-IMAGE.png" "https://assets.EXAMPLE.com/v1/?token=XXXXXX"
 {
-    "optimized": false, 
-    "created": "Wed Sep 28 11:07:33 2016", 
-    "file_path": "xxxxxxxx-MY-IMAGE.png", 
+    "optimized": false,
+    "created": "Wed Sep 28 11:07:33 2016",
+    "file_path": "xxxxxxxx-MY-IMAGE.png",
     "tags": ""
 }
 ```
