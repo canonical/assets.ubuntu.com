@@ -2,6 +2,7 @@ Assets server
 ===
 
 [![Build Status](https://travis-ci.org/ubuntudesign/assets-server.svg?branch=master)](https://travis-ci.org/ubuntudesign/assets-server)
+[![Coverage Status](https://coveralls.io/repos/github/ubuntudesign/assets-server/badge.svg?branch=master)](https://coveralls.io/github/ubuntudesign/assets-server?branch=master)
 
 This is a Restful API service for creating and serving binary assets over HTTP, built with [Django REST framework](http://www.django-rest-framework.org/).
 

@@ -297,23 +297,33 @@ class RedirectManager:
         )
         return self._format(redirect_record)
 
-    def update(self, redirect_path, target_url, permanent=None):
+    def update(self, redirect_path, target_url, permanent=None, force=False):
         """
         Create or update redirect, by setting a target URL
         for a local URL path
         """
 
-        search = {"redirect_path": redirect_path}
-
-        data = {
+        updates = {
             "redirect_path": redirect_path,
             "target_url": target_url
         }
 
         if permanent is not None:
-            data['permanent'] = permanent
+            updates['permanent'] = permanent
 
-        self.data_collection.update(search, data, True)
+        existing_record = self.fetch(redirect_path)
+
+        if existing_record:
+            new_record = existing_record
+            new_record.update(updates)
+        else:
+            new_record = updates
+
+        self.data_collection.update(
+            {"redirect_path": redirect_path},
+            new_record,
+            True
+        )
 
         return self.fetch(redirect_path)
 

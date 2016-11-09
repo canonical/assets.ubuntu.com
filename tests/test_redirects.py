@@ -1,18 +1,11 @@
 # System
-import os
-import sys
 from copy import copy
 
 # Modules
 from mongomock import Connection
 
 # Local
-file_path = os.path.abspath(__file__)
-current_directory = os.path.dirname(file_path)
-parent_directory = os.path.dirname(current_directory)
-app_directory = os.path.join(parent_directory, 'assets_server')
-sys.path.insert(1, app_directory)
-from mappers import RedirectManager
+from assets_server.mappers import RedirectManager
 
 
 class TestRedirectManager:
@@ -25,8 +18,14 @@ class TestRedirectManager:
         'target_url': 'https://example.com/something'
     }
     redirect_two = {
+        'permanent': False,
         'redirect_path': 'what-now',
         'target_url': '/something-else'
+    }
+    redirect_three = {
+        'permanent': True,
+        'redirect_path': 'third-redirect',
+        'target_url': '/third-target'
     }
 
     collection = None
@@ -39,6 +38,7 @@ class TestRedirectManager:
         self.collection = Connection().db.collection
         self.collection.insert(copy(self.redirect_one))
         self.collection.insert(copy(self.redirect_two))
+        self.collection.insert(copy(self.redirect_three))
 
         return RedirectManager(self.collection)
 
@@ -51,11 +51,15 @@ class TestRedirectManager:
         response_two = manager.exists(
             redirect_path=self.redirect_two['redirect_path']
         )
-        response_three = manager.exists('non-existent')
+        response_three = manager.exists(
+            redirect_path=self.redirect_three['redirect_path']
+        )
+        response_four = manager.exists('non-existent')
 
         assert response_one is True
         assert response_two is True
-        assert response_three is False
+        assert response_three is True
+        assert response_four is False
 
     def test_fetch(self):
         manager = self.get_manager()
@@ -66,11 +70,17 @@ class TestRedirectManager:
         response_two = manager.fetch(
             self.redirect_two['redirect_path']
         )
-        response_three = manager.fetch('some/other/path')
+        response_three = manager.fetch(
+            self.redirect_three['redirect_path']
+        )
+        response_four = manager.fetch('some/other/path')
 
-        assert response_one == self.redirect_one
+        expected_one = self.redirect_one
+        expected_one['permanent'] = False
+        assert response_one == expected_one
         assert response_two == self.redirect_two
-        assert response_three is None
+        assert response_three == self.redirect_three
+        assert response_four is None
 
     def test_create(self):
         manager = self.get_manager()
@@ -84,6 +94,7 @@ class TestRedirectManager:
             target_url=new_redirect['target_url']
         )
         new_record = self.collection.find_one(new_redirect)
+        new_redirect['permanent'] = False
 
         assert response_new == new_redirect
         assert new_record['redirect_path'] == new_redirect['redirect_path']
@@ -92,32 +103,41 @@ class TestRedirectManager:
     def test_update(self):
         manager = self.get_manager()
 
-        update_redirect = {
-            'redirect_path': self.redirect_one['redirect_path'],
+        new_redirect = {
+            'redirect_path': self.redirect_three['redirect_path'],
             'target_url': 'http://example.com/another_path'
         }
 
-        response_updated = manager.update(
-            redirect_path=update_redirect['redirect_path'],
-            target_url=update_redirect['target_url']
+        update_response = manager.update(
+            redirect_path=new_redirect['redirect_path'],
+            target_url=new_redirect['target_url']
         )
 
-        updated_record = self.collection.find_one(update_redirect)
+        found_record = self.collection.find_one({
+            "redirect_path": new_redirect['redirect_path']
+        })
 
-        assert response_updated == response_updated
-        updated_redirect_path = update_redirect['redirect_path']
-        updated_target_url = update_redirect['target_url']
-        assert updated_record['redirect_path'] == updated_redirect_path
-        assert updated_record['target_url'] == updated_target_url
+        new_redirect_path = new_redirect['redirect_path']
+        new_target_url = new_redirect['target_url']
+
+        assert update_response['redirect_path'] == new_redirect_path
+        assert found_record['redirect_path'] == new_redirect_path
+        assert update_response['target_url'] == new_target_url
+        assert found_record['target_url'] == new_target_url
+        assert update_response['permanent'] is True
+        assert found_record['permanent'] is True
 
     def test_all(self):
         manager = self.get_manager()
 
         all_redirects = manager.all()
 
+        expected_one = self.redirect_one
+        expected_one['permanent'] = False
         assert sorted(all_redirects) == sorted([
-            self.redirect_one,
-            self.redirect_two
+            expected_one,
+            self.redirect_two,
+            self.redirect_three
         ])
 
     def test_delete(self):
