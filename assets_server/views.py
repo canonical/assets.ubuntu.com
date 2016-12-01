@@ -391,17 +391,19 @@ class RedirectRecord(APIView):
         """
 
         target_url = request.DATA.get('target_url')
+        permanent = request.DATA.get('permanent')
+
+        if permanent is not None:
+            permanent = permanent.lower() in ('true', 'yes', 'on')
 
         if not settings.REDIRECT_MANAGER.exists(redirect_path):
             return error_404(request.path)
 
-        if not target_url:
-            raise ParseError('To update a redirect, supply a target_url')
-        else:
-            redirect_record = settings.REDIRECT_MANAGER.update(
-                unquote(redirect_path),
-                target_url
-            )
+        redirect_record = settings.REDIRECT_MANAGER.update(
+            unquote(redirect_path),
+            target_url,
+            permanent
+        )
 
         return Response(redirect_record)
 
