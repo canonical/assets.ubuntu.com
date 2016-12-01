@@ -52,7 +52,7 @@ class Asset(APIView):
         time_format = '%a, %d %b %Y %H:%M:%S %Z'
 
         def make_datetime(x):
-            datetime.strptime(x, time_format)
+            return datetime.strptime(x, time_format)
 
         last_modified = asset_headers['last-modified']
         if_modified_since = request.META.get(
@@ -436,9 +436,14 @@ class Redirects(APIView):
         if not redirect_record:
             return error_404(request.path)
 
-        response = redirect(
-            redirect_record['target_url'],
-            permanent=redirect_record.get('permanent', False)
-        )
+        permanent = redirect_record.get('permanent', False)
+
+        response = redirect(redirect_record['target_url'], permanent=permanent)
+
+        # Cache permanent redirect longtime. Temporary, not so much.
+        if permanent:
+            response['Cache-Control'] = 'max-age=31556926'
+        else:
+            response['Cache-Control'] = 'max-age=60'
 
         return set_headers_for_type(response, get_mimetype(request_path))
