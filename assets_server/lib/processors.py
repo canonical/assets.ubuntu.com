@@ -111,12 +111,16 @@ class ImageProcessor:
             ):
                 operation = "resize"
 
-            if operation or 'q' in self.options:
-                try:
-                    self._pilbox_operation(operation)
-                except (TypeError, AttributeError) as operation_error:
-                    self._missing_param_error(operation_error, operation)
+            operations = operation.split(',')
 
+            for operation in operations:
+                if operation or 'q' in self.options:
+                    try:
+                        self._pilbox_operation(operation)
+                    except (TypeError, AttributeError) as operation_error:
+                        self._missing_param_error(operation_error, operation)
+
+            if operation:
                 return True
 
     # Private helper methods
