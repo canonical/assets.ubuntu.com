@@ -8,6 +8,7 @@ iso8601==0.1.10
 itsdangerous==0.24
 Jinja2==2.7.2
 MarkupSafe==0.21
+more-itertools==2.5.0
 netaddr==0.7.11
 pilbox==0.9.18
 prettytable==0.7.2
