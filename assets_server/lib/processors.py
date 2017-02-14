@@ -3,6 +3,7 @@ from io import BytesIO
 import os
 
 # Modules
+from more_itertools import unique_everseen
 from pilbox.errors import PilboxError
 from pilbox.image import Image as PilboxImage
 from scour.scour import scourString
@@ -111,12 +112,18 @@ class ImageProcessor:
             ):
                 operation = "resize"
 
-            if operation or 'q' in self.options:
-                try:
-                    self._pilbox_operation(operation)
-                except (TypeError, AttributeError) as operation_error:
-                    self._missing_param_error(operation_error, operation)
+            operations = operation.split(',')
+            # Remove duplicate operations from list
+            operations = unique_everseen(operations)
 
+            for operation in operations:
+                if operation or 'q' in self.options:
+                    try:
+                        self._pilbox_operation(operation)
+                    except (TypeError, AttributeError) as operation_error:
+                        self._missing_param_error(operation_error, operation)
+
+            if operation:
                 return True
 
     # Private helper methods

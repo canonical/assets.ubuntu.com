@@ -58,6 +58,32 @@ The server is intended to be run in production behind a caching layer (e.g. [squ
 Using the server
 ---
 
+### Transforming images
+
+Images can be transformed using the `op` get option, along with the required arguments.
+
+You can manually specify one of these operations along with their corresponding options:
+ - `region`
+  - `rect`: The region as x,y,w,h; x,y: top-left position, w,h: width/height of region
+ - `resize`
+  - `w`: Width
+  - `h`: Height
+  - `max-width`
+  - `max-height`
+ - `rotate`
+  - `deg`: Degrees to rotate the image
+
+The default option is resize and can be used without setting `op`
+```
+14e45f53-image.png?w=30
+```
+
+You can also specify multiple comma separated operations. They will be applied in the order they are listed.
+```
+14e45f53-image.png?op=region,resize&w=30&rect=0,0,50,50
+```
+
+
 ### Tokens
 
 To interact with the assets server, you'll need to generate an authentication token:
