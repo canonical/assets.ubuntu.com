@@ -191,7 +191,6 @@ class AssetInfo(APIView):
 
     base_name = 'asset_json'
 
-    @token_authorization
     def get(self, request, file_path):
         """
         Get data for an asset by path
