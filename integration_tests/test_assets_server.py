@@ -1,14 +1,69 @@
-from api_test_helpers import get, token_fixture, post, delete, exit_if_server_not_found
+# Core packages
+import argparse
+import uuid
+import sys
+import errno
 
-exit_if_server_not_found()
+# Third-party packages
+import requests
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "server_url",
+    help="URL for the server to test, e.g. http://localhost:8017/v1/"
+)
+parser.add_argument(
+    "token",
+    help="An authentication token for the server."
+)
+args = parser.parse_args()
+server_url = args.server_url
+token = args.token
+
+
+def exit_if_server_not_found():
+    try:
+        requests.get(server_url)
+    except ConnectionError as e:
+        error_number = e.args[0].reason.errno
+        lookup_error = {
+            errno.ECONNREFUSED: "No server found: ",
+            -2: "Unknown error: "
+        }
+        sys.exit(
+            '{0}{1}'.format(lookup_error.get(error_number), e)
+        )
+
+
+def get(path="", params={}, server_url=server_url):
+    """
+    Convienince function for making simple GETs
+    """
+
+    return requests.get(server_url + path, params=params)
+
+
+def post(data={}, path="", params={}, server_url=server_url):
+    """
+    Convienince function for making simple POSTs
+    """
+
+    return requests.post(server_url + path, params=params, data=data)
+
+
+def delete(path="", params={}, server_url=server_url):
+    """
+    Convienince function for making simple DELETEs
+    """
+
+    return requests.delete(server_url + path, params=params)
 
 
 class TestAssetsAPI:
     """
     API tests of the assets server.
     """
-
-    token = token_fixture()
 
     def test_no_token(self):
         """
@@ -27,35 +82,50 @@ class TestAssetsAPI:
         """
         Tests a good token returns a 200 at the root.
         """
-        assert get(params={'token': self.token}).status_code == 200, (
-            "Token '{0}' failed to authenticate correctly".format(self.token)
+        assert get(params={'token': token}).status_code == 200, (
+            "Token '{0}' failed to authenticate correctly".format(token)
         )
 
     def test_upload_and_delete_file(self):
         """
         Tests uploading an asset, getting that asset and deleting it.
         """
+
         post_response = post(
             params={
-                'token': self.token
+                'token': token
             },
             data={
-                "asset": "Test",
+                "asset": uuid.uuid4().hex,
                 "friendly-name": "test_friendly_name",
                 "tags": "tags",
                 "type": "base64"
             }
         )
+
         assert post_response.status_code == 201, (
             "Asset not created correctly."
         )
 
         file_path = post_response.json()['file_path']
 
-        assert get(path=file_path, params={'token': self.token}).status_code == 200, (
+        assert get(
+            path=file_path, params={'token': token}
+        ).status_code == 200, (
             "Asset not downloaded correctly"
         )
 
-        assert delete(path=file_path, params={'token': self.token}).status_code == 200, (
+        assert delete(
+            path=file_path, params={'token': token}
+        ).status_code == 200, (
             "Asset not deleted successfully."
         )
+
+
+if __name__ == "__main__":
+    tests = TestAssetsAPI()
+    tests.test_no_token()
+    tests.test_bad_token()
+    tests.test_token()
+    tests.test_upload_and_delete_file()
+    print("All tests passed")
