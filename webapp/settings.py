@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 import os
 
 # Modules
-from swiftclient.client import Connection as SwiftConnection
+import swiftclient
 
 # Local
 from .mappers import DataManager, FileManager, TokenManager, RedirectManager
@@ -68,15 +68,27 @@ MONGO_DB = mongo_db_from_url(
 TOKEN_MANAGER = TokenManager(data_collection=MONGO_DB['tokens'])
 REDIRECT_MANAGER = RedirectManager(data_collection=MONGO_DB['redirects'])
 DATA_MANAGER = DataManager(data_collection=MONGO_DB['asset_data'])
-FILE_MANAGER = FileManager(
-    SwiftConnection(
+
+SWIFT_CONNECTION = swiftclient.client.Connection(
+    'http://swift:8080/auth/v1.0',
+    'test:tester',
+    'testing',
+    auth_version='1.0'
+)
+
+swift_settings = [
+    'OS_AUTH_URL', 'OS_USERNAME', 'OS_PASSWORD', 'OS_TENANT_NAME'
+]
+if set(swift_settings).issubset(set(os.environ)):
+    SWIFT_CONNECTION = swiftclient.client.Connection(
         os.environ.get('OS_AUTH_URL'),
         os.environ.get('OS_USERNAME'),
         os.environ.get('OS_PASSWORD'),
         auth_version='2.0',
         os_options={'tenant_name': os.environ.get('OS_TENANT_NAME')}
     )
-)
+
+FILE_MANAGER = FileManager(SWIFT_CONNECTION)
 
 LOGGING = {
     'version': 1,
