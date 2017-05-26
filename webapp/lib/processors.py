@@ -13,7 +13,7 @@ from wand.image import Image as WandImage
 import magic
 
 # Local
-from python_helpers import shared_items
+from .python_helpers import shared_items
 
 
 class ImageProcessor:

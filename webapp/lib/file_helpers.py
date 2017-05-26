@@ -8,7 +8,7 @@ from django.conf import settings
 from wand.image import Image
 
 # Local
-from processors import ImageProcessor
+from .processors import ImageProcessor
 
 
 def create_asset(
@@ -41,14 +41,7 @@ def create_asset(
 
     # Create file
     if not settings.DATA_MANAGER.exists(url_path):
-        try:
-            settings.FILE_MANAGER.create(file_data, url_path)
-        except:
-            raise file_error(
-                error_number=errno.EEXIST,
-                message="Failed to create asset {0}.".format(url_path),
-                filename=url_path
-            )
+        settings.FILE_MANAGER.create(file_data, url_path)
     else:
         error_message = "Asset already exists at {0}.".format(url_path)
         asset = settings.DATA_MANAGER.fetch_one(url_path)

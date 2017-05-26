@@ -5,7 +5,7 @@ from hashlib import sha1
 
 from swiftclient.exceptions import ClientException as SwiftException
 
-from lib.url_helpers import normalize
+from .lib.url_helpers import normalize
 
 
 class FileManager:
@@ -242,7 +242,7 @@ class TokenManager:
         """Generate a random token, with a given name"""
 
         data = {
-            'token': uuid.uuid4().get_hex(),  # Random UUID
+            'token': uuid.uuid4().hex,  # Random UUID
             'name': name
         }
 

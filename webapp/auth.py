@@ -5,7 +5,7 @@ import os
 from django.conf import settings
 
 # local
-from assets_server.exceptions import PrettyAuthenticationFailed
+from .exceptions import PrettyAuthenticationFailed
 
 
 def token_authorization(target_function):
@@ -20,7 +20,7 @@ def token_authorization(target_function):
 
         # Combine request parameters
         params = request.GET.dict()
-        params.update(request.DATA.dict())
+        params.update(request.data.dict())
 
         # Token based authorization
         if auth_header[:6].lower() == "token ":
