@@ -14,7 +14,7 @@
 set -euo pipefail
 
 # Define the versions of the two docker images
-django_image="canonicalwebteam/django:v2.2.0-imagemagick"
+django_image="canonicalwebteam/django:v2.2.1-imagemagick"
 
 USAGE="Usage
 ===
@@ -260,6 +260,6 @@ case $run_command in
     "django")
         start_database "${project}-db"
         start_swift_server "${project}-swift"
-        django_run "${project}-django-$(date +'%s')" "${*}" "--network ${network_name} --rm" ;;
+        django_run "${project}-django-$(date +'%s')" "${*}" "--network ${network_name}" ;;
     *) invalid "Command '${run_command}' not recognised." ;;
 esac
