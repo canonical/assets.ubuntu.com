@@ -56,7 +56,7 @@ You can also specify multiple comma separated operations. They will be applied i
 To interact with the assets server, you'll need to generate an authentication token:
 
 ``` bash
-$ ./run django manage.py gettoken {token-name}
+$ ./run django ./manage.py gettoken {token-name}
 Token '{token-name}' created
 3fe479a6b8184be4a4cdf42085f19f9a
 ```
