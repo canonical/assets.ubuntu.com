@@ -1,9 +1,0 @@
--r standard.txt
-vex==0.0.18
-mongomock==2.0.0
-ipdb
-flake8==3.0.4
-pytest==3.0.3
-pytest-cover==3.0.0
-pytest-django==3.0.0
-

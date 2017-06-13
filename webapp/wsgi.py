@@ -1,5 +1,5 @@
 """
-WSGI config for assets_server project.
+WSGI config for assets.ubuntu.com.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -13,7 +13,8 @@ import sys
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(BASE_DIR)
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "assets_server.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "webapp.settings")
 
 from django.core.wsgi import get_wsgi_application  # noqa: E402
+
 application = get_wsgi_application()

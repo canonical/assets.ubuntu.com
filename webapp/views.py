@@ -3,7 +3,10 @@ import errno
 import re
 from base64 import b64decode
 from datetime import datetime
-from urllib import unquote
+try:
+    from urllib.parse import unquote
+except ImportError:
+    from urllib import unquote
 
 # Packages
 from django.conf import settings
@@ -16,19 +19,19 @@ from rest_framework.views import APIView
 from swiftclient.exceptions import ClientException as SwiftClientException
 
 # Local
-from auth import token_authorization
-from lib.file_helpers import (
+from .auth import token_authorization
+from .lib.file_helpers import (
     create_asset,
     file_error,
     remove_filename_hash,
     get_mimetype
 )
-from lib.http_helpers import (
+from .lib.http_helpers import (
     error_response,
     error_404,
     set_headers_for_type
 )
-from lib.processors import ImageProcessor
+from .lib.processors import ImageProcessor
 
 
 class Asset(APIView):
@@ -115,7 +118,7 @@ class Asset(APIView):
         Update metadata against an asset
         """
 
-        tags = request.DATA.get('tags', '')
+        tags = request.data.get('tags', '')
 
         data = settings.DATA_MANAGER.update(file_path, tags)
 
@@ -158,11 +161,11 @@ class AssetList(APIView):
         Create a new asset
         """
 
-        tags = request.DATA.get('tags', '')
-        optimize = request.DATA.get('optimize', False)
-        asset = request.DATA.get('asset')
-        friendly_name = request.DATA.get('friendly-name')
-        url_path = request.DATA.get('url-path', '').strip('/')
+        tags = request.data.get('tags', '')
+        optimize = request.data.get('optimize', False)
+        asset = request.data.get('asset')
+        friendly_name = request.data.get('friendly-name')
+        url_path = request.data.get('url-path', '').strip('/')
 
         try:
             url_path = create_asset(
@@ -234,7 +237,7 @@ class Tokens(APIView):
         Create a new token
         """
 
-        name = request.DATA.get('name')
+        name = request.data.get('name')
         body = {'name': name}
         token = False
 
@@ -312,9 +315,9 @@ class RedirectRecords(APIView):
         Create a redirect record
         """
 
-        redirect_path = request.DATA.get('redirect_path').lstrip('/')
-        target_url = request.DATA.get('target_url')
-        permanent = request.DATA.get(
+        redirect_path = request.data.get('redirect_path').lstrip('/')
+        target_url = request.data.get('target_url')
+        permanent = request.data.get(
             'permanent', 'false'
         ).lower() in ('true', 'yes', 'on')
 
@@ -389,8 +392,8 @@ class RedirectRecord(APIView):
         Update target URL for a redirect
         """
 
-        target_url = request.DATA.get('target_url')
-        permanent = request.DATA.get('permanent')
+        target_url = request.data.get('target_url')
+        permanent = request.data.get('permanent')
 
         if permanent is not None:
             permanent = permanent.lower() in ('true', 'yes', 'on')

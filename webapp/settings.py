@@ -12,31 +12,30 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 import os
 
 # Modules
-from swiftclient.client import Connection as SwiftConnection
+import swiftclient
 
 # Local
-from mappers import DataManager, FileManager, TokenManager, RedirectManager
-from lib.db_helpers import mongo_db_from_url
+from .mappers import DataManager, FileManager, TokenManager, RedirectManager
+from .lib.db_helpers import mongo_db_from_url
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
-
-# Keep it secret, keep it safe!
-# (Although it's probably irrelevent to this app)
-SECRET_KEY = 'a6f@ev$$r^@d4boc-gx^j3l@a=fr4rc^qq3my27zh)pn09$583'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'no_secret')
 
 ALLOWED_HOSTS = ['*']
 
-DEBUG = os.environ.get('WSGI_DEBUG', "").lower() == 'true'
+DEBUG = os.environ.get('DJANGO_DEBUG', 'false').lower() == 'true'
 
-INSTALLED_APPS = ['rest_framework']
+INSTALLED_APPS = [
+    'rest_framework',
+    'webapp'
+]
 
 MIDDLEWARE_CLASSES = []
 
-ROOT_URLCONF = 'assets_server.urls'
-
-WSGI_APPLICATION = 'assets_server.wsgi.application'
+ROOT_URLCONF = 'webapp.urls'
+WSGI_APPLICATION = 'webapp.wsgi.application'
 
 LANGUAGE_CODE = 'en-uk'
 TIME_ZONE = 'UTC'
@@ -49,33 +48,47 @@ DEFAULT_JSON_INDENT = 4
 REST_FRAMEWORK = {
     # Default format is JSON
     'DEFAULT_RENDERER_CLASSES': (
-        'assets_server.renderers.PrettyJSONRenderer',
+        'webapp.renderers.PrettyJSONRenderer',
     ),
 
     # No complex permissions
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny'
-    ]
+    ],
+
+    # Disable authentication
+    'UNAUTHENTICATED_USER': None
 }
 
 MONGO_DB = mongo_db_from_url(
-    mongo_url=os.environ.get('MONGO_URL'),
+    mongo_url=os.environ.get('MONGO_URL', 'db'),
     default_database='assets'
 )
 
 TOKEN_MANAGER = TokenManager(data_collection=MONGO_DB['tokens'])
 REDIRECT_MANAGER = RedirectManager(data_collection=MONGO_DB['redirects'])
 DATA_MANAGER = DataManager(data_collection=MONGO_DB['asset_data'])
-FILE_MANAGER = FileManager(
-    SwiftConnection(
+
+SWIFT_CONNECTION = swiftclient.client.Connection(
+    'http://swift:8080/auth/v1.0',
+    'test:tester',
+    'testing',
+    auth_version='1.0'
+)
+
+swift_settings = [
+    'OS_AUTH_URL', 'OS_USERNAME', 'OS_PASSWORD', 'OS_TENANT_NAME'
+]
+if set(swift_settings).issubset(set(os.environ)):
+    SWIFT_CONNECTION = swiftclient.client.Connection(
         os.environ.get('OS_AUTH_URL'),
         os.environ.get('OS_USERNAME'),
         os.environ.get('OS_PASSWORD'),
         auth_version='2.0',
         os_options={'tenant_name': os.environ.get('OS_TENANT_NAME')}
     )
-)
 
+FILE_MANAGER = FileManager(SWIFT_CONNECTION)
 
 LOGGING = {
     'version': 1,
