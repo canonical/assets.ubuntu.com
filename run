@@ -78,6 +78,7 @@ db_container="${project}-db"
 db_volume="${project}-db"
 swift_volume="${project}-swift"
 network_name="${project}-net"
+db_network_alias="db"
 
 # Defaults environment settings
 PORT=8000
@@ -149,6 +150,7 @@ django_run () {
         --volume ${pip_cache_volume}:/home/shared/.cache/pip/  `# Bind cache to volume` \
         --env PORT=${PORT}                                     `# Set the port correctly`  \
         --env DJANGO_DEBUG=${DJANGO_DEBUG}                     `# Set django debug mode`  \
+        --env DATABASE_URL=${db_network_alias}                 `# Set django debug mode`  \
         ${extra_options}                                       `# Any extra docker options`  \
         ${django_image} ${command}                             `# Run command in the Django image`
 }
@@ -157,13 +159,13 @@ start_database () {
     container_name="${1}"
     if ! docker inspect -f {{.State.Running}} ${container_name} &>/dev/null; then
         docker run \
-            --name ${container_name}          `# Name the container`  \
-            --rm                              `# Remove the container once it's finished`  \
-            --volume "${db_volume}":/data/db  `# Store dependencies in a docker volume`  \
-            --network "${network_name}"       `# Use an isolated network`  \
-            --network-alias db                `# Call this container "db" on the network so it can be found`  \
-            --detach                          `# Run in the background` \
-            mongo                             `# Use the _library/mongo image`
+            --name ${container_name}             `# Name the container`  \
+            --rm                                 `# Remove the container once it's finished`  \
+            --volume "${db_volume}":/data/db     `# Store dependencies in a docker volume`  \
+            --network "${network_name}"          `# Use an isolated network`  \
+            --network-alias ${db_network_alias}  `# Call this container "db" on the network so it can be found`  \
+            --detach                             `# Run in the background` \
+            mongo                                `# Use the _library/mongo image`
     fi
 }
 

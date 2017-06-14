@@ -61,7 +61,7 @@ REST_FRAMEWORK = {
 }
 
 MONGO_DB = mongo_db_from_url(
-    mongo_url=os.environ.get('MONGO_URL', 'db'),
+    mongo_url=os.environ.get('DATABASE_URL', 'localhost'),
     default_database='assets'
 )
 
