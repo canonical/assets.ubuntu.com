@@ -20,7 +20,7 @@ def token_authorization(target_function):
 
         # Combine request parameters
         params = request.GET.dict()
-        params.update(request.data.dict())
+        params.update(request.data)
 
         # Token based authorization
         if auth_header[:6].lower() == "token ":
