@@ -3,7 +3,7 @@ Assets server
 
 This is a Restful API service for creating and serving binary assets over HTTP, built with [Django REST framework](http://www.django-rest-framework.org/).
 
-Usage
+Running the server
 ---
 
 First you have to have access to an [openstack swift](http://docs.openstack.org/developer/swift/) installation. Then make your details available as environment variables:
@@ -21,31 +21,6 @@ Then, to run the server locally:
 make setup    # Install dependencies
 make develop  # Run development server on port 8012
 ```
-
-### Tokens
-
-To interact with the assets server, you'll need to generate an authentication token:
-
-``` bash
-$ scripts/get-token.sh your-name  # Generate a new token called "your-name"
-Token 'your-name' created
-3fe479a6b8184be4a4cdf42085f19f9a
-```
-
-You can now pass this token in your requests to the assets server API. E.g.:
-
-```
-http://localhost:8012/v1/?token=3fe479a6b8184be4a4cdf42085f19f9a  # List all existing assets in JSON format
-```
-
-You can also list all tokens with [list-tokens.sh](scripts/list-tokens.sh) or delete them with [delete-token.sh](scripts/delete-token.sh).
-
-Advanced usage
----
-
-### Security
-
-As the server only uses a basic token for authentication, it is paramount that in a production setting, the API functions are only accessed over HTTPS, to keep the API token secret. For this reason, when `DEBUG==false` the server will force a redirect to HTTPS for all API calls.
 
 ### Python environment
 
@@ -66,9 +41,66 @@ You can tell the development server to run on any port using the `PORT` environm
 PORT=9001 make develop  # Run the development server on port 9001
 ```
 
+Production setup
+---
+
+### Security
+
+As the server only uses a basic token for authentication, it is paramount that in a production setting, the API functions are only accessed over HTTPS, to keep the API token secret. For this reason, when `DEBUG==false` the server will force a redirect to HTTPS for all API calls.
+
+### Caching
+
+The server is intended to be run in production behind a caching layer (e.g. [squid cache](http://www.squid-cache.org/)). And as the server stores assets by default with a unique hash corresponding to the file's contents (e.g. <code><b>a2f56da4</b>-some-image.png</code>), the cache expiration time should be as long as possible to maximise performance.
+
+Using the server
+---
+
+### Tokens
+
+To interact with the assets server, you'll need to generate an authentication token:
+
+``` bash
+$ scripts/get-token.sh your-name  # Generate a new token called "your-name"
+Token 'your-name' created
+3fe479a6b8184be4a4cdf42085f19f9a
+```
+
+You can now pass this token in your requests to the assets server API. E.g.:
+
+```
+http://localhost:8012/v1/?token=3fe479a6b8184be4a4cdf42085f19f9a  # List all existing assets in JSON format
+```
+
+You can list all tokens with [scripts/list-tokens.sh](scripts/list-tokens.sh) or delete them with [scripts/delete-token.sh](scripts/delete-token.sh).
+
+### Uploading assets via the command-line
+
+The [asset-uploader project](https://github.com/ubuntudesign/asset-uploader) helps you upload assets from the command-line:
+
+``` bash
+$ ./upload-asset.py  \
+    --server-url https://assets.EXAMPLE.com/v1/  \
+    --auth-token XXXXXXXX  \
+    MY-IMAGE.png
+{'url': u'https://assets.EXAMPLE.com/v1/xxxxx-MY-IMAGE.png', 'image': True, 'created': u'Tue Sep 27 16:13:22 2016', 'file_path': u'xxxxx-MY-IMAGE.png', 'tags': u''}
+```
+
+You can also use [curl](https://curl.haxx.se/docs/manpage.html):
+
+``` bash
+$ echo "asset=$(base64 -w 0 MY-IMAGE.png)" | \
+  curl --data @- --data "friendly-name=MY-IMAGE.png" "https://assets.EXAMPLE.com/v1/?token=XXXXXX"
+{
+    "optimized": false, 
+    "created": "Wed Sep 28 11:07:33 2016", 
+    "file_path": "xxxxxxxx-MY-IMAGE.png", 
+    "tags": ""
+}
+```
+
 ### Assets manager
 
-You may want to setup the [assets-manager](https://github.com/ubuntudesign/assets-manager/) to easily upload assets to your assets server.
+You may wish to setup the [assets-manager](https://github.com/ubuntudesign/assets-manager/), a simple web interface for managing assets on your assets server.
 
 Tests
 ---

@@ -143,11 +143,10 @@ class AssetList(APIView):
         """
 
         queries = request.GET.get('q', '').split(' ')
-
-        regex_string = '({0})'.format('|'.join(queries))
+        file_type = request.GET.get('type', '')
 
         return Response(
-            settings.DATA_MANAGER.find(regex_string),
+            settings.DATA_MANAGER.find(queries, file_type),
             headers={'Cache-Control': 'no-cache'}
         )
 

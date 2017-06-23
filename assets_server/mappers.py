@@ -135,17 +135,40 @@ class DataManager:
 
         return self.format(asset_data) if asset_data else None
 
-    def find(self, query):
-        match = re.compile(query, re.IGNORECASE)
+    def find(self, tags, file_type):
+        """
+        Find all objects that contain all the supplied tags
+        """
 
-        results = self.data_collection.find(
-            {
+        conditions = []
+
+        for tag in tags:
+            # Only match fields that contain the tag bounded by word delimeters
+            # E.g. match a-{word}-image.jpg, but not a-{word}ing-image.png
+            tag_regex = re.compile(r'\b{}\b'.format(tag), re.IGNORECASE)
+
+            # Look for the tag in either file_path or tags fields
+            conditions.append({
                 '$or': [
-                    {'file_path': match},
-                    {'tags': match}
+                    {'file_path': tag_regex},
+                    {'tags': tag_regex}
                 ]
-            }
-        )
+            })
+
+        # Only return object that contain all tags
+
+        if file_type:
+            extension_search = re.compile(
+                r'\.{}$'.format(file_type),
+                re.IGNORECASE
+            )
+            conditions.append({'file_path': extension_search})
+
+        mongo_search = {
+            '$and': conditions
+        }
+
+        results = self.data_collection.find(mongo_search)
 
         return [
             self.format(asset_data)
