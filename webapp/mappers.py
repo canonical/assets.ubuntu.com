@@ -1,3 +1,4 @@
+import pymongo
 import re
 import uuid
 from copy import copy
@@ -168,7 +169,11 @@ class DataManager:
             '$and': conditions
         }
 
-        results = self.data_collection.find(mongo_search)
+        mongo_sort = (
+            ('_id', pymongo.DESCENDING),
+        )
+
+        results = self.data_collection.find(mongo_search).sort(mongo_sort)
 
         return [
             self.format(asset_data)
