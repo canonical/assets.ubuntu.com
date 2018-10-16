@@ -1,6 +1,6 @@
 aniso8601==1.2.1
 Babel==2.4.0
-Django==1.11.1
+Django==1.11.16
 djangorestframework==3.6.3
 iso8601==0.1.11
 itsdangerous==0.24
