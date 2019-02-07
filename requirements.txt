@@ -25,4 +25,4 @@ sphinx-me==0.3
 tornado==4.5.1
 Wand==0.4.4
 Werkzeug==0.12.2
-wsgiref==0.1.2
+wsgiref==0.1.2; python_version < '3.0'
