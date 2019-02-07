@@ -5,7 +5,7 @@ djangorestframework==3.6.3
 iso8601==0.1.11
 itsdangerous==0.24
 Jinja2==2.9.6
-MarkupSafe==1.0
+MarkupSafe==1.1.0
 mongomock==3.8.0
 more-itertools==3.1.0
 netaddr==0.7.19
