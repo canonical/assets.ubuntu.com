@@ -12,7 +12,7 @@ from .processors import ImageProcessor
 
 
 def create_asset(
-    file_data, friendly_name, tags='', url_path='', optimize=False
+    file_data, friendly_name, tags="", url_path="", optimize=False
 ):
     data = {"optimized": optimize}
 
@@ -21,21 +21,20 @@ def create_asset(
             image = ImageProcessor(file_data)
             image.optimize(allow_svg_errors=True)
             file_data = image.data
-        except:
+        except Exception:
             # If optimisation failed, just don't bother optimising
             data["optimized"] = "Optimization failed"
 
     if not url_path:
         url_path = settings.FILE_MANAGER.generate_asset_path(
-            file_data,
-            friendly_name
+            file_data, friendly_name
         )
 
     try:
         with Image(blob=file_data) as image_info:
-            data['width'] = image_info.width
-            data['height'] = image_info.height
-    except:
+            data["width"] = image_info.width
+            data["height"] = image_info.height
+    except Exception:
         # Just don't worry if image reading fails
         pass
 
@@ -55,13 +54,11 @@ def create_asset(
             image_data["height"] = data["height"]
 
         if image_data:
-            settings.DATA_MANAGER.update(url_path, asset['tags'], image_data)
+            settings.DATA_MANAGER.update(url_path, asset["tags"], image_data)
             error_message += " Updated image information."
 
         raise file_error(
-            error_number=errno.EEXIST,
-            message=error_message,
-            filename=url_path
+            error_number=errno.EEXIST, message=error_message, filename=url_path
         )
 
     # Once the file is created, create file metadata
@@ -88,7 +85,7 @@ def remove_filename_hash(filename):
     from a filename
     """
 
-    if is_hex(filename[:8]) and filename[8] == '-':
+    if is_hex(filename[:8]) and filename[8] == "-":
         filename = filename[9:]
 
     return filename
@@ -101,9 +98,7 @@ def get_mimetype(filepath):
     otherwise ask Python to guess.
     """
 
-    mappings = {
-        '.woff2': 'font/woff2'
-    }
+    mappings = {".woff2": "font/woff2"}
 
     extension = os.path.splitext(filepath)[1]
 
@@ -115,10 +110,7 @@ def file_error(error_number, message, filename):
     Create an IOError
     """
 
-    file_error = IOError(
-        error_number,
-        message
-    )
+    file_error = IOError(error_number, message)
     file_error.message = message
     file_error.filename = filename
 

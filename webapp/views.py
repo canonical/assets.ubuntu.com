@@ -3,6 +3,7 @@ import errno
 import re
 from base64 import b64decode
 from datetime import datetime
+
 try:
     from urllib.parse import unquote
 except ImportError:
@@ -24,13 +25,9 @@ from .lib.file_helpers import (
     create_asset,
     file_error,
     remove_filename_hash,
-    get_mimetype
+    get_mimetype,
 )
-from .lib.http_helpers import (
-    error_response,
-    error_404,
-    set_headers_for_type
-)
+from .lib.http_helpers import error_response, error_404, set_headers_for_type
 from .lib.processors import ImageProcessor
 
 
@@ -39,7 +36,7 @@ class Asset(APIView):
     Actions on a single asset respource.
     """
 
-    base_name = 'asset'
+    base_name = "asset"
 
     def get(self, request, file_path):
         """
@@ -52,15 +49,14 @@ class Asset(APIView):
         except SwiftClientException as error:
             return error_response(error, file_path)
 
-        time_format = '%a, %d %b %Y %H:%M:%S %Z'
+        time_format = "%a, %d %b %Y %H:%M:%S %Z"
 
         def make_datetime(x):
             return datetime.strptime(x, time_format)
 
-        last_modified = asset_headers['last-modified']
+        last_modified = asset_headers["last-modified"]
         if_modified_since = request.META.get(
-            'HTTP_IF_MODIFIED_SINCE',
-            'Mon, 1 Jan 1980 00:00:00 GMT'
+            "HTTP_IF_MODIFIED_SINCE", "Mon, 1 Jan 1980 00:00:00 GMT"
         )
 
         if make_datetime(last_modified) <= make_datetime(if_modified_since):
@@ -68,10 +64,7 @@ class Asset(APIView):
 
         # Run image processor
         try:
-            image = ImageProcessor(
-                asset_data,
-                request.GET
-            )
+            image = ImageProcessor(asset_data, request.GET)
             converted_type = image.process()
             asset_data = image.data
         except (PilboxError, ValueError) as error:
@@ -80,20 +73,19 @@ class Asset(APIView):
         # Get a sensible filename, including a converted extension
         filename = remove_filename_hash(file_path)
         if converted_type:
-            filename = '{0}.{1}'.format(filename, converted_type)
+            filename = "{0}.{1}".format(filename, converted_type)
 
         # Start response, guessing mime type
         response = HttpResponse(
-            asset_data,
-            content_type=get_mimetype(filename)
+            asset_data, content_type=get_mimetype(filename)
         )
 
         # Set download filename
-        response['Content-Disposition'] = "filename={}".format(filename)
+        response["Content-Disposition"] = "filename={}".format(filename)
 
         # Cache all genuine assets forever
-        response['Cache-Control'] = 'max-age=31556926'
-        response['Last-Modified'] = last_modified
+        response["Cache-Control"] = "max-age=31556926"
+        response["Last-Modified"] = last_modified
 
         # Return asset
         return set_headers_for_type(response)
@@ -118,7 +110,7 @@ class Asset(APIView):
         Update metadata against an asset
         """
 
-        tags = request.data.get('tags', '')
+        tags = request.data.get("tags", "")
 
         data = settings.DATA_MANAGER.update(file_path, tags)
 
@@ -130,7 +122,7 @@ class AssetList(APIView):
     Actions on the asset collection.
     """
 
-    base_name = 'asset_list'
+    base_name = "asset_list"
 
     @token_authorization
     def get(self, request):
@@ -147,12 +139,12 @@ class AssetList(APIView):
         file paths
         """
 
-        queries = request.GET.get('q', '').split(' ')
-        file_type = request.GET.get('type', '')
+        queries = request.GET.get("q", "").split(" ")
+        file_type = request.GET.get("type", "")
 
         return Response(
             settings.DATA_MANAGER.find(queries, file_type),
-            headers={'Cache-Control': 'no-cache'}
+            headers={"Cache-Control": "no-cache"},
         )
 
     @token_authorization
@@ -161,11 +153,11 @@ class AssetList(APIView):
         Create a new asset
         """
 
-        tags = request.data.get('tags', '')
-        optimize = request.data.get('optimize', False)
-        asset = request.data.get('asset')
-        friendly_name = request.data.get('friendly-name')
-        url_path = request.data.get('url-path', '').strip('/')
+        tags = request.data.get("tags", "")
+        optimize = request.data.get("optimize", False)
+        asset = request.data.get("asset")
+        friendly_name = request.data.get("friendly-name")
+        url_path = request.data.get("url-path", "").strip("/")
 
         try:
             url_path = create_asset(
@@ -173,7 +165,7 @@ class AssetList(APIView):
                 friendly_name=friendly_name,
                 tags=tags,
                 url_path=url_path,
-                optimize=optimize
+                optimize=optimize,
             )
         except IOError as create_error:
             if create_error.errno == errno.EEXIST:
@@ -192,7 +184,7 @@ class AssetInfo(APIView):
     Data about an asset
     """
 
-    base_name = 'asset_json'
+    base_name = "asset_json"
 
     def get(self, request, file_path):
         """
@@ -202,13 +194,13 @@ class AssetInfo(APIView):
         if settings.DATA_MANAGER.exists(file_path):
             response = Response(
                 settings.DATA_MANAGER.fetch_one(file_path),
-                headers={'Cache-Control': 'no-cache'}
+                headers={"Cache-Control": "no-cache"},
             )
         else:
             asset_error = file_error(
                 error_number=errno.ENOENT,
                 message="No JSON data found for file {0}".format(file_path),
-                filename=file_path
+                filename=file_path,
             )
             response = error_response(asset_error)
 
@@ -227,8 +219,7 @@ class Tokens(APIView):
         """
 
         return Response(
-            settings.TOKEN_MANAGER.all(),
-            headers={'Cache-Control': 'no-cache'}
+            settings.TOKEN_MANAGER.all(), headers={"Cache-Control": "no-cache"}
         )
 
     @token_authorization
@@ -237,24 +228,24 @@ class Tokens(APIView):
         Create a new token
         """
 
-        name = request.data.get('name')
-        body = {'name': name}
+        name = request.data.get("name")
+        body = {"name": name}
         token = False
 
         if not name:
-            raise ParseError('To create a token, please specify a name')
+            raise ParseError("To create a token, please specify a name")
 
         elif settings.TOKEN_MANAGER.exists(name):
-            raise ParseError('Another token by that name already exists')
+            raise ParseError("Another token by that name already exists")
 
         else:
             token = settings.TOKEN_MANAGER.create(name)
 
             if token:
-                body['message'] = 'Token created'
-                body['token'] = token['token']
+                body["message"] = "Token created"
+                body["token"] = token["token"]
             else:
-                raise ParseError('Failed to create a token')
+                raise ParseError("Failed to create a token")
 
         return Response(body)
 
@@ -286,7 +277,7 @@ class Token(APIView):
         body = settings.TOKEN_MANAGER.delete(name) or {}
 
         if body:
-            body['message'] = "Successfully deleted."
+            body["message"] = "Successfully deleted."
         else:
             return error_404(request.path)
 
@@ -306,7 +297,7 @@ class RedirectRecords(APIView):
 
         return Response(
             settings.REDIRECT_MANAGER.all(),
-            headers={'Cache-Control': 'no-cache'}
+            headers={"Cache-Control": "no-cache"},
         )
 
     @token_authorization
@@ -315,53 +306,52 @@ class RedirectRecords(APIView):
         Create a redirect record
         """
 
-        redirect_path = request.data.get('redirect_path').lstrip('/')
-        target_url = request.data.get('target_url')
-        permanent = request.data.get(
-            'permanent', 'false'
-        ).lower() in ('true', 'yes', 'on')
+        redirect_path = request.data.get("redirect_path").lstrip("/")
+        target_url = request.data.get("target_url")
+        permanent = request.data.get("permanent", "false").lower() in (
+            "true",
+            "yes",
+            "on",
+        )
 
         # Remove multiple-slashes
         redirect_path = re.sub("//+", "/", redirect_path)
 
         body = {
-            'redirect_path': redirect_path,
-            'target_url': target_url,
-            'permanent': permanent
+            "redirect_path": redirect_path,
+            "target_url": target_url,
+            "permanent": permanent,
         }
 
         redirect_record = False
 
         if not redirect_path:
             raise ParseError(
-                'To create a new redirect, please specify a '
-                'redirect_path and a target_url'
+                "To create a new redirect, please specify a "
+                "redirect_path and a target_url"
             )
 
         elif settings.REDIRECT_MANAGER.exists(redirect_path):
             return Response(
                 {
                     "message": (
-                        'Another redirect with that path '
-                        'already exists'
+                        "Another redirect with that path " "already exists"
                     ),
                     "redirect_path": redirect_path,
-                    "code": 409
+                    "code": 409,
                 },
-                status=409
+                status=409,
             )
 
         else:
             redirect_record = settings.REDIRECT_MANAGER.update(
-                redirect_path,
-                target_url,
-                permanent
+                redirect_path, target_url, permanent
             )
 
             if redirect_record:
-                body['message'] = 'Redirect created'
+                body["message"] = "Redirect created"
             else:
-                raise ParseError('Failed to create redirect')
+                raise ParseError("Failed to create redirect")
 
         return Response(body)
 
@@ -392,19 +382,17 @@ class RedirectRecord(APIView):
         Update target URL for a redirect
         """
 
-        target_url = request.data.get('target_url')
-        permanent = request.data.get('permanent')
+        target_url = request.data.get("target_url")
+        permanent = request.data.get("permanent")
 
         if permanent is not None:
-            permanent = permanent.lower() in ('true', 'yes', 'on')
+            permanent = permanent.lower() in ("true", "yes", "on")
 
         if not settings.REDIRECT_MANAGER.exists(redirect_path):
             return error_404(request.path)
 
         redirect_record = settings.REDIRECT_MANAGER.update(
-            unquote(redirect_path),
-            target_url,
-            permanent
+            unquote(redirect_path), target_url, permanent
         )
 
         return Response(redirect_record)
@@ -419,7 +407,7 @@ class RedirectRecord(APIView):
         body = settings.REDIRECT_MANAGER.delete(unquote(redirect_path)) or {}
 
         if body:
-            body['message'] = "Successfully deleted."
+            body["message"] = "Successfully deleted."
         else:
             return error_404(request.path)
 
@@ -440,14 +428,14 @@ class Redirects(APIView):
         if not redirect_record:
             return error_404(request.path)
 
-        permanent = redirect_record.get('permanent', False)
+        permanent = redirect_record.get("permanent", False)
 
-        response = redirect(redirect_record['target_url'], permanent=permanent)
+        response = redirect(redirect_record["target_url"], permanent=permanent)
 
         # Cache permanent redirect longtime. Temporary, not so much.
         if permanent:
-            response['Cache-Control'] = 'max-age=31556926'
+            response["Cache-Control"] = "max-age=31556926"
         else:
-            response['Cache-Control'] = 'max-age=60'
+            response["Cache-Control"] = "max-age=60"
 
         return set_headers_for_type(response, get_mimetype(request_path))

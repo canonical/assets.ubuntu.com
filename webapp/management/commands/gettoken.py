@@ -7,17 +7,17 @@ from django.conf import settings
 
 
 class Command(BaseCommand):
-    help = 'List authentication tokens'
+    help = "List authentication tokens"
 
     def add_arguments(self, parser):
         parser.add_argument(
-            'token-name',
+            "token-name",
             type=str,
-            help='The name for this token (e.g.: default)'
+            help="The name for this token (e.g.: default)",
         )
 
     def handle(self, *args, **options):
-        name = options['token-name']
+        name = options["token-name"]
 
         token = settings.TOKEN_MANAGER.create(name)
 
@@ -27,4 +27,4 @@ class Command(BaseCommand):
             token = settings.TOKEN_MANAGER.fetch(name)
             print("Found Token '{}'".format(name), file=sys.stderr)
 
-        print(token['token'])
+        print(token["token"])
