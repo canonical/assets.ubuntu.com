@@ -18,9 +18,9 @@ from .python_helpers import shared_items
 
 class ImageProcessor:
     operation_parameters = {
-        'region': ['rect'],
-        'rotate': ['deg'],
-        'resize': ['w', 'h', 'max-width', 'max-height']
+        "region": ["rect"],
+        "rotate": ["deg"],
+        "resize": ["w", "h", "max-width", "max-height"],
     }
 
     def __init__(self, image_contents, options={}):
@@ -32,7 +32,7 @@ class ImageProcessor:
         Reformat, optimize or transform an image
         """
 
-        target_format = self.options.get('fmt')
+        target_format = self.options.get("fmt")
         optimize = self.options.get("opt") is not None
 
         # Reformat images
@@ -55,20 +55,20 @@ class ImageProcessor:
         """
 
         mimetype = magic.Magic(mime=True).from_buffer(self.data)
-        tmp_filename = '/tmp/' + uuid4().get_hex()
+        tmp_filename = "/tmp/" + uuid4().get_hex()
 
-        if mimetype == 'image/svg+xml':
+        if mimetype == "image/svg+xml":
             try:
                 self.data = str(scourString(self.data))
-            except:
+            except Exception:
                 # SVG contains bad data, we can't optimise it
                 pass
 
-        elif mimetype == 'image/jpeg':
+        elif mimetype == "image/jpeg":
             self.data = jpegtran("-optimize", _in=self.data).stdout
 
-        elif mimetype == 'image/png':
-            with open(tmp_filename, 'w') as tmp:
+        elif mimetype == "image/png":
+            with open(tmp_filename, "w") as tmp:
                 tmp.write(self.data)
             optipng(tmp_filename)
             with open(tmp_filename) as tmp:
@@ -78,15 +78,14 @@ class ImageProcessor:
     def convert(self, target_format):
         if not target_format:
             return False
-        if target_format in ['png', 'jpg', 'gif']:
+        if target_format in ["png", "jpg", "gif"]:
             # Do conversion with wand
             with WandImage(blob=self.data) as image:
                 self.data = image.make_blob(target_format)
                 return True
         else:
             raise PilboxError(
-                400,
-                log_message="Cannot convert to '{}'".format(target_format)
+                400, log_message="Cannot convert to '{}'".format(target_format)
             )
 
     def transform(self):
@@ -103,21 +102,20 @@ class ImageProcessor:
 
         mimetype = magic.Magic(mime=True).from_buffer(self.data)
 
-        if mimetype in ['image/png', 'image/jpeg', 'image/gif']:
-            operation = self.options.get('op')
+        if mimetype in ["image/png", "image/jpeg", "image/gif"]:
+            operation = self.options.get("op")
 
-            if (
-                not operation and
-                shared_items(self.options, self.operation_parameters['resize'])
+            if not operation and shared_items(
+                self.options, self.operation_parameters["resize"]
             ):
                 operation = "resize"
 
-            operations = operation.split(',')
+            operations = operation.split(",")
             # Remove duplicate operations from list
             operations = unique_everseen(operations)
 
             for operation in operations:
-                if operation or 'q' in self.options:
+                if operation or "q" in self.options:
                     try:
                         self._pilbox_operation(operation)
                     except (TypeError, AttributeError) as operation_error:
@@ -137,14 +135,11 @@ class ImageProcessor:
         image = PilboxImage(BytesIO(self.data))
 
         if operation == "region":
-            image.region(
-                self.options.get("rect").split(',')
-            )
+            image.region(self.options.get("rect").split(","))
 
         elif operation == "rotate":
             image.rotate(
-                deg=self.options.get("deg"),
-                expand=self.options.get("expand")
+                deg=self.options.get("deg"), expand=self.options.get("expand")
             )
         elif operation == "resize":
             max_width = self.options.get("max-width")
@@ -170,16 +165,13 @@ class ImageProcessor:
                     width_oversize = resize_width > image_info.width
                     height_oversize = resize_height > image_info.height
 
-                    if (width_oversize or height_oversize):
+                    if width_oversize or height_oversize:
                         expand_message = (
                             "Resize error: Maximum dimensions for this image "
                             "are {0}px wide by {1}px high."
                         ).format(image_info.width, image_info.height)
 
-                        raise PilboxError(
-                            400,
-                            log_message=expand_message
-                        )
+                        raise PilboxError(400, log_message=expand_message)
 
                 # Process max_width and max_height
                 if not resize_width and max_width:
@@ -198,7 +190,7 @@ class ImageProcessor:
                     filter=self.options.get("filter"),
                     background=self.options.get("bg"),
                     retain=self.options.get("retain"),
-                    position=self.options.get("pos")
+                    position=self.options.get("pos"),
                 )
 
         self.data = image.save(quality=self.options.get("q")).read()
@@ -206,7 +198,7 @@ class ImageProcessor:
     def _missing_param_error(self, error, operation):
         expected_errors = [
             "int() argument must be a string or a number, not 'NoneType'",
-            "'NoneType' object has no attribute 'split'"
+            "'NoneType' object has no attribute 'split'",
         ]
 
         if error.message in expected_errors:
@@ -214,8 +206,7 @@ class ImageProcessor:
                 "Invalid image operation. '{0}' accepts: {1}. "
                 "See https://github.com/agschwender/pilbox for more detail."
             ).format(
-                operation,
-                ', '.join(self.operation_parameters[operation])
+                operation, ", ".join(self.operation_parameters[operation])
             )
 
             raise PilboxError(400, log_message=message)

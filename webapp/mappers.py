@@ -35,9 +35,7 @@ class FileManager:
         try:
             # Create object
             self.swift_connection.put_object(
-                self.container_name,
-                normalize(file_path),
-                file_data
+                self.container_name, normalize(file_path), file_data
             )
         except SwiftException as swift_error:
             if swift_error.http_status == 404:
@@ -46,9 +44,7 @@ class FileManager:
 
                 # And try to create again
                 self.swift_connection.put_object(
-                    self.container_name,
-                    normalize(file_path),
-                    file_data
+                    self.container_name, normalize(file_path), file_data
                 )
             else:
                 # Otherwise, throw the exception again
@@ -59,8 +55,7 @@ class FileManager:
 
         try:
             self.swift_connection.head_object(
-                self.container_name,
-                normalize(file_path)
+                self.container_name, normalize(file_path)
             )
         except SwiftException as error:
             if error.http_status == 404:
@@ -72,8 +67,7 @@ class FileManager:
         asset_data = None
 
         asset = self.swift_connection.get_object(
-            self.container_name,
-            normalize(file_path)
+            self.container_name, normalize(file_path)
         )
         asset_data = asset[1]
 
@@ -81,15 +75,13 @@ class FileManager:
 
     def headers(self, file_path):
         return self.swift_connection.head_object(
-            self.container_name,
-            normalize(file_path)
+            self.container_name, normalize(file_path)
         )
 
     def delete(self, file_path):
         if self.exists(file_path):
             self.swift_connection.delete_object(
-                self.container_name,
-                normalize(file_path)
+                self.container_name, normalize(file_path)
             )
             return True
 
@@ -101,7 +93,7 @@ class FileManager:
 
         path = sha1(file_data).hexdigest()[:8]
         if friendly_name:
-            path += '-' + friendly_name
+            path += "-" + friendly_name
 
         return path
 
@@ -120,10 +112,7 @@ class DataManager:
     def update(self, file_path, tags, data={}):
         search = {"file_path": normalize(file_path)}
 
-        data.update({
-            "file_path": normalize(file_path),
-            "tags": tags
-        })
+        data.update({"file_path": normalize(file_path), "tags": tags})
 
         self.data_collection.update(search, data, True)
 
@@ -146,70 +135,56 @@ class DataManager:
         for tag in tags:
             # Only match fields that contain the tag bounded by word delimeters
             # E.g. match a-{word}-image.jpg, but not a-{word}ing-image.png
-            tag_regex = re.compile(r'\b{}\b'.format(tag), re.IGNORECASE)
+            tag_regex = re.compile(r"\b{}\b".format(tag), re.IGNORECASE)
 
             # Look for the tag in either file_path or tags fields
-            conditions.append({
-                '$or': [
-                    {'file_path': tag_regex},
-                    {'tags': tag_regex}
-                ]
-            })
+            conditions.append(
+                {"$or": [{"file_path": tag_regex}, {"tags": tag_regex}]}
+            )
 
         # Only return object that contain all tags
 
         if file_type:
             extension_search = re.compile(
-                r'\.{}$'.format(file_type),
-                re.IGNORECASE
+                r"\.{}$".format(file_type), re.IGNORECASE
             )
-            conditions.append({'file_path': extension_search})
+            conditions.append({"file_path": extension_search})
 
-        mongo_search = {
-            '$and': conditions
-        }
+        mongo_search = {"$and": conditions}
 
-        mongo_sort = (
-            ('_id', pymongo.DESCENDING),
-        )
+        mongo_sort = (("_id", pymongo.DESCENDING),)
 
         results = self.data_collection.find(mongo_search).sort(mongo_sort)
 
-        return [
-            self.format(asset_data)
-            for asset_data in results
-        ]
+        return [self.format(asset_data) for asset_data in results]
 
     def exists(self, file_path):
         return bool(self.fetch_one(file_path))
 
     def format(self, asset_record):
         asset_data = {
-            'file_path': asset_record['file_path'],
-            'tags': asset_record["tags"] or "",
-            'created': asset_record["_id"].generation_time.ctime()
+            "file_path": asset_record["file_path"],
+            "tags": asset_record["tags"] or "",
+            "created": asset_record["_id"].generation_time.ctime(),
         }
 
-        if 'width' in asset_record:
+        if "width" in asset_record:
             asset_data["width"] = asset_record["width"]
 
-        if 'height' in asset_record:
+        if "height" in asset_record:
             asset_data["height"] = asset_record["height"]
 
-        if 'optimized' in asset_record:
-            asset_data['optimized'] = asset_record['optimized']
+        if "optimized" in asset_record:
+            asset_data["optimized"] = asset_record["optimized"]
 
         return asset_data
 
     def fetch(self, file_paths):
-        return [
-            self.fetch_one(file_path)
-            for file_path in file_paths
-        ]
+        return [self.fetch_one(file_path) for file_path in file_paths]
 
     def delete(self, file_path):
         if self.exists(file_path):
-            return self.data_collection.remove({'file_path': file_path})
+            return self.data_collection.remove({"file_path": file_path})
 
 
 class TokenManager:
@@ -229,27 +204,18 @@ class TokenManager:
     def authenticate(self, token):
         """Check if this authentication token is valid (i.e. exists)"""
 
-        return bool(
-            self.data_collection.find_one(
-                {'token': token}
-            )
-        )
+        return bool(self.data_collection.find_one({"token": token}))
 
     def fetch(self, name):
         """Get a token's data, by its name"""
 
-        token_record = self.data_collection.find_one(
-            {"name": name}
-        )
+        token_record = self.data_collection.find_one({"name": name})
         return self._format(token_record)
 
     def create(self, name):
         """Generate a random token, with a given name"""
 
-        data = {
-            'token': uuid.uuid4().hex,  # Random UUID
-            'name': name
-        }
+        data = {"token": uuid.uuid4().hex, "name": name}  # Random UUID
 
         if not self.exists(name):
             # Insert a copy, so we don't modify the original record
@@ -261,7 +227,7 @@ class TokenManager:
         token = self.fetch(name)
 
         if token:
-            self.data_collection.remove({'name': name})
+            self.data_collection.remove({"name": name})
             return token
 
     def all(self):
@@ -272,8 +238,8 @@ class TokenManager:
     def _format(self, token_record):
         if token_record:
             return {
-                'token': token_record['token'],
-                'name': token_record['name']
+                "token": token_record["token"],
+                "name": token_record["name"],
             }
 
 
@@ -310,15 +276,13 @@ class RedirectManager:
         for a local URL path
         """
 
-        updates = {
-            "redirect_path": redirect_path
-        }
+        updates = {"redirect_path": redirect_path}
 
         if target_url is not None:
-            updates['target_url'] = target_url
+            updates["target_url"] = target_url
 
         if permanent is not None:
-            updates['permanent'] = permanent
+            updates["permanent"] = permanent
 
         existing_record = self.fetch(redirect_path)
 
@@ -329,9 +293,7 @@ class RedirectManager:
             new_record = updates
 
         self.data_collection.update(
-            {"redirect_path": redirect_path},
-            new_record,
-            True
+            {"redirect_path": redirect_path}, new_record, True
         )
 
         return self.fetch(redirect_path)
@@ -344,7 +306,7 @@ class RedirectManager:
         redirect_record = self.fetch(redirect_path)
 
         if redirect_record:
-            self.data_collection.remove({'redirect_path': redirect_path})
+            self.data_collection.remove({"redirect_path": redirect_path})
             return redirect_record
 
     def all(self):
@@ -357,7 +319,7 @@ class RedirectManager:
     def _format(self, redirect_record):
         if redirect_record:
             return {
-                'redirect_path': redirect_record['redirect_path'],
-                'permanent': redirect_record.get('permanent', False),
-                'target_url': redirect_record['target_url']
+                "redirect_path": redirect_record["redirect_path"],
+                "permanent": redirect_record.get("permanent", False),
+                "target_url": redirect_record["target_url"],
             }

@@ -3,7 +3,7 @@ from django.conf import settings
 
 
 class Command(BaseCommand):
-    help = 'List authentication tokens'
+    help = "List authentication tokens"
 
     def handle(self, *args, **options):
         all_tokens = settings.TOKEN_MANAGER.all()

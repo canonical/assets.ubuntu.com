@@ -15,18 +15,18 @@ class TestRedirectManager(SimpleTestCase):
     """
 
     redirect_one = {
-        'redirect_path': 'hello/world.fish/and.chips',
-        'target_url': 'https://example.com/something'
+        "redirect_path": "hello/world.fish/and.chips",
+        "target_url": "https://example.com/something",
     }
     redirect_two = {
-        'permanent': False,
-        'redirect_path': 'what-now',
-        'target_url': '/something-else'
+        "permanent": False,
+        "redirect_path": "what-now",
+        "target_url": "/something-else",
     }
     redirect_three = {
-        'permanent': True,
-        'redirect_path': 'third-redirect',
-        'target_url': '/third-target'
+        "permanent": True,
+        "redirect_path": "third-redirect",
+        "target_url": "/third-target",
     }
 
     collection = None
@@ -47,15 +47,15 @@ class TestRedirectManager(SimpleTestCase):
         manager = self._get_manager()
 
         response_one = manager.exists(
-            redirect_path=self.redirect_one['redirect_path']
+            redirect_path=self.redirect_one["redirect_path"]
         )
         response_two = manager.exists(
-            redirect_path=self.redirect_two['redirect_path']
+            redirect_path=self.redirect_two["redirect_path"]
         )
         response_three = manager.exists(
-            redirect_path=self.redirect_three['redirect_path']
+            redirect_path=self.redirect_three["redirect_path"]
         )
-        response_four = manager.exists('non-existent')
+        response_four = manager.exists("non-existent")
 
         self.assertTrue(response_one)
         self.assertTrue(response_two)
@@ -65,19 +65,13 @@ class TestRedirectManager(SimpleTestCase):
     def test_fetch(self):
         manager = self._get_manager()
 
-        response_one = manager.fetch(
-            self.redirect_one['redirect_path']
-        )
-        response_two = manager.fetch(
-            self.redirect_two['redirect_path']
-        )
-        response_three = manager.fetch(
-            self.redirect_three['redirect_path']
-        )
-        response_four = manager.fetch('some/other/path')
+        response_one = manager.fetch(self.redirect_one["redirect_path"])
+        response_two = manager.fetch(self.redirect_two["redirect_path"])
+        response_three = manager.fetch(self.redirect_three["redirect_path"])
+        response_four = manager.fetch("some/other/path")
 
         expected_one = self.redirect_one
-        expected_one['permanent'] = False
+        expected_one["permanent"] = False
 
         self.assertEqual(response_one, expected_one)
         self.assertEqual(response_two, self.redirect_two)
@@ -88,48 +82,48 @@ class TestRedirectManager(SimpleTestCase):
         manager = self._get_manager()
 
         new_redirect = {
-            'redirect_path': 'new/redirect',
-            'target_url': 'http://example.com/some_path'
+            "redirect_path": "new/redirect",
+            "target_url": "http://example.com/some_path",
         }
         response_new = manager.update(
-            redirect_path=new_redirect['redirect_path'],
-            target_url=new_redirect['target_url']
+            redirect_path=new_redirect["redirect_path"],
+            target_url=new_redirect["target_url"],
         )
         new_record = self.collection.find_one(new_redirect)
-        new_redirect['permanent'] = False
+        new_redirect["permanent"] = False
 
         self.assertEqual(response_new, new_redirect)
         self.assertEqual(
-            new_record['redirect_path'], new_redirect['redirect_path']
+            new_record["redirect_path"], new_redirect["redirect_path"]
         )
-        self.assertEqual(new_record['target_url'], new_record['target_url'])
+        self.assertEqual(new_record["target_url"], new_record["target_url"])
 
     def test_update(self):
         manager = self._get_manager()
 
         new_redirect = {
-            'redirect_path': self.redirect_three['redirect_path'],
-            'target_url': 'http://example.com/another_path'
+            "redirect_path": self.redirect_three["redirect_path"],
+            "target_url": "http://example.com/another_path",
         }
 
         update_response = manager.update(
-            redirect_path=new_redirect['redirect_path'],
-            target_url=new_redirect['target_url']
+            redirect_path=new_redirect["redirect_path"],
+            target_url=new_redirect["target_url"],
         )
 
-        found_record = self.collection.find_one({
-            "redirect_path": new_redirect['redirect_path']
-        })
+        found_record = self.collection.find_one(
+            {"redirect_path": new_redirect["redirect_path"]}
+        )
 
-        new_redirect_path = new_redirect['redirect_path']
-        new_target_url = new_redirect['target_url']
+        new_redirect_path = new_redirect["redirect_path"]
+        new_target_url = new_redirect["target_url"]
 
-        self.assertEqual(update_response['redirect_path'], new_redirect_path)
-        self.assertEqual(found_record['redirect_path'], new_redirect_path)
-        self.assertEqual(update_response['target_url'], new_target_url)
-        self.assertEqual(found_record['target_url'], new_target_url)
-        self.assertTrue(update_response['permanent'])
-        self.assertTrue(found_record['permanent'])
+        self.assertEqual(update_response["redirect_path"], new_redirect_path)
+        self.assertEqual(found_record["redirect_path"], new_redirect_path)
+        self.assertEqual(update_response["target_url"], new_target_url)
+        self.assertEqual(found_record["target_url"], new_target_url)
+        self.assertTrue(update_response["permanent"])
+        self.assertTrue(found_record["permanent"])
 
     def test_all(self):
         manager = self._get_manager()
@@ -137,19 +131,19 @@ class TestRedirectManager(SimpleTestCase):
         all_redirects = manager.all()
 
         expected_one = self.redirect_one
-        expected_one['permanent'] = False
+        expected_one["permanent"] = False
         self.assertEqual(
-            sorted(all_redirects, key=lambda x: x['redirect_path']),
+            sorted(all_redirects, key=lambda x: x["redirect_path"]),
             sorted(
                 [expected_one, self.redirect_two, self.redirect_three],
-                key=lambda x: x['redirect_path']
-            )
+                key=lambda x: x["redirect_path"],
+            ),
         )
 
     def test_delete(self):
         manager = self._get_manager()
 
-        delete_path = self.redirect_one['redirect_path']
+        delete_path = self.redirect_one["redirect_path"]
 
         assert manager.exists(delete_path)
 

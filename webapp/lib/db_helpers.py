@@ -12,7 +12,7 @@ def mongo_db_from_url(mongo_url, default_database):
     """
 
     if not mongo_url:
-        mongo_url = 'mongodb://localhost/'
+        mongo_url = "mongodb://localhost/"
 
     mongo = MongoClient(mongo_url)
 
