@@ -33,7 +33,7 @@ from .lib.processors import ImageProcessor
 
 class Asset(APIView):
     """
-    Actions on a single asset respource.
+    Actions on a single asset resource.
     """
 
     base_name = "asset"

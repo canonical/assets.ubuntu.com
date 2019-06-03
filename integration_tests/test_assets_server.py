@@ -33,7 +33,7 @@ def exit_if_server_not_found():
 
 def get(path="", params={}, server_url=server_url):
     """
-    Convienince function for making simple GETs
+    Convenience function for making simple GETs
     """
 
     return requests.get(server_url + path, params=params)
@@ -41,7 +41,7 @@ def get(path="", params={}, server_url=server_url):
 
 def post(data={}, path="", params={}, server_url=server_url):
     """
-    Convienince function for making simple POSTs
+    Convenience function for making simple POSTs
     """
 
     return requests.post(server_url + path, params=params, data=data)
@@ -49,7 +49,7 @@ def post(data={}, path="", params={}, server_url=server_url):
 
 def delete(path="", params={}, server_url=server_url):
     """
-    Convienince function for making simple DELETEs
+    Convenience function for making simple DELETEs
     """
 
     return requests.delete(server_url + path, params=params)
