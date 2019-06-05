@@ -52,7 +52,7 @@ REST_FRAMEWORK = {
 }
 
 MONGO_DB = mongo_db_from_url(
-    mongo_url=os.environ.get("DATABASE_URL", "localhost"),
+    mongo_url=os.environ.get("DATABASE_URL", "mongodb"),
     default_database="assets",
 )
 
@@ -80,24 +80,3 @@ if set(swift_settings).issubset(set(os.environ)):
     )
 
 FILE_MANAGER = FileManager(SWIFT_CONNECTION)
-
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "handlers": {
-        "error_file": {
-            "level": "ERROR",
-            "filename": os.path.join(BASE_DIR, "django-error.log"),
-            "class": "logging.handlers.RotatingFileHandler",
-            "maxBytes": 1 * 1024 * 1024,
-            "backupCount": 2,
-        }
-    },
-    "loggers": {
-        "django": {
-            "handlers": ["error_file"],
-            "level": "ERROR",
-            "propagate": True,
-        }
-    },
-}
