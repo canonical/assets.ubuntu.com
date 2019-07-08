@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/ubuntudesign/assets-server.svg?branch=master)](https://travis-ci.org/ubuntudesign/assets-server)
 [![Coverage Status](https://coveralls.io/repos/github/ubuntudesign/assets-server/badge.svg?branch=master)](https://coveralls.io/github/ubuntudesign/assets-server?branch=master)
+[![CircleCI build status](https://circleci.com/gh/canonical-web-and-design/assets.ubuntu.com.svg?style=shield)](https://circleci.com/gh/canonical-web-and-design/assets.ubuntu.com) [![Code coverage](https://codecov.io/gh/canonical-web-and-design/assets.ubuntu.com/branch/master/graph/badge.svg)](https://codecov.io/gh/canonical-web-and-design/assets.ubuntu.com)
 
 This is the codebase for https://assets.ubuntu.com, a Restful API service for storing and serving binary assets over HTTP, built with [Django REST framework](http://www.django-rest-framework.org/).
 
