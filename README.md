@@ -23,6 +23,10 @@ As the server only uses a basic token for authentication, it is paramount that i
 
 The server is intended to be run in production behind a caching layer (e.g. [squid cache](http://www.squid-cache.org/)). And as the server stores assets by default with a unique hash corresponding to the file's contents (e.g. <code><b>a2f56da4</b>-some-image.png</code>), the cache expiration time should be as long as possible to maximise performance.
 
+### Migrations
+If we need to change or create new models in `webapp.models` we can then run `./alembic revision --autogenerate -m "describe change here"`
+to get the changes reflected as a data migration. Most of the changes you do [should be picked up](https://alembic.sqlalchemy.org/en/latest/autogenerate.html#what-does-autogenerate-detect-and-what-does-it-not-detect).
+
 ## Using the server
 
 ### Transforming images
