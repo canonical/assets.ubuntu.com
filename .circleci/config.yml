@@ -12,21 +12,29 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install dependencies
-          command: pip3 install flake8 black
-      - run:
-          name: Lint webapp with flake8 & Black
-          command: flake8 webapp/ integration_tests/ && black --check --line-length 79 webapp/ integration_tests/
+          name: Lint python code
+          command: yarn lint-python
   test-python:
     <<: *defaults
     steps:
       - checkout
       - run:
-          name: Install pip dependencies
-          command: pip3 install -r requirements.txt && pip install gunicorn
+          name: Yarn install
+          command: yarn install
       - run:
-          name: Run the tests
-          command: yarn run test-python
+          name: Yarn build
+          command: yarn build
+      - run:
+          name: Install requirements
+          command: pip3 install -r requirements.txt
+      - run:
+          name: Install dependencies
+          command: pip3 install coverage
+      - run:
+          name: Run tests with coverage
+          command: |
+            coverage run  --source=. -m unittest discover tests
+            bash <(curl -s https://codecov.io/bash) -cF python
   test-site:
     <<: *defaults
     steps:
