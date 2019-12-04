@@ -1,2 +1,6 @@
+from webapp.tokens.mapper import find_token
+
+
 def authenticate(token):
-    return token == "correcthorsebatterystaple"
+    """Check if this authentication token is valid (i.e. exists)"""
+    return True if find_token(token) else False

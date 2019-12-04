@@ -1,10 +1,16 @@
-import flask
-
 from canonicalwebteam.flask_base.app import FlaskBase
+
+from webapp.database import db
 from webapp.decorators import token_required
+from webapp.tokens.cli import token_cli
+from webapp.tokens.flask import tokens_blueprint
 
 
 app = FlaskBase(__name__, "assets.ubuntu.com")
+
+# Register tokens blueprint and CLI
+app.register_blueprint(tokens_blueprint)
+app.cli.add_command(token_cli)
 
 
 @app.route("/")
@@ -13,17 +19,22 @@ def index():
     return {}, 200
 
 
+@app.errorhandler(400)
 @app.errorhandler(401)
-def error_401(exception=None):
-    return {"status": "401", "message": str(exception)}, 401
-
-
+@app.errorhandler(403)
 @app.errorhandler(404)
-def error_404(exception=None):
-    return {"status": "404", "message": "Resource not found"}, 404
+def error_handler(exception=None):
+    code = getattr(exception, "code")
+    return {"status": f"{code}", "message": str(exception)}, code
 
 
 @app.errorhandler(500)
 def error_500(exception=None):
-    flask.current_app.extensions["sentry"].captureException()
+    app.extensions["sentry"].captureException()
     return {"status": "500", "message": ""}, 500
+
+
+@app.teardown_appcontext
+def remove_db_session(response):
+    db.remove()
+    return response
