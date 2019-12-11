@@ -1,6 +1,6 @@
 from canonicalwebteam.flask_base.app import FlaskBase
 
-from webapp.database import db
+from webapp.alembic.env import get_database_session
 from webapp.decorators import token_required
 from webapp.tokens.cli import token_cli
 from webapp.tokens.flask import tokens_blueprint
@@ -11,7 +11,7 @@ app = FlaskBase(__name__, "assets.ubuntu.com")
 # Register tokens blueprint and CLI
 app.register_blueprint(tokens_blueprint)
 app.cli.add_command(token_cli)
-
+database_session = get_database_session()
 
 @app.route("/")
 @token_required
@@ -36,5 +36,5 @@ def error_500(exception=None):
 
 @app.teardown_appcontext
 def remove_db_session(response):
-    db.remove()
+    database_session.remove()
     return response
