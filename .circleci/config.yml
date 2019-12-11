@@ -17,7 +17,7 @@ jobs:
   test-python:
     <<: *defaults
     environment:
-      - DB_URL: sqlite://
+      - DATABASE_URL: sqlite://
     steps:
       - checkout
       - run:
@@ -40,7 +40,7 @@ jobs:
   test-site:
     <<: *defaults
     environment:
-      - DB_URL: sqlite://
+      - DATABASE_URL: sqlite://
     steps:
       - checkout
       - run:

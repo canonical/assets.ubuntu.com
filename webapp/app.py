@@ -1,6 +1,6 @@
 from canonicalwebteam.flask_base.app import FlaskBase
 
-from webapp.database import db
+from webapp.database import db_session
 from webapp.decorators import token_required
 from webapp.tokens.cli import token_cli
 from webapp.tokens.flask import tokens_blueprint
@@ -36,5 +36,5 @@ def error_500(exception=None):
 
 @app.teardown_appcontext
 def remove_db_session(response):
-    db.remove()
+    db_session.remove()
     return response
