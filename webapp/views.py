@@ -18,6 +18,7 @@ def index():
 # Tokens
 # ===
 
+
 @token_required
 def get_tokens():
     tokens = db_session.query(Token).all()

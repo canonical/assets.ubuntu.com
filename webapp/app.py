@@ -19,6 +19,7 @@ app = FlaskBase(__name__, "assets.ubuntu.com")
 # Error pages
 # ===
 
+
 @app.errorhandler(400)
 @app.errorhandler(401)
 @app.errorhandler(403)
