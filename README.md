@@ -7,13 +7,48 @@ This is the codebase for https://assets.ubuntu.com, a Restful API service for st
 
 ## Local development
 
-The simplest way to run the site locally is to first [install Docker](https://docs.docker.com/engine/installation/) (on Linux you may need to [add your user to the `docker` group](https://docs.docker.com/engine/installation/linux/linux-postinstall/)), and then use the `./run` script:
+The simplest way to run the site makes use of SQLite, which is not the same as production where it will use PostgreSQL:
 
 ``` bash
-./run
+./run exec alembic upgrade head        # Run database migrations
+./run exec flask token create mytoken  # Create a token
 ```
 
-Once the containers are setup, you can visit <http://127.0.0.1:8017> in your browser.
+Save the output token
+
+``` bash
+./run  # Run the server
+```
+
+You can now access the API with your token in your browser - e.g.: <http://127.0.0.1:8017?token=THETOKEN>.
+
+### Using PostgreSQL
+
+``` bash
+sudo apt-get install libpq-dev    # PostgreSQL libraries
+python3 -m venv .venv             # Create a virtual environment
+source .venv/bin/activate         # Enable the environment
+pip3 install -r requirements.txt  # Install python dependencies
+
+# Spin up a Docker postgresql database
+docker run --rm --name db -e POSTGRES_PASSWORD=pw -d postgres
+# Configure the database location
+export DATABASE_URL=postgres://postgres:pw@`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' db`/postgres
+# Provision the database
+alembic upgrade head
+
+# Create a token
+FLASK_APP=webapp.app flask token create mytoken
+```
+
+Now save the token that's output, and run the site with:
+
+``` bash
+# Run the site
+./entrypoint 0.0.0.0:8017
+```
+
+You can now access the API with your token in your browser - e.g.: <http://127.0.0.1:8017?token=THETOKEN>.
 
 ### Security
 
