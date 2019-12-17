@@ -22,6 +22,9 @@ def token_required(f):
             message = "Invalid or missing token."
             flask.abort(401, message)
 
-        return f(*args, **kwargs)
+        response = flask.make_response(f(*args, **kwargs))
+        response.cache_control.private = True
+
+        return response
 
     return wrapped
