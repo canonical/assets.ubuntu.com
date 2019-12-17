@@ -16,6 +16,8 @@ jobs:
           command: yarn lint-python
   test-python:
     <<: *defaults
+    environment:
+      - DATABASE_URL: sqlite://
     steps:
       - checkout
       - run:
@@ -37,6 +39,8 @@ jobs:
             bash <(curl -s https://codecov.io/bash) -cF python
   test-site:
     <<: *defaults
+    environment:
+      - DATABASE_URL: sqlite://
     steps:
       - checkout
       - run:
