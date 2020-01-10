@@ -1,0 +1,17 @@
+version: '3'
+services:
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: assets
+      POSTGRES_USER: assets
+      POSTGRES_PASSWORD: password
+    network_mode: "host"
+    ports: 
+      - "5432:5432"
+  swift:
+    image: bouncestorage/swift-aio:latest
+    network_mode: "host"
+    ports: 
+      - "8080:8080"
+

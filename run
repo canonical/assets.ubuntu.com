@@ -128,7 +128,7 @@ db_container="${project}-db"
 pip_container="${project}-pip"
 
 # Network name
-network_name="${project}-net"
+network_name="host"
 
 invalid() {
     message=${1}
