@@ -1,7 +1,10 @@
+# Standard library
 import functools
 
+# Packages
 import flask
 
+# Local
 from webapp.auth import authenticate
 
 
@@ -11,7 +14,7 @@ def get_token_from_request(request):
     if auth_header[:6].lower() == "token ":
         return auth_header[6:]
 
-    return request.args.get("token", None)
+    return request.values.get("token", None)
 
 
 def token_required(f):

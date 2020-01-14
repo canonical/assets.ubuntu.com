@@ -1,6 +1,9 @@
+# System
 import os
 import errno
-from rest_framework.response import Response
+
+# Packages
+from flask import jsonify
 
 
 def content_404():
@@ -17,18 +20,6 @@ def content_404():
         return chbs_file.read().splitlines()
 
 
-def error_404(url_path):
-    """
-    Produce our standard 404 Response object
-    Which will contain "Hex" the owl as ASCII
-    """
-
-    return Response(
-        {"message": content_404(), "requested_path": url_path, "code": 404},
-        status=404,
-    )
-
-
 def error_response(error, file_path=""):
     """
     Given an IO error,
@@ -40,8 +31,8 @@ def error_response(error, file_path=""):
     413: E2BIG
     500: Anything else
     """
-
-    file_path = file_path or error.filename or ""
+    # We need getattr here because SwiftErrors don't have a filename attr
+    file_path = file_path or getattr(error, "filename", "unknow")
 
     # Get the status from either .errno or .http_status
     status = 500  # Default to "server error"
@@ -63,7 +54,7 @@ def error_response(error, file_path=""):
             status = 413  # Request Entity Too Large
 
     if hasattr(error, "http_status"):
-        if error.http_status > 99:
+        if error.http_status and error.http_status > 99:
             status = error.http_status
         elif hasattr(error, "msg") and error.msg[:12] == "Unauthorised":
             # Special case for swiftclient.exceptions.ClientException
@@ -84,14 +75,16 @@ def error_response(error, file_path=""):
         message = [message, ""]
         message += content_404()
 
-    return Response(
-        {
-            "message": message,
-            "file_path": file_path,
-            "error_class": error.__class__.__name__,
-            "code": status,
-        },
-        status=status,
+    return (
+        jsonify(
+            {
+                "message": message,
+                "file_path": file_path,
+                "error_class": error.__class__.__name__,
+                "code": status,
+            }
+        ),
+        status,
     )
 
 
@@ -101,9 +94,9 @@ def set_headers_for_type(response, content_type=None):
     """
 
     if not content_type:
-        content_type = response["Content-Type"]
+        content_type = response.headers["Content-Type"]
 
     if "font" in content_type:
-        response["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Origin"] = "*"
 
     return response

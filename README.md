@@ -120,19 +120,6 @@ $ ./upload-asset.py  \
 {'url': u'http://localhost:8017/v1/xxxxx-MY-IMAGE.png', 'image': True, 'created': u'Tue Sep 27 16:13:22 2016', 'file_path': u'xxxxx-MY-IMAGE.png', 'tags': u''}
 ```
 
-You can also use [curl](https://curl.haxx.se/docs/manpage.html):
-
-``` bash
-$ echo "asset=$(base64 -w 0 MY-IMAGE.png)" | \
-  curl --data @- --data "friendly-name=MY-IMAGE.png" "http://localhost:8017/v1/?token=XXXXXX"
-{
-    "optimized": false,
-    "created": "Wed Sep 28 11:07:33 2016",
-    "file_path": "xxxxxxxx-MY-IMAGE.png",
-    "tags": ""
-}
-```
-
 ### Assets manager
 
 You may wish to setup the [assets-manager](https://github.com/ubuntudesign/assets-manager/), a simple web interface for managing assets on your assets server.

@@ -3,11 +3,16 @@ from canonicalwebteam.flask_base.app import FlaskBase
 
 # Local
 from webapp.views import (
-    index,
+    create_asset,
     create_token,
+    delete_asset,
     delete_token,
+    get_asset,
+    get_assets,
+    get_asset_info,
     get_tokens,
     get_token,
+    update_asset,
 )
 from webapp.database import db_session
 from webapp.commands import token_group
@@ -38,7 +43,17 @@ def error_500(exception=None):
 # Routes
 # ===
 
-app.add_url_rule("/", view_func=index)
+# Assets
+app.add_url_rule("/", view_func=get_assets)
+app.add_url_rule("/", view_func=create_asset, methods=["POST"])
+app.add_url_rule("/<string:file_path>", view_func=get_asset)
+app.add_url_rule(
+    "/<string:file_path>", view_func=update_asset, methods=["PUT"]
+)
+app.add_url_rule(
+    "/<string:file_path>", view_func=delete_asset, methods=["DELETE"]
+)
+app.add_url_rule("/<string:file_path>/info", view_func=get_asset_info)
 
 # Tokens
 app.add_url_rule("/tokens", view_func=get_tokens)

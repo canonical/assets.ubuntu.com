@@ -2,7 +2,19 @@
 
 defaults: &defaults
   docker:
+    # Primary image where all commands are run
     - image: canonicalwebteam/dev
+      environment:
+          DATABASE_URL: postgresql://root@localhost/circle_test
+          OS_AUTH_URL: http://localhost:8080/auth/v1.0
+          OS_USERNAME: test:tester
+          OS_PASSWORD: testing
+          OS_AUTH_VERSION: 1.0
+
+    # Service container image
+    - image: circleci/postgres:9.6.5-alpine-ram
+    - image: bouncestorage/swift-aio:latest
+
   working_directory: /srv
 
 version: 2
@@ -16,8 +28,6 @@ jobs:
           command: yarn lint-python
   test-python:
     <<: *defaults
-    environment:
-      - DATABASE_URL: sqlite://
     steps:
       - checkout
       - run:
@@ -39,8 +49,6 @@ jobs:
             bash <(curl -s https://codecov.io/bash) -cF python
   test-site:
     <<: *defaults
-    environment:
-      - DATABASE_URL: sqlite://
     steps:
       - checkout
       - run:

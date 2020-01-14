@@ -13,7 +13,7 @@ from wand.image import Image as WandImage
 import magic
 
 # Local
-from .python_helpers import shared_items
+from webapp.lib.python_helpers import shared_items
 
 
 class ImageProcessor:
@@ -110,7 +110,7 @@ class ImageProcessor:
             ):
                 operation = "resize"
 
-            operations = operation.split(",")
+            operations = operation.split(",") if operation else []
             # Remove duplicate operations from list
             operations = unique_everseen(operations)
 
