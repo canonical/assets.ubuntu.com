@@ -43,6 +43,9 @@ jobs:
           name: Install dependencies
           command: pip3 install coverage
       - run:
+          name: Run migrations
+          command: alembic upgrade head
+      - run:
           name: Run tests with coverage
           command: |
             coverage run  --source=. -m unittest discover tests

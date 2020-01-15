@@ -1,11 +1,14 @@
 # Standard library
 import errno
+import re
 import uuid
 from base64 import b64decode
 from datetime import datetime
+from urllib.parse import unquote
 
 # Packages
 import flask
+from flask import jsonify, redirect, request
 from wand.image import Image
 from pilbox.errors import PilboxError
 from swiftclient.exceptions import ClientException as SwiftException
@@ -20,7 +23,7 @@ from webapp.lib.file_helpers import (
 )
 from webapp.lib.http_helpers import error_response, set_headers_for_type
 from webapp.lib.processors import ImageProcessor
-from webapp.models import Asset, Token
+from webapp.models import Asset, Redirect, Token
 from webapp.swift import file_manager
 
 
@@ -84,6 +87,24 @@ def _create_asset(
 
 
 def get_asset(file_path):
+    request_path = re.sub("//+", "/", request.path.lstrip("/"))
+    redirect_record = (
+        db_session.query(Redirect)
+        .filter(Redirect.redirect_path == request_path)
+        .one_or_none()
+    )
+
+    if redirect_record:
+        # Cache permanent redirect longtime. Temporary, not so much.
+        max_age = (
+            "max-age=31556926" if redirect_record.permanent else "max-age=60"
+        )
+
+        response = redirect(redirect_record.target_url)
+        response.headers["Cache-Control"] = max_age
+
+        return set_headers_for_type(response, get_mimetype(request_path))
+
     try:
         asset_data = file_manager.fetch(file_path)
         asset_headers = file_manager.headers(file_path)
@@ -273,3 +294,121 @@ def delete_token(name):
     db_session.commit()
 
     return flask.jsonify({}), 204
+
+
+# Redirects
+# ---
+@token_required
+def get_redirect(redirect_path):
+    redirect_record = (
+        db_session.query(Redirect)
+        .filter(Redirect.redirect_path == redirect_path)
+        .one_or_none()
+    )
+
+    if not redirect_record:
+        flask.abort(404, f"No redirect for '{redirect_path}'")
+
+    return jsonify(redirect_record.as_json())
+
+
+@token_required
+def get_redirects():
+    redirect_records = db_session.query(Redirect).all()
+    return jsonify(
+        [redirect_record.as_json() for redirect_record in redirect_records]
+    )
+
+
+@token_required
+def create_redirect():
+    """
+    Create a redirect record
+    """
+
+    redirect_path = request.values.get("redirect_path")
+    target_url = request.values.get("target_url")
+    permanent = request.values.get("permanent", "false").lower() in (
+        "true",
+        "yes",
+        "on",
+    )
+
+    if not redirect_path and target_url:
+        flask.abort(
+            400,
+            "To create a new redirect, please specify a "
+            "redirect_path and a target_url",
+        )
+
+    redirect_path = re.sub("//+", "/", redirect_path.lstrip("/"))
+    redirect_record = (
+        db_session.query(Redirect)
+        .filter(Redirect.redirect_path == redirect_path)
+        .one_or_none()
+    )
+
+    if redirect_record:
+        return (
+            jsonify(
+                {
+                    "message": (
+                        "Another redirect with that path already exists"
+                    ),
+                    "redirect_path": redirect_path,
+                    "code": 409,
+                }
+            ),
+            409,
+        )
+
+    redirect_record = Redirect(
+        redirect_path=redirect_path, target_url=target_url, permanent=permanent
+    )
+    db_session.add(redirect_record)
+    db_session.commit()
+
+    return jsonify(redirect_record.as_json()), 201
+
+
+@token_required
+def update_redirect(redirect_path):
+    target_url = request.values.get("target_url")
+    permanent = request.values.get("permanent", "false").lower() in (
+        "true",
+        "yes",
+        "on",
+    )
+
+    redirect_record = (
+        db_session.query(Redirect)
+        .filter(Redirect.redirect_path == redirect_path)
+        .one_or_none()
+    )
+    if not redirect_record:
+        flask.abort(404, f"No redirect for '{redirect_path}'")
+
+    redirect_record.redirect_path = unquote(redirect_path)
+    redirect_record.target_url = target_url
+    redirect_record.permanent = permanent
+
+    db_session.commit()
+
+    return jsonify(redirect_record.as_json())
+
+
+@token_required
+def delete_redirect(redirect_path):
+    redirect_record = (
+        db_session.query(Redirect)
+        .filter(Redirect.redirect_path == redirect_path)
+        .one_or_none()
+    )
+
+    if not redirect_record:
+        flask.abort(404, f"No redirect for '{redirect_path}'")
+
+    db_session.delete(redirect_record)
+    db_session.commit()
+
+    return jsonify({}), 204
