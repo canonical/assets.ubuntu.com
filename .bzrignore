@@ -1,5 +1,0 @@
-django-error.log
-*.pyc
-env/
-.git/
-pip-cache/
