@@ -1,4 +1,4 @@
-from sqlalchemy import Column, DateTime, Integer, JSON, String
+from sqlalchemy import Boolean, Column, DateTime, Integer, JSON, String
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -25,4 +25,20 @@ class Asset(Base):
             **self.data,
             "created": self.created.strftime("%a, %d %b %Y %H:%M:%S"),
             "file_path": self.file_path,
+        }
+
+
+class Redirect(Base):
+    __tablename__ = "redirect"
+
+    id = Column(Integer, primary_key=True)
+    redirect_path = Column(String, nullable=False)
+    target_url = Column(String, nullable=False)
+    permanent = Column(Boolean, nullable=False)
+
+    def as_json(self):
+        return {
+            "redirect_path": self.redirect_path,
+            "target_url": self.target_url,
+            "permanent": self.permanent,
         }
