@@ -111,8 +111,11 @@ class Asset(APIView):
         """
 
         tags = request.data.get("tags", "")
+        deprecated = request.data.get("deprecated", False) == "true"
 
-        data = settings.DATA_MANAGER.update(file_path, tags)
+        data = settings.DATA_MANAGER.update(
+            file_path, {"tags": tags, "deprecated": deprecated}
+        )
 
         return Response(data)
 
@@ -153,10 +156,11 @@ class AssetList(APIView):
         Create a new asset
         """
 
-        tags = request.data.get("tags", "")
-        optimize = request.data.get("optimize", False)
         asset = request.data.get("asset")
+        deprecated = request.data.get("deprecated", False)
         friendly_name = request.data.get("friendly-name")
+        optimize = request.data.get("optimize", False)
+        tags = request.data.get("tags", "")
         url_path = request.data.get("url-path", "").strip("/")
 
         try:
@@ -166,6 +170,7 @@ class AssetList(APIView):
                 tags=tags,
                 url_path=url_path,
                 optimize=optimize,
+                deprecated=deprecated,
             )
         except IOError as create_error:
             if create_error.errno == errno.EEXIST:

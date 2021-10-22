@@ -12,9 +12,14 @@ from .processors import ImageProcessor
 
 
 def create_asset(
-    file_data, friendly_name, tags="", url_path="", optimize=False
+    file_data,
+    friendly_name,
+    tags="",
+    url_path="",
+    optimize=False,
+    deprecated=False,
 ):
-    data = {"optimized": optimize}
+    data = {"tags": tags, "deprecated": deprecated, "optimized": optimize}
 
     if optimize:
         try:
@@ -62,7 +67,7 @@ def create_asset(
         )
 
     # Once the file is created, create file metadata
-    settings.DATA_MANAGER.update(url_path, tags, data)
+    settings.DATA_MANAGER.update(url_path, data)
 
     return url_path
 

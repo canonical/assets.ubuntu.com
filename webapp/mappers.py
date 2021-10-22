@@ -109,10 +109,11 @@ class DataManager:
     def __init__(self, data_collection):
         self.data_collection = data_collection
 
-    def update(self, file_path, tags, data={}):
+    def update(self, file_path, data={}):
         search = {"file_path": normalize(file_path)}
 
-        data.update({"file_path": normalize(file_path), "tags": tags})
+        # Set the "file_path" entry in data
+        data.update(search)
 
         self.data_collection.update(search, data, True)
 
@@ -165,6 +166,7 @@ class DataManager:
         asset_data = {
             "file_path": asset_record["file_path"],
             "tags": asset_record["tags"] or "",
+            "deprecated": asset_record.get("deprecated") or False,
             "created": asset_record["_id"].generation_time.ctime(),
         }
 

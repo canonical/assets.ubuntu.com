@@ -55,6 +55,14 @@ def delete(path="", params={}, server_url=server_url):
     return requests.delete(server_url + path, params=params)
 
 
+def put(path="", params={}, server_url=server_url):
+    """
+    Convenience function for making simple DELETEs
+    """
+
+    return requests.delete(server_url + path, params=params)
+
+
 class TestAssetsAPI:
     """
     API tests of the assets server.
@@ -82,9 +90,9 @@ class TestAssetsAPI:
             get(params={"token": token}).status_code == 200
         ), "Token '{0}' failed to authenticate correctly".format(token)
 
-    def test_upload_and_delete_file(self):
+    def test_upload_file(self):
         """
-        Tests uploading an asset, getting that asset and deleting it.
+        Tests uploading an asset and getting that asset.
         """
 
         post_response = post(
@@ -102,12 +110,42 @@ class TestAssetsAPI:
         file_path = post_response.json()["file_path"]
 
         assert (
-            get(path=file_path, params={"token": token}).status_code == 200
+            get(path=file_path, parserver_urlams={"token": token}).status_code
+            == 200
         ), "Asset not downloaded correctly"
 
+        return file_path
+
+    def test_delete_file(self, file_path):
+        """
+        Tests deleting an asset.
+        """
         assert (
             delete(path=file_path, params={"token": token}).status_code == 200
         ), "Asset not deleted successfully."
+
+    def test_update_and_fetch_deprecated_file(self, file_path):
+        """
+        Tests updating an asset as deprecated, make sure that asset is hidden.
+        """
+
+        put_response = put(
+            path=f"/{file_path}",
+            params={"token": token},
+            data={"deprecated": True},
+        )
+
+        assert put_response.status_code == 201, "Asset not created correctly."
+
+        deprecated = put_response.json()["deprecated"]
+
+        assert deprecated, "Asset attribute 'deprecated' not updated"
+
+        get_assets_response = get(path=file_path, params={"token": token})
+
+        assert (
+            get_assets_response.status_code == 200
+        ), "Asset not downloaded correctly"
 
 
 if __name__ == "__main__":
@@ -115,5 +153,7 @@ if __name__ == "__main__":
     tests.test_no_token()
     tests.test_bad_token()
     tests.test_token()
-    tests.test_upload_and_delete_file()
+    file_path = tests.test_upload_file()
+    tests.test_update_and_fetch_deprecated_file(file_path)
+    tests.test_delete_file(file_path)
     print("All tests passed")
