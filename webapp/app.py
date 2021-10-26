@@ -132,6 +132,8 @@ app.add_url_rule(
 
 # Teardown
 # ===
+
+
 @app.teardown_appcontext
 def remove_db_session(response):
     db_session.remove()

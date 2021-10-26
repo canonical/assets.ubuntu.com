@@ -5,6 +5,7 @@ defaults: &defaults
     # Primary image where all commands are run
     - image: canonicalwebteam/dev
       environment:
+          SECRET_KEY: development
           DATABASE_URL: postgresql://root@localhost/circle_test
           OS_AUTH_URL: http://localhost:8080/auth/v1.0
           OS_USERNAME: test:tester
