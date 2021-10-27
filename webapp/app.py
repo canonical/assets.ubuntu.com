@@ -1,35 +1,111 @@
 # System
 import errno
+import flask
+import traceback
 
 # Packages
 from canonicalwebteam.flask_base.app import FlaskBase
+from flask.globals import request
 from pilbox.errors import PilboxError
 from swiftclient.exceptions import ClientException as SwiftException
 
-
 # Local
+from webapp.commands import token_group
+from webapp.database import db_session
+from webapp.services import AssetAlreadyExistException, asset_service
+from webapp.sso import init_sso, login_required
 from webapp.views import (
     create_asset,
-    create_token,
     create_redirect,
+    create_token,
     delete_asset,
-    delete_token,
     delete_redirect,
+    delete_token,
     get_asset,
-    get_assets,
     get_asset_info,
-    get_tokens,
-    get_token,
+    get_assets,
     get_redirect,
     get_redirects,
+    get_token,
+    get_tokens,
     update_asset,
     update_redirect,
 )
-from webapp.database import db_session
-from webapp.commands import token_group
+
+app = FlaskBase(
+    __name__,
+    "assets.ubuntu.com",
+    static_folder="../static",
+    template_folder="../templates",
+)
 
 
-app = FlaskBase(__name__, "assets.ubuntu.com")
+# Manager routes
+# TODO: enable csrf only on the manager view
+# csrf = CSRFProtect()
+# csrf.init_app(app)
+
+init_sso(app)
+
+
+@app.route("/")
+@login_required
+def home():
+    query = request.values.get("q", "")
+    asset_type = request.values.get("q")
+
+    if query:
+        assets = asset_service.find_assets()
+        print("assets", list(map(lambda e: e.data, assets)))
+    else:
+        assets = []
+
+    return flask.render_template(
+        "index.html", assets=assets, query=query, type=asset_type
+    )
+
+
+@app.route("/create", methods=["GET", "POST"])
+@login_required
+def create():
+    created_assets = []
+    existing_assets = []
+    failed_assets = []
+
+    if flask.request.method == "POST":
+        tags = flask.request.form.get("tags", "")
+        optimize = flask.request.form.get("optimize", True)
+
+        for asset_file in flask.request.files.getlist("assets"):
+            try:
+                name = asset_file.filename
+                content = asset_file.read()
+
+                asset = asset_service.create_asset(
+                    file_content=content,
+                    friendly_name=name,
+                    optimize=optimize,
+                    data={"tags": tags},
+                )
+
+                created_assets.append(asset)
+            except AssetAlreadyExistException as error:
+                assets = asset_service.find_assets(query=error)
+                if len(assets) > 0:
+                    existing_assets.append(*assets)
+            except Exception as error:
+                failed_assets.append({"file_path": name, "error": str(error)})
+                print(traceback.format_exc())
+        return flask.render_template(
+            "created.html",
+            assets=created_assets,
+            existing=existing_assets,
+            failed=failed_assets,
+            tags=tags,
+            optimize=optimize,
+        )
+
+    return flask.render_template("create.html")
 
 
 # Error pages
@@ -94,40 +170,44 @@ def error_swift(error=None):
     return {"code": status, "message": f"Swift Error: {error.msg}"}, status
 
 
-# Routes
+# API Routes
 # ===
 
 # Assets
-app.add_url_rule("/", view_func=get_assets)
-app.add_url_rule("/", view_func=create_asset, methods=["POST"])
+app.add_url_rule("/api/", view_func=get_assets)
+app.add_url_rule("/api/", view_func=create_asset, methods=["POST"])
 app.add_url_rule("/<string:file_path>", view_func=get_asset)
 app.add_url_rule(
-    "/<string:file_path>", view_func=update_asset, methods=["PUT"]
+    "/api/<string:file_path>", view_func=update_asset, methods=["PUT"]
 )
 app.add_url_rule(
-    "/<string:file_path>", view_func=delete_asset, methods=["DELETE"]
+    "/api/<string:file_path>", view_func=delete_asset, methods=["DELETE"]
 )
-app.add_url_rule("/<string:file_path>/info", view_func=get_asset_info)
+app.add_url_rule("/api/<string:file_path>/info", view_func=get_asset_info)
 
 # Tokens
-app.add_url_rule("/tokens", view_func=get_tokens)
-app.add_url_rule("/tokens/<string:name>", view_func=get_token)
+app.add_url_rule("/api/tokens", view_func=get_tokens)
+app.add_url_rule("/api/tokens/<string:name>", view_func=get_token)
 app.add_url_rule(
-    "/tokens/<string:name>", view_func=create_token, methods=["POST"]
+    "/api/tokens/<string:name>", view_func=create_token, methods=["POST"]
 )
 app.add_url_rule(
-    "/tokens/<string:name>", view_func=delete_token, methods=["DELETE"]
+    "/api/tokens/<string:name>", view_func=delete_token, methods=["DELETE"]
 )
 
 # Redirects
-app.add_url_rule("/redirects", view_func=get_redirects)
-app.add_url_rule("/redirects", view_func=create_redirect, methods=["POST"])
-app.add_url_rule("/redirects/<redirect_path>", view_func=get_redirect)
+app.add_url_rule("/api/redirects", view_func=get_redirects)
+app.add_url_rule("/api/redirects", view_func=create_redirect, methods=["POST"])
+app.add_url_rule("/api/redirects/<redirect_path>", view_func=get_redirect)
 app.add_url_rule(
-    "/redirects/<redirect_path>", view_func=update_redirect, methods=["PUT"]
+    "/api/redirects/<redirect_path>",
+    view_func=update_redirect,
+    methods=["PUT"],
 )
 app.add_url_rule(
-    "/redirects/<redirect_path>", view_func=delete_redirect, methods=["DELETE"]
+    "/api/redirects/<redirect_path>",
+    view_func=delete_redirect,
+    methods=["DELETE"],
 )
 
 # Teardown

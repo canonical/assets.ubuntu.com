@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{% block title %}{% endblock %} | Assets manager</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="{{ versioned_static('css/main.css') }}" />
+    <link
+      rel="icon"
+      type="image/png"
+      href="https://assets.ubuntu.com/v1/cb22ba5d-favicon-16x16.png"
+      sizes="16x16"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      href="https://assets.ubuntu.com/v1/49a1a858-favicon-32x32.png"
+      sizes="32x32"
+    />
+  </head>
+
+  <body>
+    <header id="navigation" class="p-navigation">
+      <div class="p-navigation__row">
+        <div class="p-navigation__banner">
+          <div class="p-navigation__logo">
+            <a class="p-navigation__link" href="/">
+              <img
+                class="p-navigation__image"
+                src="https://assets.ubuntu.com/v1/c4f35e06-products-hero-ubuntu.svg"
+              />
+            </a>
+          </div>
+          <a href="#navigation" class="p-navigation__toggle--open" title="menu"
+            >Menu</a
+          >
+          <a
+            href="#navigation-closed"
+            class="p-navigation__toggle--close"
+            title="close menu"
+            >Close menu</a
+          >
+        </div>
+        <nav class="p-navigation__nav">
+          <span class="u-off-screen">
+            <a href="#main-content">Jump to main content</a>
+          </span>
+          <ul class="p-navigation__links" role="menu">
+            <li class="p-navigation__link p-nav">
+              <a href="/">Search assets</a>
+            </li>
+            <li class="p-navigation__link p-nav">
+              <a href="/create">Create asset(s)</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+    <main id="main-content">{% block content %} {% endblock %}</main>
+    <script>
+      function generateImageTag(str) {
+        const img = new Image();
+        img.onload = function () {
+          imageLoadHandler(`
+          \{\{ image \(
+            url="${str}",
+            alt="",
+            width="${this.width}",
+            height="${this.height}",
+            hi_def=True,
+            loading="auto|lazy"
+            \) \| safe
+          \}\}`);
+        };
+        img.src = str;
+      }
+
+      function imageLoadHandler(imageTagContent) {
+        copyToClipboard(imageTagContent);
+      }
+
+      function copyToClipboard(str) {
+        var el = document.createElement("textarea"); // Create a <textarea> element
+        el.value = str; // Set its value to the string that you want copied
+        el.setAttribute("readonly", ""); // Make it readonly to be tamper-proof
+        el.style.position = "absolute";
+        el.style.left = "-9999px"; // Move outside the screen to make it invisible
+        document.body.appendChild(el); // Append the <textarea> element to the HTML document
+        var selected =
+          document.getSelection().rangeCount > 0 // Check if there is any content selected previously
+            ? document.getSelection().getRangeAt(0) // Store selection if found
+            : false; // Mark as false to know no selection existed before
+        el.select(); // Select the <textarea> content
+        document.execCommand("copy"); // Copy - only works as a result of a user action (e.g. click events)
+        document.body.removeChild(el); // Remove the <textarea> element
+        if (selected) {
+          // If a selection existed before copying
+          document.getSelection().removeAllRanges(); // Unselect everything on the HTML document
+          document.getSelection().addRange(selected); // Restore the original selection
+        }
+      }
+
+      var imageTagButtons = document.querySelectorAll(".js-copy-image-tag");
+      imageTagButtons.forEach((button) => {
+        button.addEventListener("click", (e) => {
+          let url = e.target.dataset.url;
+          if (url.startsWith("/")) url = `${location.origin}${url}`;
+          generateImageTag(url);
+        });
+      });
+
+      var copyButtons = document.querySelectorAll(".copy-link");
+      for (var copyButton of copyButtons) {
+        copyButton.addEventListener(
+          "click",
+          function (e) {
+            let url = e.target.dataset.url;
+            if (url.startsWith("/")) url = `${location.origin}${url}`;
+            copyToClipboard(url);
+          },
+          false
+        );
+      }
+    </script>
+  </body>
+</html>

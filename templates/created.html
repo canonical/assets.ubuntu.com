@@ -1,0 +1,30 @@
+{% extends "_layout.html" %}
+
+{% block title %}Created assets{% endblock %}
+
+{% block content %}
+<div class="p-strip is-shallow">
+  {% if failed %}
+  <div class="row">
+    <h2>Failed to upload {{failed|length}} assets</h2>
+    {% for failure in failed %}
+    <p>{{failed.file_path}} - {{failed.error}}</p>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% if assets %}
+  <div class="row">
+    <h2>{{assets|length}} assets created</h2>
+    {% include "_asset-list.html" %}
+  </div>
+  {% endif %}
+
+  {% if existing %}
+  <div class="row">
+    {% set assets = existing %}
+    <h2>{{existing|length}} existing assets</h2>
+    {% include "_asset-list.html" %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

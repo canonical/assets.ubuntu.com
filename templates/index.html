@@ -1,0 +1,42 @@
+{% extends "_layout.html" %}
+
+{% block title %}Search assets{% endblock %}
+
+{% block content %}
+<div class="p-strip is-shallow">
+  <div class="row">
+    <div class="col-12">
+      <form action="/" class="p-form p-form--inline search">
+        <div class="p-form__group">
+          <div class="p-form__control u-clearfix">
+            <input type="search" class="p-form__control" name="q" placeholder="Search" value="{{ query }}">
+          </div>
+        </div>
+        <div class="p-form__group">
+          <div class="p-form__control u-clearfix">
+            <select name="type" onchange="this.form.submit()">
+              <option {% if not type %} selected {% endif %} value="">any</option>
+              <option {% if type == "svg" %} selected {% endif %} value="svg">svg</option>
+              <option {% if type == "png" %} selected {% endif %} value="png">png</option>
+              <option {% if type == "jpeg" %} selected {% endif %} value="jpeg">jpeg</option>
+              <option {% if type == "jpg" %} selected {% endif %} value="jpg">jpg</option>
+              <option {% if type == "gif" %} selected {% endif %} value="gif">gif</option>
+              <option {% if type == "pdf" %} selected {% endif %} value="pdf">pdf</option>
+            </select>
+          </div>
+        </div>
+        <button class="p-button--positive">Search</button>
+      </form>
+    </div>
+  </div>
+</div>
+<div class="p-strip is-shallow">
+  <div class="row u-clearfix">
+    {% if assets %}
+      {% include "_asset-list.html" %}
+    {% else %}
+      <h3>No assets found.</h3>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
