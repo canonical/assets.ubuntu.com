@@ -16,7 +16,7 @@ class TestRoutes(unittest.TestCase):
         we should return a 401 status code
         """
 
-        self.assertEqual(self.client.get("/api").status_code, 401)
+        self.assertEqual(self.client.get("/").status_code, 401)
 
     def test_not_found(self):
         """

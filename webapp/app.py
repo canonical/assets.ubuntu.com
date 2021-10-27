@@ -48,7 +48,7 @@ app = FlaskBase(
 init_sso(app)
 
 
-@app.route("/")
+@app.route("/manager/")
 @login_required
 def home():
     query = request.values.get("q", "")
@@ -65,7 +65,7 @@ def home():
     )
 
 
-@app.route("/create", methods=["GET", "POST"])
+@app.route("/manager/create", methods=["GET", "POST"])
 @login_required
 def create():
     created_assets = []
@@ -174,38 +174,38 @@ def error_swift(error=None):
 # ===
 
 # Assets
-app.add_url_rule("/api/", view_func=get_assets)
-app.add_url_rule("/api/", view_func=create_asset, methods=["POST"])
+app.add_url_rule("/", view_func=get_assets)
+app.add_url_rule("/", view_func=create_asset, methods=["POST"])
 app.add_url_rule("/<string:file_path>", view_func=get_asset)
 app.add_url_rule(
-    "/api/<string:file_path>", view_func=update_asset, methods=["PUT"]
+    "/<string:file_path>", view_func=update_asset, methods=["PUT"]
 )
 app.add_url_rule(
-    "/api/<string:file_path>", view_func=delete_asset, methods=["DELETE"]
+    "/<string:file_path>", view_func=delete_asset, methods=["DELETE"]
 )
-app.add_url_rule("/api/<string:file_path>/info", view_func=get_asset_info)
+app.add_url_rule("/<string:file_path>/info", view_func=get_asset_info)
 
 # Tokens
-app.add_url_rule("/api/tokens", view_func=get_tokens)
-app.add_url_rule("/api/tokens/<string:name>", view_func=get_token)
+app.add_url_rule("/tokens", view_func=get_tokens)
+app.add_url_rule("/tokens/<string:name>", view_func=get_token)
 app.add_url_rule(
-    "/api/tokens/<string:name>", view_func=create_token, methods=["POST"]
+    "/tokens/<string:name>", view_func=create_token, methods=["POST"]
 )
 app.add_url_rule(
-    "/api/tokens/<string:name>", view_func=delete_token, methods=["DELETE"]
+    "/tokens/<string:name>", view_func=delete_token, methods=["DELETE"]
 )
 
 # Redirects
-app.add_url_rule("/api/redirects", view_func=get_redirects)
-app.add_url_rule("/api/redirects", view_func=create_redirect, methods=["POST"])
-app.add_url_rule("/api/redirects/<redirect_path>", view_func=get_redirect)
+app.add_url_rule("/redirects", view_func=get_redirects)
+app.add_url_rule("/redirects", view_func=create_redirect, methods=["POST"])
+app.add_url_rule("/redirects/<redirect_path>", view_func=get_redirect)
 app.add_url_rule(
-    "/api/redirects/<redirect_path>",
+    "/redirects/<redirect_path>",
     view_func=update_redirect,
     methods=["PUT"],
 )
 app.add_url_rule(
-    "/api/redirects/<redirect_path>",
+    "/redirects/<redirect_path>",
     view_func=delete_redirect,
     methods=["DELETE"],
 )
