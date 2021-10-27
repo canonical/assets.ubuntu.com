@@ -11,7 +11,9 @@ SSO_TEAM = "canonical-content-people"
 
 def init_sso(app):
     open_id = OpenID(
-        stateless=True, safe_roots=[], extension_responses=[TeamsResponse]
+        store_factory=lambda: None,
+        safe_roots=[],
+        extension_responses=[TeamsResponse],
     )
 
     @app.route("/login", methods=["GET", "POST"])
