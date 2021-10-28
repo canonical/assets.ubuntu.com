@@ -13,6 +13,7 @@ from webapp.commands import token_group
 from webapp.database import db_session
 from webapp.services import (
     AssetAlreadyExistException,
+    AssetNotFound,
     asset_service,
 )
 from webapp.sso import init_sso, login_required
@@ -106,6 +107,27 @@ def create():
         )
 
     return flask.render_template("create.html")
+
+
+@app.route("/manager/update", methods=["GET", "POST"])
+@login_required
+def update():
+    file_path = request.args.get("file-path")
+
+    if request.method == "GET":
+        asset = asset_service.find_asset(file_path)
+        if not asset:
+            flask.flash("Asset not found", "negative")
+
+    elif request.method == "POST":
+        tags = request.form.get("tags")
+        try:
+            asset = asset_service.update_asset(file_path, {"tags": tags})
+            flask.flash("Tags updated", "positive")
+        except AssetNotFound:
+            flask.flash("Asset not found", "negative")
+
+    return flask.render_template("update.html", asset=asset)
 
 
 # Error pages

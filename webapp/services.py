@@ -109,10 +109,35 @@ class AssetService:
 
         return asset
 
+    def update_asset(self, file_path, data):
+        asset = (
+            db_session.query(Asset)
+            .filter(Asset.file_path == file_path)
+            .one_or_none()
+        )
+
+        if not asset:
+            raise AssetNotFound(file_path)
+
+        # Create a new dict otherwise the new values won't be saved
+        asset.data = asset.data.copy()
+        asset.data["tags"] = data.get("tags", "")
+
+        db_session.commit()
+        return asset
+
 
 class AssetAlreadyExistException(Exception):
     """
     Raised when the requested asset to create already exists
+    """
+
+    pass
+
+
+class AssetNotFound(Exception):
+    """
+    Raised when the requested asset wasn't found
     """
 
     pass

@@ -6,7 +6,7 @@
 <div class="p-strip is-shallow">
   <div class="row">
     <div class="col-8">
-      <h2>{{ asset.file_path }}</h2>
+      <h2>{{ asset.file_path or request.args.get("file-path")}}</h2>
       {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
       {% for category, message in messages %}
@@ -18,17 +18,18 @@
       {% endfor %}
       {% endif %}
       {% endwith %}
+      {% if asset %}
       <form method="post">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-        {% if asset.image %}
-        <a href="{{ asset.url }}" target="_blank">
-          <img class="p-image--bordered asset-thumbnail" src="{{ asset.url }}">
+        {% if asset.data.image %}
+        <a href="/{{ asset.file_path }}" target="_blank">
+          <img class="p-image--bordered asset-thumbnail" src="/{{ asset.file_path }}">
         </a>
         {% endif %}
         <label for="input-tags">Tags:</label>
-        <input id="input-tags" placeholder="e.g.: button, ubuntu" value="{{ asset.tags }}" type="text" name="tags" />
+        <input id="input-tags" placeholder="e.g.: button, ubuntu" value="{{ asset.data.tags }}" type="text" name="tags" />
         <button class="p-button--positive" type="submit">Save</button>
       </form>
+      {% endif %}
     </div>
   </div>
 </div>
