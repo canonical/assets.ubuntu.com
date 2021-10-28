@@ -1,23 +1,21 @@
 # Standard library
-import re
-import uuid
-from base64 import b64decode
 from datetime import datetime
 from urllib.parse import unquote
+import re
+import uuid
 
 # Packages
-from flask import abort, jsonify, redirect, request, Response
-from wand.image import Image
+from flask import Response, abort, jsonify, redirect, request
 
 # Local
-from webapp.decorators import token_required
 from webapp.database import db_session
+from webapp.decorators import token_required
 from webapp.lib.file_helpers import get_mimetype, remove_filename_hash
 from webapp.lib.http_helpers import set_headers_for_type
 from webapp.lib.processors import ImageProcessor
 from webapp.models import Asset, Redirect, Token
+from webapp.services import AssetAlreadyExistException, asset_service
 from webapp.swift import file_manager
-
 
 # Assets
 # ===
@@ -139,7 +137,10 @@ def get_asset_info(file_path):
 
 @token_required
 def get_assets():
-    assets = db_session.query(Asset).all()
+    query = request.values.get("q", "")
+    file_type = request.values.get("type", "")
+
+    assets = asset_service.find_assets(query=query, file_type=file_type)
     return jsonify([asset.as_json() for asset in assets])
 
 
@@ -148,61 +149,24 @@ def create_asset():
     """
     Create a new asset
     """
-    tags = request.values.get("tags", "")
-    optimize = request.values.get("optimize", False)
-    asset = request.values.get("asset")
+    asset = request.files.get("asset")
+    file_content = asset.read()
     friendly_name = request.values.get("friendly-name")
-    url_path = request.values.get("url-path", "").strip("/")
+    optimize = request.values.get("optimize", False)
+    tags = request.values.get("tags", "")
+    url_path = asset.filename.strip("/")
 
     data = {"tags": tags}
-    file_data = (b64decode(asset),)
-
-    if optimize:
-        try:
-            image = ImageProcessor(file_data)
-            image.optimize(allow_svg_errors=True)
-            file_data = image.data
-            data["optimized"] = True
-        except Exception:
-            # If optimisation failed, just don't bother optimising
-            data["optimized"] = False
-
-    if not url_path:
-        url_path = file_manager.generate_asset_path(file_data, friendly_name)
-
     try:
-        with Image(blob=file_data) as image_info:
-            data["width"] = image_info.width
-            data["height"] = image_info.height
-    except Exception:
-        # Just don't worry if image reading fails
-        pass
-
-    asset = (
-        db_session.query(Asset)
-        .filter(Asset.file_path == url_path)
-        .one_or_none()
-    )
-
-    if asset:
-        if "width" not in asset.data and "width" in data:
-            asset.data["width"] = data["width"]
-
-        if "height" not in asset.data and "height" in data:
-            asset.data["height"] = data["height"]
-
-        db_session.commit()
-
-        abort(409, f"Asset already exists at {url_path}")
-
-    # Save the file in Swift
-    file_manager.create(file_data, url_path)
-
-    # Save file info in Postgres
-    asset = Asset(file_path=url_path, data=data, created=datetime.utcnow())
-    db_session.add(asset)
-    db_session.commit()
-
+        asset = asset_service.create_asset(
+            file_content=file_content,
+            friendly_name=friendly_name,
+            optimize=optimize,
+            data=data,
+            url_path=url_path,
+        )
+    except AssetAlreadyExistException as error:
+        abort(409, error)
     return jsonify(asset.as_json()), 201
 
 

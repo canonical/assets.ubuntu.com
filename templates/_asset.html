@@ -1,0 +1,36 @@
+<div class="col-4 p-card">
+  {% if asset.data.image %}
+  <a href="/{{ asset.file_path }}" target="_blank">
+    <img
+      class="p-card__thumbnail p-image--bordered asset-thumbnail"
+      src="/{{ asset.file_path }}"
+    />
+  </a>
+  <hr class="u-sv1" />
+  {% endif %}
+  <div class="p-card__content">
+    <p><strong>{{ asset.file_path }}</strong></p>
+    <p>
+      <span
+        ><a href="/manager/update?file-path={{ asset.file_path }}">Tags</a>: {{
+        asset.data.tags|default("None", true) }}</span
+      >
+    </p>
+    <p><span>Created: {{ asset.created }}</span></p>
+    <p>
+      <small>Copy:</small>
+      <button
+        class="p-button--positive copy-link is-inline"
+        data-url="/{{ asset.file_path }}"
+      >
+        Link
+      </button>
+      <button
+        class="p-button js-copy-image-tag"
+        data-url="/{{ asset.file_path }}"
+      >
+        Image tag
+      </button>
+    </p>
+  </div>
+</div>

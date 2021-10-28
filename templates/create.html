@@ -1,0 +1,21 @@
+{% extends "_layout.html" %}
+
+{% block title %}Create assets{% endblock %}
+
+{% block content %}
+<div class="p-strip is-shallow">
+  <div class="row">
+    <div class="col-6">
+      <h2>Create asset(s)</h2>
+      <form method="post" enctype="multipart/form-data">
+        <input id="input-files" type="file" multiple name="assets" />
+        <label for="input-tags">Tags:</label>
+        <input id="input-tags" placeholder="e.g.: button, ubuntu" value="{{ tags }}" type="text" name="tags" />
+        <input id="input-optimize" {% if optimize %} checked {% endif%} type="checkbox" name="optimize" />
+        <label for="input-optimize">Optimize images</label>
+        <button class="p-button--positive" type="submit">Submit</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

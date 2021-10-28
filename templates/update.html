@@ -1,0 +1,35 @@
+{% extends "_layout.html" %}
+
+{% block title %}Update tags{% endblock %}
+
+{% block content %}
+<div class="p-strip is-shallow">
+  <div class="row">
+    <div class="col-8">
+      <h2>{{ asset.file_path }}</h2>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      {% for category, message in messages %}
+      <div class="p-notification--{{category}}">
+        <p class="p-notification__response">
+          {{message}}
+        </p>
+      </div>
+      {% endfor %}
+      {% endif %}
+      {% endwith %}
+      <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        {% if asset.image %}
+        <a href="{{ asset.url }}" target="_blank">
+          <img class="p-image--bordered asset-thumbnail" src="{{ asset.url }}">
+        </a>
+        {% endif %}
+        <label for="input-tags">Tags:</label>
+        <input id="input-tags" placeholder="e.g.: button, ubuntu" value="{{ asset.tags }}" type="text" name="tags" />
+        <button class="p-button--positive" type="submit">Save</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

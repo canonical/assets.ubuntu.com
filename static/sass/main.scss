@@ -1,0 +1,12 @@
+@charset 'UTF-8';
+
+$color-navigation-background: #f7f7f7;
+
+// import vanilla-framework
+@import 'vanilla-framework/scss/build';
+
+// import site specific patterns and overrides
+.asset-thumbnail {
+  max-height: 100px;
+  min-height: 100px;
+}
