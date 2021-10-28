@@ -1,7 +1,6 @@
 # System
 import errno
 import flask
-import traceback
 
 # Packages
 from canonicalwebteam.flask_base.app import FlaskBase
@@ -12,7 +11,10 @@ from swiftclient.exceptions import ClientException as SwiftException
 # Local
 from webapp.commands import token_group
 from webapp.database import db_session
-from webapp.services import AssetAlreadyExistException, asset_service
+from webapp.services import (
+    AssetAlreadyExistException,
+    asset_service,
+)
 from webapp.sso import init_sso, login_required
 from webapp.views import (
     create_asset,
@@ -52,11 +54,10 @@ init_sso(app)
 @login_required
 def home():
     query = request.values.get("q", "")
-    asset_type = request.values.get("q")
+    asset_type = request.values.get("type")
 
     if query:
-        assets = asset_service.find_assets()
-        print("assets", list(map(lambda e: e.data, assets)))
+        assets = asset_service.find_assets(query=query, file_type=asset_type)
     else:
         assets = []
 
@@ -90,12 +91,11 @@ def create():
 
                 created_assets.append(asset)
             except AssetAlreadyExistException as error:
-                assets = asset_service.find_assets(query=error)
-                if len(assets) > 0:
-                    existing_assets.append(*assets)
+                asset = asset_service.find_asset(str(error))
+                if asset:
+                    existing_assets.append(asset)
             except Exception as error:
                 failed_assets.append({"file_path": name, "error": str(error)})
-                print(traceback.format_exc())
         return flask.render_template(
             "created.html",
             assets=created_assets,

@@ -16,23 +16,34 @@ from webapp.swift import file_manager
 
 
 class AssetService:
-    def find_assets(self, file_type="", query=None):
+    def find_assets(self, file_type="%", query=None):
         """
         Find assets that matches the given criterions
         """
         if not query:
             return db_session.query(Asset).all()
-
+        if file_type == "":
+            file_type = "%"
         return (
             db_session.query(Asset)
             .filter(
-                Asset.file_path.endswith(f".{file_type}%"),
+                Asset.file_path.ilike(f"%.{file_type}"),
                 or_(
                     Asset.file_path.ilike(f"%{query}%"),
                     Asset.data.cast(Text).ilike(f"%{query}%"),
                 ),
             )
             .all()
+        )
+
+    def find_asset(self, file_path):
+        """
+        Find an asset that has that matches the exact give file_path or None
+        """
+        return (
+            db_session.query(Asset)
+            .filter(Asset.file_path == file_path)
+            .one_or_none()
         )
 
     def create_asset(
@@ -48,7 +59,7 @@ class AssetService:
             # As it's not an image, there is no need for optimization
             data["optimized"] = False
         # Try to optimize the asset if it's an image
-        if data["image"] and optimize:
+        if data.get("image") and optimize:
             try:
                 image = ImageProcessor(encoded_file_content)
                 image.optimize(allow_svg_errors=True)
@@ -62,13 +73,12 @@ class AssetService:
                 file_content, friendly_name
             )
 
-        if data["image"]:
+        if data.get("image"):
             try:
                 with Image(blob=encoded_file_content) as image_info:
                     data["width"] = image_info.width
                     data["height"] = image_info.height
-            except Exception as e:
-                print("e", e)
+            except Exception:
                 # Just don't worry if image reading fails
                 pass
 
