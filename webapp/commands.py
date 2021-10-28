@@ -1,16 +1,19 @@
 # Standard library
+from datetime import datetime
 import uuid
 
 # Packages
 import click
 import flask
+import requests
 
 # Local
 from webapp.database import db_session
-from webapp.models import Token
-
+from webapp.models import Asset, Token
+from webapp.services import asset_service
 
 token_group = flask.cli.AppGroup("token")
+db_group = flask.cli.AppGroup("database")
 
 
 @token_group.command("create")
@@ -47,3 +50,59 @@ def list_token():
             print(f"{token.name} - {token.token}")
     else:
         print("No tokens found")
+
+
+@db_group.command("update-assets-from-prod")
+@click.argument("token")
+def update_assets_from_prod(token):
+    print("Assets in DB count (before):", db_session.query(Asset).count())
+    data = requests.get(f"https://assets.ubuntu.com/v1?token={token}").json()
+    for entry in data:
+        file_path = entry.get("file_path")
+        created = datetime.strptime(
+            entry.get("created"), "%a %b %d %H:%M:%S %Y"
+        )
+        entry.pop("file_path", None)
+        entry.pop("created", None)
+
+        asset = asset_service.find_asset(file_path)
+        # update all the fields if already exists
+        if asset:
+            asset.data = entry
+            asset.created = created
+            db_session.commit()
+        else:
+            asset = Asset(
+                file_path=file_path,
+                data=entry,
+                created=created,
+            )
+            db_session.add(asset)
+    db_session.commit()
+    print("Assets in DB count (after):", db_session.query(Asset).count())
+
+
+@db_group.command("insert-dummy-data")
+def insert_dummy_data():
+    dummy_pdf = {
+        "name": "dummy.pdf",
+        "file": open("./webapp/dummy-data/dummy.pdf", "rb").read(),
+    }
+    ubuntu_png = {
+        "name": "ubuntu.png",
+        "file": open("./webapp/dummy-data/ubuntu.png", "rb").read(),
+        "optimize": True,
+    }
+    ubuntu_svg = {
+        "name": "ubuntu.svg",
+        "file": open("./webapp/dummy-data/ubuntu.svg", "rb").read(),
+    }
+
+    assets_to_create = [dummy_pdf, ubuntu_png, ubuntu_svg]
+    for asset in assets_to_create:
+        asset_service.create_asset(
+            file_content=asset["file"],
+            friendly_name=asset["name"],
+            optimize=asset.get("optimize", False),
+            data={"tags": "dummy_asset"},
+        )
