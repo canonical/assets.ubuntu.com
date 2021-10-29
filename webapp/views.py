@@ -14,7 +14,11 @@ from webapp.lib.file_helpers import get_mimetype, remove_filename_hash
 from webapp.lib.http_helpers import set_headers_for_type
 from webapp.lib.processors import ImageProcessor
 from webapp.models import Asset, Redirect, Token
-from webapp.services import AssetAlreadyExistException, asset_service
+from webapp.services import (
+    AssetAlreadyExistException,
+    AssetNotFound,
+    asset_service,
+)
 from webapp.swift import file_manager
 
 # Assets
@@ -81,21 +85,12 @@ def get_asset(file_path):
 
 @token_required
 def update_asset(file_path):
-    asset = (
-        db_session.query(Asset)
-        .filter(Asset.file_path == file_path)
-        .one_or_none()
-    )
-
-    if not asset:
-        abort(404)
-
     tags = request.values.get("tags", "")
-    asset.data["tags"] = tags
-
-    db_session.commit()
-
-    return jsonify(asset.as_json())
+    try:
+        asset = asset_service.update_asset(file_path, {"tags": tags})
+        return jsonify(asset.as_json())
+    except AssetNotFound:
+        abort(404)
 
 
 @token_required
