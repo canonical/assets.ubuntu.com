@@ -1,0 +1,61 @@
+domain: assets.ubuntu.com
+image: prod-comms.docker-registry.canonical.com/assets.ubuntu.com
+
+env:
+  - name: FLASK_APP
+    value: webapp.app
+
+  # Postgres
+  - name: DATABASE_URL
+    secretKeyRef:
+      key: database-url
+      name: assets-ubuntu
+
+  # Swift
+  - name: OS_AUTH_URL
+    secretKeyRef:
+      key: os-auth-url
+      name: assets-ubuntu
+
+  - name: OS_USERNAME
+    secretKeyRef:
+      key: os-username
+      name: assets-ubuntu
+
+  - name: OS_PASSWORD
+    secretKeyRef:
+      key: os-password
+      name: assets-ubuntu
+
+  - name: OS_AUTH_VERSION
+    value: 1.0
+
+# TODO: uncomment once deployed
+# extraHosts:
+#   - domain: manager.assets.ubuntu.com
+
+# Overrides for production
+production:
+  replicas: 2
+  nginxConfigurationSnippet: |
+    if ($host = 'assets.ubuntu.com' ) {
+      rewrite ^ https://assets.ubuntu.com$request_uri? permanent;
+    }
+    # TODO: uncomment once deployed
+    # if ($host = 'manager.assets.ubuntu.com' ) {
+    #   rewrite ^ https://assets.ubuntu.com/manager$request_uri? permanent;
+    # }
+    more_set_headers "X-Robots-Tag: noindex";
+
+# Overrides for staging
+staging:
+  replicas: 2
+  nginxConfigurationSnippet: |
+    if ($host = 'assets.staging.ubuntu.com' ) {
+      rewrite ^ https://assets.staging.ubuntu.com$request_uri? permanent;
+    }
+    # TODO: uncomment once deployed
+    # if ($host = 'manager.staging.assets.ubuntu.com' ) {
+    #   rewrite ^ https://assets.staging.ubuntu.com/manager$request_uri? permanent;
+    # }
+    more_set_headers "X-Robots-Tag: noindex";
