@@ -9,7 +9,7 @@ from pilbox.errors import PilboxError
 from swiftclient.exceptions import ClientException as SwiftException
 
 # Local
-from webapp.commands import token_group
+from webapp.commands import token_group, db_group
 from webapp.database import db_session
 from webapp.services import (
     AssetAlreadyExistException,
@@ -245,3 +245,4 @@ def remove_db_session(response):
 # CLI commands
 # ===
 app.cli.add_command(token_group)
+app.cli.add_command(db_group)
