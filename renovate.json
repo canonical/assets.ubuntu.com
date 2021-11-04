@@ -1,16 +1,5 @@
 {
   "extends": [
-    "config:base",
-    "schedule:monthly",
-    "group:all"
-  ],
-  "packageRules": [
-    {
-      "depTypeList": ["devDependencies"],
-      "extends": [":automergeMinor"]
-    }
-  ],
-  "compatibility": {
-    "python": "2.7"
-  }
+    "github>canonical-web-and-design/renovate-websites"
+  ]
 }
