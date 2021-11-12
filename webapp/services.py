@@ -1,7 +1,7 @@
 # System
+import imghdr
 from base64 import b64decode
 from datetime import datetime
-import imghdr
 
 # Packages
 from sqlalchemy.sql.expression import or_
@@ -11,19 +11,24 @@ from wand.image import Image
 # Local
 from webapp.database import db_session
 from webapp.lib.processors import ImageProcessor
-from webapp.models import Asset
+from webapp.models import Asset, Tag
 from webapp.swift import file_manager
 
 
 class AssetService:
-    def find_assets(self, file_type="%", query=None):
+    def find_assets(self, file_type="%", tag=None, query=None):
         """
         Find assets that matches the given criterions
         """
         if not query:
-            return db_session.query(Asset).all()
-        if file_type == "":
+            query = "%"
+        if not file_type:
             file_type = "%"
+
+        tag_condition = Asset.tags.any()
+        if tag:
+            tag_condition = Asset.tags.any(Tag.name == tag)
+
         return (
             db_session.query(Asset)
             .filter(
@@ -32,6 +37,7 @@ class AssetService:
                     Asset.file_path.ilike(f"%{query}%"),
                     Asset.data.cast(Text).ilike(f"%{query}%"),
                 ),
+                tag_condition,
             )
             .all()
         )
@@ -47,7 +53,13 @@ class AssetService:
         )
 
     def create_asset(
-        self, file_content, friendly_name, optimize, url_path=None, data={}
+        self,
+        file_content,
+        friendly_name,
+        optimize,
+        url_path=None,
+        tags=[],
+        data={},
     ):
         """
         Create a new asset
@@ -103,13 +115,43 @@ class AssetService:
         file_manager.create(file_content, url_path)
 
         # Save file info in Postgres
-        asset = Asset(file_path=url_path, data=data, created=datetime.utcnow())
+        asset = Asset(
+            file_path=url_path, data=data, tags=[], created=datetime.utcnow()
+        )
+        tags = self.create_tags_if_not_exist(tags)
+        asset.tags = tags
         db_session.add(asset)
         db_session.commit()
-
         return asset
 
-    def update_asset(self, file_path, data):
+    def create_tags_if_not_exist(self, tag_names):
+        """
+        Create the given tag name if it's new and return the
+        object from the database
+        """
+        tag_names = list(
+            set([self.normalize_tag_name(name) for name in tag_names if name])
+        )
+        existing_tags = (
+            db_session.query(Tag).filter(Tag.name.in_(tag_names)).all()
+        )
+        existing_tag_names = set([tag.name for tag in existing_tags])
+        tag_names_to_create = [
+            name for name in tag_names if name not in existing_tag_names
+        ]
+
+        tags_to_create = []
+        for tag_name in tag_names_to_create:
+            tag = Tag(name=tag_name, assets=[])
+            tags_to_create.append(tag)
+        db_session.add_all(tags_to_create)
+        db_session.commit()
+        return [*existing_tags, *tags_to_create]
+
+    def normalize_tag_name(self, tag_name):
+        return tag_name.strip().lower()
+
+    def update_asset(self, file_path, tags=[]):
         asset = (
             db_session.query(Asset)
             .filter(Asset.file_path == file_path)
@@ -118,10 +160,8 @@ class AssetService:
 
         if not asset:
             raise AssetNotFound(file_path)
-
-        # Create a new dict otherwise the new values won't be saved
-        asset.data = asset.data.copy()
-        asset.data["tags"] = data.get("tags", "")
+        tags = self.create_tags_if_not_exist(tags)
+        asset.tags = tags
 
         db_session.commit()
         return asset
