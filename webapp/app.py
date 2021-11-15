@@ -1,5 +1,7 @@
 # System
 import errno
+import re
+
 import flask
 
 # Packages
@@ -9,7 +11,7 @@ from pilbox.errors import PilboxError
 from swiftclient.exceptions import ClientException as SwiftException
 
 # Local
-from webapp.commands import token_group, db_group
+from webapp.commands import db_group, token_group
 from webapp.database import db_session
 from webapp.services import (
     AssetAlreadyExistException,
@@ -55,10 +57,13 @@ init_sso(app)
 @login_required
 def home():
     query = request.values.get("q", "")
+    tag = request.values.get("tag", None)
     asset_type = request.values.get("type")
 
-    if query:
-        assets = asset_service.find_assets(query=query, file_type=asset_type)
+    if query or tag:
+        assets = asset_service.find_assets(
+            query=query, file_type=asset_type, tag=tag
+        )
     else:
         assets = []
 
@@ -76,6 +81,8 @@ def create():
 
     if flask.request.method == "POST":
         tags = flask.request.form.get("tags", "")
+        tags = re.split(",|\\s", tags)
+
         optimize = flask.request.form.get("optimize", True)
 
         for asset_file in flask.request.files.getlist("assets"):
@@ -87,7 +94,7 @@ def create():
                     file_content=content,
                     friendly_name=name,
                     optimize=optimize,
-                    data={"tags": tags},
+                    tags=tags,
                 )
 
                 created_assets.append(asset)
@@ -122,7 +129,7 @@ def update():
     elif request.method == "POST":
         tags = request.form.get("tags")
         try:
-            asset = asset_service.update_asset(file_path, {"tags": tags})
+            asset = asset_service.update_asset(file_path, tags=tags.split(","))
             flask.flash("Tags updated", "positive")
         except AssetNotFound:
             flask.flash("Asset not found", "negative")

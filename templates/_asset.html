@@ -11,10 +11,14 @@
   <div class="p-card__content">
     <p><strong>{{ asset.file_path }}</strong></p>
     <p>
-      <span
-        ><a href="/manager/update?file-path={{ asset.file_path }}">Tags</a>: {{
-        asset.data.tags|default("None", true) }}</span
-      >
+      <span>
+      <a href="/manager/update?file-path={{ asset.file_path }}">Tags</a>:
+      {% for tag in asset.tags %}
+        <a href="/manager?tag={{ tag.name }}">
+          <span class="p-label">{{tag.name}}</span>
+        </a>
+      {% endfor %}
+      </span>
     </p>
     <p><span>Created: {{ asset.created }}</span></p>
     <p>

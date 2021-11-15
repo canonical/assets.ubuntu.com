@@ -1,5 +1,6 @@
 # Standard library
 from datetime import datetime
+import re
 import uuid
 
 # Packages
@@ -57,28 +58,34 @@ def list_token():
 def update_assets_from_prod(token):
     print("Assets in DB count (before):", db_session.query(Asset).count())
     data = requests.get(f"https://assets.ubuntu.com/v1?token={token}").json()
-    for entry in data:
+    print("Data to insert:", len(data))
+    for index in range(len(data)):
+        if index % 1000 == 0:
+            print(f"{index}/{len(data)}")
+        entry = data[index]
         file_path = entry.get("file_path")
         created = datetime.strptime(
             entry.get("created"), "%a %b %d %H:%M:%S %Y"
         )
+        tags = entry.get("tags", "")
+        tags = re.split(",|\\s", tags)
         entry.pop("file_path", None)
         entry.pop("created", None)
+        entry.pop("tags", None)
+
+        # rename optimized
+        if entry.get("optimized", None):
+            entry["optimize"] = entry.get("optimized", None)
 
         asset = asset_service.find_asset(file_path)
         # update all the fields if already exists
         if asset:
-            asset.data = entry
-            asset.created = created
-            db_session.commit()
+            asset_service.update_asset(file_path, tags)
         else:
-            asset = Asset(
-                file_path=file_path,
-                data=entry,
-                created=created,
-            )
+            asset = Asset(file_path=file_path, data=entry, created=created)
             db_session.add(asset)
-    db_session.commit()
+            asset.tags = asset_service.create_tags_if_not_exist(tags)
+            db_session.commit()
     print("Assets in DB count (after):", db_session.query(Asset).count())
 
 
@@ -104,5 +111,5 @@ def insert_dummy_data():
             file_content=asset["file"],
             friendly_name=asset["name"],
             optimize=asset.get("optimize", False),
-            data={"tags": "dummy_asset"},
+            tags=["dummy_asset"],
         )

@@ -7,6 +7,9 @@
   <div class="row">
     <div class="col-12">
       <form action="/manager" class="p-form p-form--inline search">
+        {% if request.values.get('tag', None) %}
+        <input type="text" class="u-hide" name="tag" value="{{ request.values.get('tag', None) }}">
+        {% endif %} 
         <div class="p-form__group">
           <div class="p-form__control u-clearfix">
             <input type="search" class="p-form__control" name="q" placeholder="Search" value="{{ query }}">
@@ -34,8 +37,10 @@
   <div class="row u-clearfix">
     {% if assets %}
       {% include "_asset-list.html" %}
-    {% else %}
+    {% elif request.values.get("q", None) %}
       <h3>No assets found.</h3>
+    {% else %}
+      <h3>Search for a query to show assets.</h3>
     {% endif %}
   </div>
 </div>

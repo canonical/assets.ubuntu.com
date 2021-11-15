@@ -87,7 +87,7 @@ def get_asset(file_path):
 def update_asset(file_path):
     tags = request.values.get("tags", "")
     try:
-        asset = asset_service.update_asset(file_path, {"tags": tags})
+        asset = asset_service.update_asset(file_path, tags=tags.split(","))
         return jsonify(asset.as_json())
     except AssetNotFound:
         abort(404)
@@ -149,15 +149,16 @@ def create_asset():
     friendly_name = request.values.get("friendly-name")
     optimize = request.values.get("optimize", False)
     tags = request.values.get("tags", "")
+    tags = tags.split(",")
+
     url_path = asset.filename.strip("/")
 
-    data = {"tags": tags}
     try:
         asset = asset_service.create_asset(
             file_content=file_content,
             friendly_name=friendly_name,
             optimize=optimize,
-            data=data,
+            tags=tags,
             url_path=url_path,
         )
     except AssetAlreadyExistException as error:
