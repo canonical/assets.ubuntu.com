@@ -10,7 +10,7 @@ import requests
 
 # Local
 from webapp.database import db_session
-from webapp.models import Asset, Token
+from webapp.models import Asset, Redirect, Token
 from webapp.services import asset_service
 
 token_group = flask.cli.AppGroup("token")
@@ -53,9 +53,9 @@ def list_token():
         print("No tokens found")
 
 
-@db_group.command("update-assets-from-prod")
+@db_group.command("import-assets-from-prod")
 @click.argument("token")
-def update_assets_from_prod(token):
+def import_assets_from_prod(token):
     print("Assets in DB count (before):", db_session.query(Asset).count())
     data = requests.get(f"https://assets.ubuntu.com/v1?token={token}").json()
     print("Data to insert:", len(data))
@@ -87,6 +87,27 @@ def update_assets_from_prod(token):
             asset.tags = asset_service.create_tags_if_not_exist(tags)
             db_session.commit()
     print("Assets in DB count (after):", db_session.query(Asset).count())
+
+
+@db_group.command("import-redirects-from-prod")
+@click.argument("token")
+def import_redirects_from_prod(token):
+    data = requests.get(
+        f"https://assets.ubuntu.com/v1/redirects?token={token}"
+    ).json()
+
+    print("Importing redirects...")
+    for entry in data:
+        db_session.add(
+            Redirect(
+                permanent=entry.get("permanent"),
+                redirect_path=entry.get("redirect_path"),
+                target_url=entry.get("target_url"),
+            )
+        )
+
+    db_session.commit()
+    print("Done!")
 
 
 @db_group.command("insert-dummy-data")
