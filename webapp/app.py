@@ -205,14 +205,12 @@ def error_swift(error=None):
 # Assets
 app.add_url_rule("/", view_func=get_assets)
 app.add_url_rule("/", view_func=create_asset, methods=["POST"])
-app.add_url_rule("/<string:file_path>", view_func=get_asset)
+app.add_url_rule("/<path:file_path>", view_func=get_asset)
+app.add_url_rule("/<path:file_path>", view_func=update_asset, methods=["PUT"])
 app.add_url_rule(
-    "/<string:file_path>", view_func=update_asset, methods=["PUT"]
+    "/<path:file_path>", view_func=delete_asset, methods=["DELETE"]
 )
-app.add_url_rule(
-    "/<string:file_path>", view_func=delete_asset, methods=["DELETE"]
-)
-app.add_url_rule("/<string:file_path>/info", view_func=get_asset_info)
+app.add_url_rule("/<path:file_path>/info", view_func=get_asset_info)
 
 # Tokens
 app.add_url_rule("/tokens", view_func=get_tokens)
@@ -227,14 +225,14 @@ app.add_url_rule(
 # Redirects
 app.add_url_rule("/redirects", view_func=get_redirects)
 app.add_url_rule("/redirects", view_func=create_redirect, methods=["POST"])
-app.add_url_rule("/redirects/<redirect_path>", view_func=get_redirect)
+app.add_url_rule("/redirects/<path:redirect_path>", view_func=get_redirect)
 app.add_url_rule(
-    "/redirects/<redirect_path>",
+    "/redirects/<path:redirect_path>",
     view_func=update_redirect,
     methods=["PUT"],
 )
 app.add_url_rule(
-    "/redirects/<redirect_path>",
+    "/redirects/<path:redirect_path>",
     view_func=delete_redirect,
     methods=["DELETE"],
 )

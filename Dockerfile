@@ -1,7 +1,7 @@
 # Build stage: Install python dependencies
 # ===
-FROM ubuntu:focal AS python-dependencies
-RUN apt-get update && apt-get install --no-install-recommends --yes python3-pip python3-setuptools
+FROM ubuntu:bionic AS python-dependencies
+RUN apt-get update && apt-get install --no-install-recommends --yes build-essential python3-dev python3-pip python3-setuptools python3-wheel libpq-dev
 ADD requirements.txt /tmp/requirements.txt
 RUN --mount=type=cache,target=/root/.cache/pip pip3 install --user --requirement /tmp/requirements.txt
 
@@ -23,14 +23,13 @@ RUN yarn run build-css
 
 # Build the production image
 # ===
-FROM ubuntu:focal
+FROM ubuntu:bionic
 
 # Install python and import python dependencies
-RUN apt-get update && apt-get install --no-install-recommends --yes python3-setuptools python3-lib2to3 python3-pkg-resources ca-certificates libsodium-dev \
-# depencies for python requirements
-imagemagick libjpeg-progs optipng libmagic-dev
-
-COPY --from=python-dependencies /root/.local/lib/python3.8/site-packages /root/.local/lib/python3.8/site-packages
+RUN apt-get update && apt-get install --no-install-recommends --yes \
+python3-setuptools python3-lib2to3 python3-pkg-resources ca-certificates libsodium-dev \
+libpng-dev libjpeg-dev libjpeg-progs libmagic1 libmagickwand-dev optipng
+COPY --from=python-dependencies /root/.local/lib/python3.6/site-packages /root/.local/lib/python3.6/site-packages
 COPY --from=python-dependencies /root/.local/bin /root/.local/bin
 ENV PATH="/root/.local/bin:${PATH}"
 
