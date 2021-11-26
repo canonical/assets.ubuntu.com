@@ -20,6 +20,7 @@
       {% endwith %}
       {% if asset %}
       <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
         {% if asset.data.image %}
         <a href="/{{ asset.file_path }}" target="_blank">
           <img class="p-image--bordered asset-thumbnail" src="/{{ asset.file_path }}">

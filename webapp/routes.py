@@ -4,7 +4,6 @@ import re
 # Packages
 from flask import Blueprint
 from flask.globals import request
-from swiftclient.exceptions import ClientException as SwiftException
 import flask
 
 # Local

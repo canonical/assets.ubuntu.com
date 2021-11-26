@@ -4,10 +4,12 @@ import http.client
 
 # Packages
 from canonicalwebteam.flask_base.app import FlaskBase
+from flask_wtf.csrf import CSRFProtect
 from flask.globals import request
 from pilbox.errors import PilboxError
 from swiftclient.exceptions import ClientException as SwiftException
 import flask
+
 
 # Local
 from webapp.commands import db_group, token_group
@@ -23,11 +25,9 @@ app = FlaskBase(
 )
 
 
-# Manager routes
-# TODO: enable csrf only on the manager view
-# csrf = CSRFProtect()
-# csrf.init_app(app)
-
+csrf = CSRFProtect()
+csrf.init_app(app)
+csrf.exempt(api_blueprint)
 init_sso(app)
 
 
@@ -38,11 +38,14 @@ def render_error(code, message):
     if request.full_path.startswith(api_blueprint.url_prefix + "/"):
         return {"code": code, "message": message}, code
     else:
-        return flask.render_template(
-            "error.html",
-            code=code,
-            reason=http.client.responses.get(code),
-            message=message,
+        return (
+            flask.render_template(
+                "error.html",
+                code=code,
+                reason=http.client.responses.get(code),
+                message=message,
+            ),
+            code,
         )
 
 
@@ -107,6 +110,8 @@ app.register_blueprint(api_blueprint)
 
 # Teardown
 # ===
+
+
 @app.teardown_appcontext
 def remove_db_session(response):
     db_session.remove()

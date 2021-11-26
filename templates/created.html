@@ -8,7 +8,7 @@
   <div class="row">
     <h2>Failed to upload {{failed|length}} assets</h2>
     {% for failure in failed %}
-    <p>{{failed.file_path}} - {{failed.error}}</p>
+    <p>{{failure.file_path}} - <code>{{failure.error}}</code></p>
     {% endfor %}
   </div>
   {% endif %}
