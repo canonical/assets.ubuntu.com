@@ -4,6 +4,7 @@ import http.client
 
 # Packages
 from canonicalwebteam.flask_base.app import FlaskBase
+from flask import redirect
 from flask_wtf.csrf import CSRFProtect
 from flask.globals import request
 from pilbox.errors import PilboxError
@@ -35,7 +36,7 @@ init_sso(app)
 # ===
 def render_error(code, message):
     # return JSON format in case of api route (with prefix /v1)
-    if request.full_path.startswith(api_blueprint.url_prefix + "/"):
+    if request.blueprint == api_blueprint.name:
         return {"code": code, "message": message}, code
     else:
         return (
@@ -105,6 +106,11 @@ def error_swift(error=None):
 
 # Apply blueprints
 # ===
+@app.route("/")
+def index():
+    return redirect(api_blueprint.url_prefix, code=302)
+
+
 app.register_blueprint(ui_blueprint)
 app.register_blueprint(api_blueprint)
 
