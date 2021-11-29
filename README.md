@@ -10,14 +10,14 @@ This is the codebase for https://assets.ubuntu.com, a Restful API service for st
 The simplest way to run the site makes use of SQLite, which is not the same as production where it will use PostgreSQL:
 
 ``` bash
-./run exec alembic upgrade head        # Run database migrations
-./run exec flask token create mytoken  # Create a token
+dotrun exec alembic upgrade head        # Run database migrations
+dotrun exec flask token create mytoken  # Create a token
 ```
 
 Save the output token
 
 ``` bash
-./run  # Run the server
+dotrun  # Run the server
 ```
 
 You can now access the API with your token in your browser - e.g.: <http://127.0.0.1:8017?token=THETOKEN>.
@@ -95,7 +95,7 @@ You can also specify multiple comma separated operations. They will be applied i
 To interact with the assets server, you'll need to generate an authentication token:
 
 ``` bash
-$ ./run exec ./manage.py gettoken {token-name}
+$ dotrun exec ./manage.py gettoken {token-name}
 Token '{token-name}' created
 3fe479a6b8184be4a4cdf42085f19f9a
 ```
@@ -129,5 +129,5 @@ You may wish to setup the [assets-manager](https://github.com/ubuntudesign/asset
 You can run all tests with:
 
 ``` bash
-./run test
+dotrun test
 ```

@@ -8,6 +8,7 @@
     <div class="col-6">
       <h2>Create asset(s)</h2>
       <form method="post" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
         <input id="input-files" type="file" multiple name="assets" />
         <label for="input-tags">Tags:</label>
         <input id="input-tags" placeholder="e.g.: button, ubuntu" value="{{ tags }}" type="text" name="tags" />
