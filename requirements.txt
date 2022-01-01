@@ -14,7 +14,7 @@ pymongo==3.7.2
 python-keystoneclient==3.19.0
 python-magic==0.4.15
 python-swiftclient==3.7.0
-pytz==2018.9
+pytz==2020.5
 requests==2.21.0
 scour==0.37
 sentinels==1.0.0
