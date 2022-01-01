@@ -1,9 +1,9 @@
 talisker[gunicorn]==0.14.3
 Babel==2.6.0
-Django==1.11.20
+Django==3.2.10
 djangorestframework==3.9.2
 itsdangerous==0.24
-Jinja2==2.10.1
+Jinja2==3.0.3
 MarkupSafe==1.1.1
 mongomock==3.16.0
 more-itertools==3.2.0
