@@ -3,11 +3,11 @@
 [![CircleCI build status](https://circleci.com/gh/canonical-web-and-design/assets.ubuntu.com.svg?style=shield)](https://circleci.com/gh/canonical-web-and-design/assets.ubuntu.com)
 [![Coverage Status](https://coveralls.io/repos/github/ubuntudesign/assets-server/badge.svg?branch=main)](https://coveralls.io/github/ubuntudesign/assets-server?branch=main)
 
-This is the codebase for https://assets.ubuntu.com, a Restful API service for storing and serving binary assets over HTTP, built with [Django REST framework](http://www.django-rest-framework.org/).
+This is the codebase for [assets.ubuntu.com](https://assets.ubuntu.com), a Restful API service for storing and serving binary assets over HTTP, built with [Django REST framework](http://www.django-rest-framework.org/).
 
 ## Assets manager
 
-We have also set up an [assets-manager](https://github.com/ubuntudesign/assets-manager/) at https://manager.assets.ubuntu.com. This is a simple web interface for managing assets on your assets server.
+We have also created [assets-manager](https://github.com/ubuntudesign/assets-manager/), a web interface for managing this assets server. It's hosted at [manager.assets.ubuntu.com](https://manager.assets.ubuntu.com).
 
 ## Local development
 
@@ -83,7 +83,7 @@ You can see all tokens by simply going to "https://assets.ubuntu.com/v1/tokens?t
 Anyone with a token can create another named token through the API using `curl`:
 
 ``` bash
-$ curl -d name={new-token-name} "https://assets.ubuntu.com/v1/tokens?token={your-existing-token}"
+$ curl --request POST --data name={new-token-name} "https://assets.ubuntu.com/v1/tokens?token={your-existing-token}"
 {
     "message": "Token created", 
     "name": "{new-token-name}", 
@@ -98,7 +98,7 @@ Even though at present all tokens have the same access, it's a good idea to gene
 Deleting tokens is similarly straightforward with `curl`:
 
 ``` bash
-curl -X DELETE "https://assets.ubuntu.com/v1/tokens/{token-to-be-deleted}?token={your-api-token}"
+curl --request DELETE "https://assets.ubuntu.com/v1/tokens/{token-to-be-deleted}?token={your-api-token}"
 ```
 
 ### Uploading assets
@@ -118,7 +118,7 @@ You can also use [curl](https://curl.haxx.se/docs/manpage.html):
 
 ``` bash
 $ echo "asset=$(base64 -w 0 MY-IMAGE.png)" | \
-  curl --data @- --data "friendly-name=MY-IMAGE.png" "https://assets.ubuntu.com/v1/?token={your-api-token}"
+  curl --request POST --data @- --data "friendly-name=MY-IMAGE.png" "https://assets.ubuntu.com/v1/?token={your-api-token}"
 {
     "optimized": false,
     "created": "Wed Sep 28 11:07:33 2016",
@@ -140,7 +140,7 @@ _This is also why the [assets manager](https://manager.assets.ubuntu.com) doesn'
 To delete an assets, simply use `curl` with the `DELETE` method:
 
 ``` bash
-curl -X DELETE "https://assets.ubuntu.com/v1/{asset-filename}?token={your-api-token}"
+curl --request DELETE "https://assets.ubuntu.com/v1/{asset-filename}?token={your-api-token}"
 ```
 
 ### Managing redirects
@@ -151,12 +151,12 @@ E.g., Every day we upload the latest Server Guide to e.g. `https://assets.ubuntu
 
 #### Creating redirects
 
-You can set up a new redirect with `curl -d redirect_path={the-path-to-redirect} -d target_url={the-redirect-target} https://assets.ubuntu.com/v1/redirects?token={your-api-token}`.
+You can set up a new redirect with `curl --data redirect_path={the-path-to-redirect} --data target_url={the-redirect-target} https://assets.ubuntu.com/v1/redirects?token={your-api-token}`.
 
 E.g. this would create the `https://assets.ubuntu.com/ubuntu-server-guide` redirect mentioned above:
 
 ``` bash
-$ curl -d redirect_path=ubuntu-server-guide -d target_url=https://assets.ubuntu.com/v1/25868d7a-ubuntu-server-guide-2022-07-11.pdf "https://assets.ubuntu.com/v1/redirects?token=xxxxxxxxxxx"
+$ curl --data redirect_path=ubuntu-server-guide --data target_url=https://assets.ubuntu.com/v1/25868d7a-ubuntu-server-guide-2022-07-11.pdf "https://assets.ubuntu.com/v1/redirects?token=xxxxxxxxxxx"
 {
     "permanent": false, 
     "message": "Redirect created", 
@@ -167,12 +167,12 @@ $ curl -d redirect_path=ubuntu-server-guide -d target_url=https://assets.ubuntu.
 
 #### Updating redirects
 
-Once a redirect already exists, you can use the `PUT` method to update it using `curl -X PUT -d target_url={target-url} https://assets.ubuntu.com/v1/redirects/{redirect-path}?token={your-api-token}`.
+Once a redirect already exists, you can use the `PUT` method to update it using `curl --request PUT --data target_url={target-url} https://assets.ubuntu.com/v1/redirects/{redirect-path}?token={your-api-token}`.
 
 E.g. (following the above example):
 
 ``` bash
-$ curl -X PUT -d target_url=https://assets.ubuntu.com/v1/fe8d7514-ubuntu-server-guide-2022-07-13.pdf "https://assets.ubuntu.com/v1/redirects/ubuntu-server-guide?token=xxxxxxxxx"
+$ curl --request PUT --data target_url=https://assets.ubuntu.com/v1/fe8d7514-ubuntu-server-guide-2022-07-13.pdf "https://assets.ubuntu.com/v1/redirects/ubuntu-server-guide?token=xxxxxxxxx"
 {
     "target_url": "https://assets.ubuntu.com/v1/fe8d7514-ubuntu-server-guide-2022-07-13.pdf", 
     "permanent": false, 
@@ -182,7 +182,7 @@ $ curl -X PUT -d target_url=https://assets.ubuntu.com/v1/fe8d7514-ubuntu-server-
 
 #### Deleting redirects
 
-Deleting redirects is similarly simple, with `curl -X DELETE https://assets.ubuntu.com/v1/redirects/{redirect-path}?token={your-api-token}`, e.g. `curl -X DELETE https://assets.ubuntu.com/v1/redirects/ubuntu-server-guide?token=xxxxxxxxx`.
+Deleting redirects is similarly simple, with `curl --request DELETE https://assets.ubuntu.com/v1/redirects/{redirect-path}?token={your-api-token}`, e.g. `curl --request DELETE https://assets.ubuntu.com/v1/redirects/ubuntu-server-guide?token=xxxxxxxxx`.
 
 ## Security
 
