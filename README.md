@@ -127,6 +127,22 @@ $ echo "asset=$(base64 -w 0 MY-IMAGE.png)" | \
 }
 ```
 
+### Deleting assets
+
+**Warning: Please read this before deleting anything**
+
+_The assets server serves all assets with a `cache-control` header instructing all clients to cache the asset for a year. This is to get the best possible performance on our websites. You need to bear this in mind before deleting any assets. If the asset has been cached by any clients - from our own Content Cache, to other intermediary caches, to users' browsers - you may struggle to get the assets deleted from those caches._
+
+_For this reason it's best to find ways around needing to regularly delete assets._
+
+_This is also why the [assets manager](https://manager.assets.ubuntu.com) doesn't support deleting assets through the interface._
+
+To delete an assets, simply use `curl` with the `DELETE` method:
+
+``` bash
+curl -X DELETE "https://assets.ubuntu.com/v1/{asset-filename}?token={your-api-token}"
+```
+
 ### Managing redirects
 
 Since assets are cached for a very long time, if you know you will want to update the version of an assets behind a specific URL, this should be achieved by setting up a (non-permanent) redirect to the assets.
@@ -140,7 +156,7 @@ You can set up a new redirect with `curl -d redirect_path={the-path-to-redirect}
 E.g. this would create the `https://assets.ubuntu.com/ubuntu-server-guide` redirect mentioned above:
 
 ``` bash
-$ curl -d redirect_path=ubuntu-server-guide -d target_url=https://assets.ubuntu.com/v1/25868d7a-ubuntu-server-guide-2022-07-11.pdf https://assets.ubuntu.com/v1/redirects?token=xxxxxxxxxxx
+$ curl -d redirect_path=ubuntu-server-guide -d target_url=https://assets.ubuntu.com/v1/25868d7a-ubuntu-server-guide-2022-07-11.pdf "https://assets.ubuntu.com/v1/redirects?token=xxxxxxxxxxx"
 {
     "permanent": false, 
     "message": "Redirect created", 
