@@ -38,7 +38,7 @@ class Asset(Base):
             **self.data,
             "created": self.created.strftime("%a, %d %b %Y %H:%M:%S"),
             "file_path": self.file_path,
-            "tags": ", ".join(self.tags),
+            "tags": ", ".join([tag.name for tag in self.tags]),
         }
 
 

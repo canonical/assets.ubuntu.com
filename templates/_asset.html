@@ -1,9 +1,9 @@
 <div class="col-4 p-card">
   {% if asset.data.image %}
-  <a href="/{{ asset.file_path }}" target="_blank">
+  <a href="/v1/{{ asset.file_path }}" target="_blank">
     <img
       class="p-card__thumbnail p-image--bordered asset-thumbnail"
-      src="/{{ asset.file_path }}"
+      src="/v1/{{ asset.file_path }}"
     />
   </a>
   <hr class="u-sv1" />
@@ -12,12 +12,12 @@
     <p><strong>{{ asset.file_path }}</strong></p>
     <p>
       <span>
-      <a href="/manager/update?file-path={{ asset.file_path }}">Tags</a>:
-      {% for tag in asset.tags %}
+        <a href="/manager/update?file-path={{ asset.file_path }}">Tags</a>:
+        {% for tag in asset.tags %}
         <a href="/manager?tag={{ tag.name }}">
           <span class="p-label">{{tag.name}}</span>
         </a>
-      {% endfor %}
+        {% endfor %}
       </span>
     </p>
     <p><span>Created: {{ asset.created }}</span></p>
@@ -25,10 +25,11 @@
       <small>Copy:</small>
       <button
         class="p-button--positive copy-link is-inline"
-        data-url="/{{ asset.file_path }}"
+        data-url="/v1/{{ asset.file_path }}"
       >
         Link
       </button>
+      <!-- TODO: I'm not sure about this button's expected behaviour -->
       <button
         class="p-button js-copy-image-tag"
         data-url="/{{ asset.file_path }}"
