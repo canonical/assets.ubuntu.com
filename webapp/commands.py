@@ -77,6 +77,24 @@ def import_assets_from_prod(token):
         if entry.get("optimized", None):
             entry["optimize"] = entry.get("optimized", None)
 
+        image_extensions = [
+            "jpeg",
+            "jpg",
+            "gif",
+            "png",
+            "apng",
+            "svg",
+            "bmp",
+            "webp",
+        ]
+        entry["image"] = bool(
+            re.match(
+                f".+\\.({'|'.join(image_extensions)})$",
+                file_path,
+                flags=re.IGNORECASE,
+            )
+        )
+
         asset = asset_service.find_asset(file_path)
         # update all the fields if already exists
         if asset:
