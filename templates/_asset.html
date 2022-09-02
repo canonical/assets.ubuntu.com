@@ -29,13 +29,14 @@
       >
         Link
       </button>
-      <!-- TODO: I'm not sure about this button's expected behaviour -->
+      {% if asset.data.image %}
       <button
         class="p-button js-copy-image-tag"
-        data-url="/{{ asset.file_path }}"
+        data-url="/v1/{{ asset.file_path }}"
       >
         Image tag
       </button>
+      {% endif %}
     </p>
   </div>
 </div>
