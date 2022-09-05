@@ -28,7 +28,7 @@ FROM ubuntu:bionic
 # Install python and import python dependencies
 RUN apt-get update && apt-get install --no-install-recommends --yes \
 python3-setuptools python3-lib2to3 python3-pkg-resources ca-certificates libsodium-dev \
-libpng-dev libjpeg-dev libjpeg-progs libmagic1 libmagickwand-dev optipng
+libpng-dev libjpeg-dev libjpeg-progs libmagic1 libmagickwand-dev optipng libpq-dev
 COPY --from=python-dependencies /root/.local/lib/python3.6/site-packages /root/.local/lib/python3.6/site-packages
 COPY --from=python-dependencies /root/.local/bin /root/.local/bin
 ENV PATH="/root/.local/bin:${PATH}"
