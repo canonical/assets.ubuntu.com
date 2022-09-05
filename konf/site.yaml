@@ -32,7 +32,6 @@ env:
       key: os-auth-version
       name: assets-ubuntu-swift
 
-
   - name: OS_TENANT_NAME
     secretKeyRef:
       key: os-tenant-name
@@ -45,6 +44,8 @@ env:
 # TODO: uncomment once deployed
 # extraHosts:
 #   - domain: manager.assets.ubuntu.com
+
+memoryLimit: 256Mi
 
 # Overrides for production
 production:
