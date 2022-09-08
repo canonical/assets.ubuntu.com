@@ -51,9 +51,6 @@ memoryLimit: 256Mi
 production:
   replicas: 2
   nginxConfigurationSnippet: |
-    if ($host = 'assets.ubuntu.com' ) {
-      rewrite ^ https://assets.ubuntu.com$request_uri? permanent;
-    }
     if ($host = 'manager.assets.ubuntu.com' ) {
       rewrite ^ https://assets.ubuntu.com/manager$request_uri? permanent;
     }
@@ -63,9 +60,6 @@ production:
 staging:
   replicas: 2
   nginxConfigurationSnippet: |
-    if ($host = 'assets.staging.ubuntu.com' ) {
-      rewrite ^ https://assets.staging.ubuntu.com$request_uri? permanent;
-    }
     if ($host = 'manager.staging.assets.ubuntu.com' ) {
       rewrite ^ https://assets.staging.ubuntu.com/manager$request_uri? permanent;
     }
