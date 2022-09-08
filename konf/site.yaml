@@ -41,9 +41,9 @@ env:
     secretKeyRef:
       key: os-region-name
       name: assets-ubuntu-swift
-# TODO: uncomment once deployed
-# extraHosts:
-#   - domain: manager.assets.ubuntu.com
+
+extraHosts:
+  - domain: manager.assets.ubuntu.com
 
 memoryLimit: 256Mi
 
@@ -54,10 +54,9 @@ production:
     if ($host = 'assets.ubuntu.com' ) {
       rewrite ^ https://assets.ubuntu.com$request_uri? permanent;
     }
-    # TODO: uncomment once deployed
-    # if ($host = 'manager.assets.ubuntu.com' ) {
-    #   rewrite ^ https://assets.ubuntu.com/manager$request_uri? permanent;
-    # }
+    if ($host = 'manager.assets.ubuntu.com' ) {
+      rewrite ^ https://assets.ubuntu.com/manager$request_uri? permanent;
+    }
     more_set_headers "X-Robots-Tag: noindex";
 
 # Overrides for staging
@@ -67,8 +66,7 @@ staging:
     if ($host = 'assets.staging.ubuntu.com' ) {
       rewrite ^ https://assets.staging.ubuntu.com$request_uri? permanent;
     }
-    # TODO: uncomment once deployed
-    # if ($host = 'manager.staging.assets.ubuntu.com' ) {
-    #   rewrite ^ https://assets.staging.ubuntu.com/manager$request_uri? permanent;
-    # }
+    if ($host = 'manager.staging.assets.ubuntu.com' ) {
+      rewrite ^ https://assets.staging.ubuntu.com/manager$request_uri? permanent;
+    }
     more_set_headers "X-Robots-Tag: noindex";
