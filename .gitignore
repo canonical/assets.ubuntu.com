@@ -33,6 +33,8 @@ node_modules/
 vendor/
 bower_components/
 vendor/
+.venv/
+.dotrun.json
 # Normally lockfiles would be committed, but we use yarn instead of NPM for locking dependencies
 package-lock.json
 

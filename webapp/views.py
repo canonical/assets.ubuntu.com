@@ -1,441 +1,335 @@
-# System
-import errno
-import re
-from base64 import b64decode
+# Standard library
 from datetime import datetime
-
-try:
-    from urllib.parse import unquote
-except ImportError:
-    from urllib import unquote
+from urllib.parse import unquote
+import re
+import uuid
 
 # Packages
-from django.conf import settings
-from django.http import HttpResponse, HttpResponseNotModified
-from django.shortcuts import redirect
-from pilbox.errors import PilboxError
-from rest_framework.exceptions import ParseError
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from swiftclient.exceptions import ClientException as SwiftClientException
+from flask import Response, abort, jsonify, redirect, request
 
 # Local
-from .auth import token_authorization
-from .lib.file_helpers import (
-    create_asset,
-    file_error,
-    remove_filename_hash,
-    get_mimetype,
+from webapp.database import db_session
+from webapp.decorators import token_required
+from webapp.lib.file_helpers import get_mimetype, remove_filename_hash
+from webapp.lib.http_helpers import set_headers_for_type
+from webapp.lib.processors import ImageProcessor
+from webapp.models import Asset, Redirect, Token
+from webapp.services import (
+    AssetAlreadyExistException,
+    AssetNotFound,
+    asset_service,
 )
-from .lib.http_helpers import error_response, error_404, set_headers_for_type
-from .lib.processors import ImageProcessor
+from webapp.swift import file_manager
+
+# Assets
+# ===
 
 
-class Asset(APIView):
-    """
-    Actions on a single asset resource.
-    """
+def get_asset(file_path):
+    request_path = re.sub("//+", "/", request.path.lstrip("/"))
+    redirect_record = (
+        db_session.query(Redirect)
+        .filter(Redirect.redirect_path == request_path)
+        .one_or_none()
+    )
 
-    base_name = "asset"
-
-    def get(self, request, file_path):
-        """
-        Get a single asset, 404ing if we get an OSError.
-        """
-
-        try:
-            asset_data = settings.FILE_MANAGER.fetch(file_path)
-            asset_headers = settings.FILE_MANAGER.headers(file_path)
-        except SwiftClientException as error:
-            return error_response(error, file_path)
-
-        time_format = "%a, %d %b %Y %H:%M:%S %Z"
-
-        def make_datetime(x):
-            return datetime.strptime(x, time_format)
-
-        last_modified = asset_headers["last-modified"]
-        if_modified_since = request.META.get(
-            "HTTP_IF_MODIFIED_SINCE", "Mon, 1 Jan 1980 00:00:00 GMT"
+    if redirect_record:
+        # Cache permanent redirect longtime. Temporary, not so much.
+        max_age = (
+            "max-age=31556926" if redirect_record.permanent else "max-age=60"
         )
 
-        if make_datetime(last_modified) <= make_datetime(if_modified_since):
-            return HttpResponseNotModified()
+        response = redirect(redirect_record.target_url)
+        response.headers["Cache-Control"] = max_age
 
-        # Run image processor
-        try:
-            image = ImageProcessor(asset_data, request.GET)
-            converted_type = image.process()
-            asset_data = image.data
-        except (PilboxError, ValueError) as error:
-            return error_response(error, file_path)
+        return set_headers_for_type(response, get_mimetype(request_path))
 
-        # Get a sensible filename, including a converted extension
-        filename = remove_filename_hash(file_path)
-        if converted_type:
-            filename = "{0}.{1}".format(filename, converted_type)
+    asset_data = file_manager.fetch(file_path)
+    asset_headers = file_manager.headers(file_path)
 
-        # Start response, guessing mime type
-        response = HttpResponse(
-            asset_data, content_type=get_mimetype(filename)
-        )
+    def make_datetime(x):
+        return datetime.strptime(x, "%a, %d %b %Y %H:%M:%S %Z")
 
-        # Set download filename
-        response["Content-Disposition"] = "filename={}".format(filename)
+    last_modified = asset_headers["last-modified"]
+    if_modified_since = request.headers.get(
+        "HTTP_IF_MODIFIED_SINCE", "Mon, 1 Jan 1980 00:00:00 GMT"
+    )
 
-        # Cache all genuine assets forever
-        response["Cache-Control"] = "max-age=31556926"
-        response["Last-Modified"] = last_modified
+    if make_datetime(last_modified) <= make_datetime(if_modified_since):
+        return jsonify({}), 304
 
-        # Return asset
-        return set_headers_for_type(response)
+    # Run image processor
+    image = ImageProcessor(asset_data, request.args)
+    converted_type = image.process()
+    asset_data = image.data
 
-    @token_authorization
-    def delete(self, request, file_path):
-        """
-        Delete a single named asset, 204 if successful
-        """
+    # Get a sensible filename, including a converted extension
+    filename = remove_filename_hash(file_path)
+    if converted_type:
+        filename = f"{filename}.{converted_type}"
 
-        try:
-            settings.DATA_MANAGER.delete(file_path)
-            settings.FILE_MANAGER.delete(file_path)
-            return Response({"message": "Deleted {0}".format(file_path)})
+    # Start response, guessing mime type
+    response = Response(asset_data, content_type=get_mimetype(filename))
 
-        except SwiftClientException as err:
-            return error_response(err, file_path)
+    # Set download filename
+    response.headers["Content-Disposition"] = f"filename={filename}"
+    # Cache all genuine assets forever
+    response.headers["Cache-Control"] = "max-age=31556926"
+    response.headers["Last-Modified"] = last_modified
 
-    @token_authorization
-    def put(self, request, file_path):
-        """
-        Update metadata against an asset
-        """
+    # Set headers base on mime type
+    response = set_headers_for_type(response)
 
-        tags = request.data.get("tags", "")
-
-        data = settings.DATA_MANAGER.update(file_path, tags)
-
-        return Response(data)
+    return response
 
 
-class AssetList(APIView):
-    """
-    Actions on the asset collection.
-    """
-
-    base_name = "asset_list"
-
-    @token_authorization
-    def get(self, request):
-        """
-        Get all assets.
-
-        Filter asset by providing a query
-        /?q=<query>
-
-        Query parts should be space separated,
-        and results will match all parts
-
-        Currently, the query will only be matched against
-        file paths
-        """
-
-        queries = request.GET.get("q", "").split(" ")
-        file_type = request.GET.get("type", "")
-
-        return Response(
-            settings.DATA_MANAGER.find(queries, file_type),
-            headers={"Cache-Control": "no-cache"},
-        )
-
-    @token_authorization
-    def post(self, request):
-        """
-        Create a new asset
-        """
-
-        tags = request.data.get("tags", "")
-        optimize = request.data.get("optimize", False)
-        asset = request.data.get("asset")
-        friendly_name = request.data.get("friendly-name")
-        url_path = request.data.get("url-path", "").strip("/")
-
-        try:
-            url_path = create_asset(
-                file_data=b64decode(asset),
-                friendly_name=friendly_name,
-                tags=tags,
-                url_path=url_path,
-                optimize=optimize,
-            )
-        except IOError as create_error:
-            if create_error.errno == errno.EEXIST:
-                return error_response(create_error)
-            else:
-                raise create_error
-        except SwiftClientException as swift_error:
-            return error_response(swift_error, url_path)
-
-        # Return the list of data for the created files
-        return Response(settings.DATA_MANAGER.fetch_one(url_path), 201)
+@token_required
+def update_asset(file_path):
+    tags = request.values.get("tags", "")
+    try:
+        asset = asset_service.update_asset(file_path, tags=tags.split(","))
+        return jsonify(asset.as_json())
+    except AssetNotFound:
+        abort(404)
 
 
-class AssetInfo(APIView):
+@token_required
+def delete_asset(file_path):
+    asset = (
+        db_session.query(Asset)
+        .filter(Asset.file_path == file_path)
+        .one_or_none()
+    )
+
+    if not asset:
+        abort(404)
+
+    file_manager.delete(file_path)
+    db_session.delete(asset)
+    db_session.commit()
+
+    return jsonify({"message": f"Deleted {file_path}"})
+
+
+@token_required
+def get_asset_info(file_path):
     """
     Data about an asset
     """
+    asset = (
+        db_session.query(Asset)
+        .filter(Asset.file_path == file_path)
+        .one_or_none()
+    )
 
-    base_name = "asset_json"
+    if not asset:
+        abort(404)
 
-    def get(self, request, file_path):
-        """
-        Get data for an asset by path
-        """
-
-        if settings.DATA_MANAGER.exists(file_path):
-            response = Response(
-                settings.DATA_MANAGER.fetch_one(file_path),
-                headers={"Cache-Control": "no-cache"},
-            )
-        else:
-            asset_error = file_error(
-                error_number=errno.ENOENT,
-                message="No JSON data found for file {0}".format(file_path),
-                filename=file_path,
-            )
-            response = error_response(asset_error)
-
-        return response
+    response = jsonify(asset.as_json())
+    response.headers["Cache-Control"] = "no-cache"
+    return response
 
 
-class Tokens(APIView):
+@token_required
+def get_assets():
+    query = request.values.get("q", "")
+    file_type = request.values.get("type", "")
+
+    assets = asset_service.find_assets(query=query, file_type=file_type)
+    return jsonify([asset.as_json() for asset in assets])
+
+
+@token_required
+def create_asset():
     """
-    HTTP methods for managing the collection of authentication tokens
+    Create a new asset
+    """
+    asset = request.files.get("asset")
+    file_content = asset.read()
+    friendly_name = request.values.get("friendly-name")
+    optimize = request.values.get("optimize", False)
+    tags = request.values.get("tags", "")
+    tags = tags.split(",")
+
+    url_path = asset.filename.strip("/")
+
+    try:
+        asset = asset_service.create_asset(
+            file_content=file_content,
+            friendly_name=friendly_name,
+            optimize=optimize,
+            tags=tags,
+            url_path=url_path,
+        )
+    except AssetAlreadyExistException as error:
+        abort(409, error)
+    return jsonify(asset.as_json()), 201
+
+
+# Tokens
+# ===
+@token_required
+def get_tokens():
+    tokens = db_session.query(Token).all()
+    return (
+        jsonify(
+            [{"name": token.name, "token": token.token} for token in tokens]
+        ),
+        200,
+    )
+
+
+@token_required
+def get_token(name):
+    token = db_session.query(Token).filter(Token.name == name).one_or_none()
+
+    if not token:
+        abort(404)
+
+    return jsonify({"name": token.name, "token": token.token})
+
+
+@token_required
+def create_token(name):
+    if not name:
+        abort(400, "Missing required field 'name'")
+
+    if db_session.query(Token).filter(Token.name == name).one_or_none():
+        abort(400, "A token with this name already exists")
+
+    token = Token(name=name, token=uuid.uuid4().hex)
+    db_session.add(token)
+    db_session.commit()
+
+    return jsonify({"name": token.name, "token": token.token}), 201
+
+
+@token_required
+def delete_token(name):
+    token = db_session.query(Token).filter(Token.name == name).one_or_none()
+
+    if not token:
+        abort(404, f"No token named '{name}'")
+
+    db_session.delete(token)
+    db_session.commit()
+
+    return jsonify({}), 204
+
+
+# Redirects
+# ---
+@token_required
+def get_redirect(redirect_path):
+    redirect_record = (
+        db_session.query(Redirect)
+        .filter(Redirect.redirect_path == redirect_path)
+        .one_or_none()
+    )
+
+    if not redirect_record:
+        abort(404, f"No redirect for '{redirect_path}'")
+
+    return jsonify(redirect_record.as_json())
+
+
+@token_required
+def get_redirects():
+    redirect_records = db_session.query(Redirect).all()
+    return jsonify(
+        [redirect_record.as_json() for redirect_record in redirect_records]
+    )
+
+
+@token_required
+def create_redirect():
+    """
+    Create a redirect record
     """
 
-    @token_authorization
-    def get(self, request):
-        """
-        Get a list of tokens
-        """
+    redirect_path = request.values.get("redirect_path")
+    target_url = request.values.get("target_url")
+    permanent = request.values.get("permanent", "false").lower() in (
+        "true",
+        "yes",
+        "on",
+    )
 
-        return Response(
-            settings.TOKEN_MANAGER.all(), headers={"Cache-Control": "no-cache"}
+    if not redirect_path and target_url:
+        abort(
+            400,
+            "To create a new redirect, please specify a "
+            "redirect_path and a target_url",
         )
 
-    @token_authorization
-    def post(self, request):
-        """
-        Create a new token
-        """
+    redirect_path = re.sub("//+", "/", redirect_path.lstrip("/"))
+    redirect_record = (
+        db_session.query(Redirect)
+        .filter(Redirect.redirect_path == redirect_path)
+        .one_or_none()
+    )
 
-        name = request.data.get("name")
-        body = {"name": name}
-        token = False
-
-        if not name:
-            raise ParseError("To create a token, please specify a name")
-
-        elif settings.TOKEN_MANAGER.exists(name):
-            raise ParseError("Another token by that name already exists")
-
-        else:
-            token = settings.TOKEN_MANAGER.create(name)
-
-            if token:
-                body["message"] = "Token created"
-                body["token"] = token["token"]
-            else:
-                raise ParseError("Failed to create a token")
-
-        return Response(body)
-
-
-class Token(APIView):
-    """
-    HTTP methods for managing a single authentication token
-    """
-
-    @token_authorization
-    def get(self, request, name):
-        """
-        Get token data by name
-        """
-
-        token = settings.TOKEN_MANAGER.fetch(name)
-
-        if not token:
-            return error_404(request.path)
-
-        return Response(token)
-
-    @token_authorization
-    def delete(self, request, name):
-        """
-        Delete a single named authentication token, 204 if successful
-        """
-
-        body = settings.TOKEN_MANAGER.delete(name) or {}
-
-        if body:
-            body["message"] = "Successfully deleted."
-        else:
-            return error_404(request.path)
-
-        return Response(body, 204)
-
-
-class RedirectRecords(APIView):
-    """
-    HTTP methods for managing the collection of redirect records
-    """
-
-    @token_authorization
-    def get(self, request):
-        """
-        Get data for a redirect by path
-        """
-
-        return Response(
-            settings.REDIRECT_MANAGER.all(),
-            headers={"Cache-Control": "no-cache"},
-        )
-
-    @token_authorization
-    def post(self, request):
-        """
-        Create a redirect record
-        """
-
-        redirect_path = request.data.get("redirect_path").lstrip("/")
-        target_url = request.data.get("target_url")
-        permanent = request.data.get("permanent", "false").lower() in (
-            "true",
-            "yes",
-            "on",
-        )
-
-        # Remove multiple-slashes
-        redirect_path = re.sub("//+", "/", redirect_path)
-
-        body = {
-            "redirect_path": redirect_path,
-            "target_url": target_url,
-            "permanent": permanent,
-        }
-
-        redirect_record = False
-
-        if not redirect_path:
-            raise ParseError(
-                "To create a new redirect, please specify a "
-                "redirect_path and a target_url"
-            )
-
-        elif settings.REDIRECT_MANAGER.exists(redirect_path):
-            return Response(
+    if redirect_record:
+        return (
+            jsonify(
                 {
                     "message": (
-                        "Another redirect with that path " "already exists"
+                        "Another redirect with that path already exists"
                     ),
                     "redirect_path": redirect_path,
                     "code": 409,
-                },
-                status=409,
-            )
-
-        else:
-            redirect_record = settings.REDIRECT_MANAGER.update(
-                redirect_path, target_url, permanent
-            )
-
-            if redirect_record:
-                body["message"] = "Redirect created"
-            else:
-                raise ParseError("Failed to create redirect")
-
-        return Response(body)
-
-
-class RedirectRecord(APIView):
-    """
-    HTTP methods for managing a single redirect record
-    """
-
-    @token_authorization
-    def get(self, request, redirect_path):
-        """
-        Get redirect data by name
-        """
-
-        redirect_record = settings.REDIRECT_MANAGER.fetch(
-            unquote(redirect_path)
+                }
+            ),
+            409,
         )
 
-        if not redirect_record:
-            return error_404(request.path)
+    redirect_record = Redirect(
+        redirect_path=redirect_path, target_url=target_url, permanent=permanent
+    )
+    db_session.add(redirect_record)
+    db_session.commit()
 
-        return Response(redirect_record)
-
-    @token_authorization
-    def put(self, request, redirect_path):
-        """
-        Update target URL for a redirect
-        """
-
-        target_url = request.data.get("target_url")
-        permanent = request.data.get("permanent")
-
-        if permanent is not None:
-            permanent = permanent.lower() in ("true", "yes", "on")
-
-        if not settings.REDIRECT_MANAGER.exists(redirect_path):
-            return error_404(request.path)
-
-        redirect_record = settings.REDIRECT_MANAGER.update(
-            unquote(redirect_path), target_url, permanent
-        )
-
-        return Response(redirect_record)
-
-    @token_authorization
-    def delete(self, request, redirect_path):
-        """
-        Delete a single redirect by its request URL path,
-        204 if successful
-        """
-
-        body = settings.REDIRECT_MANAGER.delete(unquote(redirect_path)) or {}
-
-        if body:
-            body["message"] = "Successfully deleted."
-        else:
-            return error_404(request.path)
-
-        return Response(body, 204)
+    return jsonify(redirect_record.as_json()), 201
 
 
-class Redirects(APIView):
-    """
-    Do redirect for any redirects found in the MongoDB
-    """
+@token_required
+def update_redirect(redirect_path):
+    target_url = request.values.get("target_url")
+    permanent = request.values.get("permanent", "false").lower() in (
+        "true",
+        "yes",
+        "on",
+    )
 
-    def get(self, request, request_path):
-        # Remove multiple slashes from path, to make sure things match
-        request_path = re.sub("//+", "/", request_path)
+    redirect_record = (
+        db_session.query(Redirect)
+        .filter(Redirect.redirect_path == redirect_path)
+        .one_or_none()
+    )
+    if not redirect_record:
+        abort(404, f"No redirect for '{redirect_path}'")
 
-        redirect_record = settings.REDIRECT_MANAGER.fetch(request_path)
+    redirect_record.redirect_path = unquote(redirect_path)
+    redirect_record.target_url = target_url
+    redirect_record.permanent = permanent
 
-        if not redirect_record:
-            return error_404(request.path)
+    db_session.commit()
 
-        permanent = redirect_record.get("permanent", False)
+    return jsonify(redirect_record.as_json())
 
-        response = redirect(redirect_record["target_url"], permanent=permanent)
 
-        # Cache permanent redirect longtime. Temporary, not so much.
-        if permanent:
-            response["Cache-Control"] = "max-age=31556926"
-        else:
-            response["Cache-Control"] = "max-age=60"
+@token_required
+def delete_redirect(redirect_path):
+    redirect_record = (
+        db_session.query(Redirect)
+        .filter(Redirect.redirect_path == redirect_path)
+        .one_or_none()
+    )
 
-        return set_headers_for_type(response, get_mimetype(request_path))
+    if not redirect_record:
+        abort(404, f"No redirect for '{redirect_path}'")
+
+    db_session.delete(redirect_record)
+    db_session.commit()
+
+    return jsonify({}), 204
