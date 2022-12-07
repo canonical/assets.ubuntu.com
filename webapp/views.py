@@ -1,8 +1,10 @@
 # Standard library
-from datetime import datetime
-from urllib.parse import unquote
+import base64
 import re
 import uuid
+from datetime import datetime
+from distutils.util import strtobool
+from urllib.parse import unquote
 
 # Packages
 from flask import Response, abort, jsonify, redirect, request
@@ -144,18 +146,15 @@ def create_asset():
     """
     Create a new asset
     """
-    asset = request.files.get("asset")
-    file_content = asset.read()
+    asset = request.values.get("asset")
     friendly_name = request.values.get("friendly-name")
-    optimize = request.values.get("optimize", False)
-    tags = request.values.get("tags", "")
-    tags = tags.split(",")
-
-    url_path = asset.filename.strip("/")
+    optimize = strtobool(request.values.get("optimize", "false"))
+    tags = request.values.get("tags", "").split(",")
+    url_path = request.values.get("url-path", "").strip("/")
 
     try:
         asset = asset_service.create_asset(
-            file_content=file_content,
+            file_content=base64.b64decode(asset),
             friendly_name=friendly_name,
             optimize=optimize,
             tags=tags,
