@@ -1,0 +1,155 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: assets-ubuntu-com
+  namespace: production
+  labels:
+    app: "assets.ubuntu.com"
+spec:
+  selector:
+    app: assets.ubuntu.com
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: http
+
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: assets-ubuntu-com
+  namespace: production
+  labels:
+    app: "assets.ubuntu.com"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: assets.ubuntu.com
+  template:
+    metadata:
+      labels:
+        app: assets.ubuntu.com
+    spec:
+      containers:
+        - name: assets-ubuntu-com
+          image: prod-comms.ps5.docker-registry.canonical.com/assets.ubuntu.com:1670233982-1d8bb2f
+
+          ports:
+            - name: http
+              containerPort: 80
+
+          env:
+            - name: TALISKER_NETWORKS
+              value: 10.0.0.0/8
+
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: assets-ubuntu-com
+                  name: secret-keys
+
+            - name: HTTP_PROXY
+              value: "http://squid.internal:3128/"
+
+            - name: HTTPS_PROXY
+              value: "http://squid.internal:3128/"
+
+            - name: NO_PROXY
+              value: "10.24.0.132,10.24.0.23,.internal,ubuntu.com,.ubuntu.com,snapcraft.io,.snapcraft.io,jujucharms.com,.jujucharms.com,maas.io,.maas.io,conjure-up.io,.conjure-up.io,netplan.io,.netplan.io,canonical.com,.canonical.com,launchpad.net,.launchpad.net,linuxcontainers.org,.linuxcontainers.org,cloud-init.io,.cloud-init.io,vanillaframework.io,.vanillaframework.io,anbox-cloud.io,.anbox-cloud.io,juju.is,.juju.is,dqlite.io,.dqlite.io,charmhub.io,.charmhub.io"
+            - name: FLASK_APP
+              value: "webapp.app"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  key: database-url
+                  name: assets-ubuntu-postgres
+            - name: OS_AUTH_URL
+              valueFrom:
+                secretKeyRef:
+                  key: os-auth-url
+                  name: assets-ubuntu-swift
+            - name: OS_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  key: os-username
+                  name: assets-ubuntu-swift
+            - name: OS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: os-password
+                  name: assets-ubuntu-swift
+            - name: OS_AUTH_VERSION
+              valueFrom:
+                secretKeyRef:
+                  key: os-auth-version
+                  name: assets-ubuntu-swift
+            - name: OS_TENANT_NAME
+              valueFrom:
+                secretKeyRef:
+                  key: os-tenant-name
+                  name: assets-ubuntu-swift
+            - name: OS_REGION_NAME
+              valueFrom:
+                secretKeyRef:
+                  key: os-region-name
+                  name: assets-ubuntu-swift
+          readinessProbe:
+            httpGet:
+              path: /_status/check
+              port: 80
+            periodSeconds: 5
+            timeoutSeconds: 3
+
+          resources:
+            limits:
+              memory: 1024Mi
+            requests:
+              memory: 128Mi
+
+---
+kind: Ingress
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: assets-ubuntu-com
+  namespace: production
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/proxy-body-size: 8m
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      if ($host = 'manager.assets.ubuntu.com' ) {
+        rewrite ^ https://assets.ubuntu.com/manager$request_uri? permanent;
+      }
+      more_set_headers "X-Robots-Tag: noindex";
+
+  labels:
+    app: "assets.ubuntu.com"
+
+spec:
+  tls:
+    - secretName: assets-ubuntu-com-tls
+
+      hosts:
+        - assets.ubuntu.com
+
+    - secretName: manager-assets-ubuntu-com-tls
+      hosts:
+        - manager.assets.ubuntu.com
+
+  rules:
+    - host: assets.ubuntu.com
+      http: &http_service
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: assets-ubuntu-com
+                port:
+                  number: 80
+
+    - host: manager.assets.ubuntu.com
+      http: *http_service

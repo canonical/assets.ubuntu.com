@@ -50,7 +50,8 @@ def login_required(func):
     def is_user_logged_in(*args, **kwargs):
         if "openid" not in flask.session:
             return flask.redirect("/login?next=" + flask.request.path)
-
-        return func(*args, **kwargs)
+        response = flask.make_response(func(*args, **kwargs))
+        response.cache_control.private = True
+        return response
 
     return is_user_logged_in
