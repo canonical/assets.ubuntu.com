@@ -68,7 +68,7 @@ class ImageProcessor:
             self.data = jpegtran("-optimize", _in=self.data).stdout
 
         elif mimetype == "image/png":
-            with open(tmp_filename, "w") as tmp:
+            with open(tmp_filename, "wb") as tmp:
                 tmp.write(self.data)
             optipng(tmp_filename)
             with open(tmp_filename) as tmp:
