@@ -55,7 +55,7 @@ class ImageProcessor:
         """
 
         mimetype = magic.Magic(mime=True).from_buffer(self.data)
-        tmp_filename = "/tmp/" + uuid4().get_hex()
+        tmp_filename = "/tmp/" + uuid4().hex
 
         if mimetype == "image/svg+xml":
             try:
@@ -161,17 +161,15 @@ class ImageProcessor:
             # Image size management
             with WandImage(blob=self.data) as image_info:
                 # Don't allow expanding of images
-                if resize_width or resize_height:
-                    width_oversize = resize_width > image_info.width
-                    height_oversize = resize_height > image_info.height
+                if (resize_width and resize_width > image_info.width) or (
+                    resize_height and resize_height > image_info.height
+                ):
+                    expand_message = (
+                        "Resize error: Maximum dimensions for this image "
+                        "are {0}px wide by {1}px high."
+                    ).format(image_info.width, image_info.height)
 
-                    if width_oversize or height_oversize:
-                        expand_message = (
-                            "Resize error: Maximum dimensions for this image "
-                            "are {0}px wide by {1}px high."
-                        ).format(image_info.width, image_info.height)
-
-                        raise PilboxError(400, log_message=expand_message)
+                    raise PilboxError(400, log_message=expand_message)
 
                 # Process max_width and max_height
                 if not resize_width and max_width:
@@ -181,7 +179,13 @@ class ImageProcessor:
                 if not resize_height and max_height:
                     if max_height < image_info.height:
                         resize_height = max_height
-
+                # conserve the image ratio
+                if resize_height and not resize_width:
+                    image_ratio = image_info.height / resize_height
+                    resize_width = image_info.width / image_ratio
+                elif not resize_height and resize_width:
+                    image_ratio = image_info.width / resize_width
+                    resize_height = image_info.height / image_ratio
             if resize_height or resize_width:
                 image.resize(
                     width=resize_width,
