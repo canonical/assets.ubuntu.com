@@ -71,7 +71,7 @@ class ImageProcessor:
             with open(tmp_filename, "wb") as tmp:
                 tmp.write(self.data)
             optipng(tmp_filename)
-            with open(tmp_filename) as tmp:
+            with open(tmp_filename, "rb") as tmp:
                 self.data = tmp.read()
             os.remove(tmp_filename)
 
