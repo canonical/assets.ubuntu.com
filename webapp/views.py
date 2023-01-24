@@ -4,7 +4,7 @@ import re
 import uuid
 from datetime import datetime
 from distutils.util import strtobool
-from urllib.parse import unquote
+from urllib.parse import unquote, urlparse
 
 # Packages
 from flask import Response, abort, jsonify, redirect, request
@@ -28,7 +28,14 @@ from webapp.swift import file_manager
 
 
 def get_asset(file_path):
-    request_path = re.sub("//+", "/", request.path.lstrip("/"))
+    request_url = urlparse(request.path)
+    # remove multiple slashes
+    request_path = re.sub("//+", "/", request_url.path)
+    # remove /v1 prefix
+    request_path = re.sub(r"^\/v1", "", request_path)
+    # remove the / from the beginning
+    request_path = request_path.lstrip("/")
+
     redirect_record = (
         db_session.query(Redirect)
         .filter(Redirect.redirect_path == request_path)
@@ -40,8 +47,8 @@ def get_asset(file_path):
         max_age = (
             "max-age=31556926" if redirect_record.permanent else "max-age=60"
         )
-
-        response = redirect(redirect_record.target_url)
+        target_url = redirect_record.target_url + "?" + request_url.query
+        response = redirect(target_url)
         response.headers["Cache-Control"] = max_age
 
         return set_headers_for_type(response, get_mimetype(request_path))
@@ -285,6 +292,7 @@ def create_redirect():
     redirect_record = Redirect(
         redirect_path=redirect_path, target_url=target_url, permanent=permanent
     )
+    redirect_record
     db_session.add(redirect_record)
     db_session.commit()
 
