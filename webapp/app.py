@@ -53,7 +53,6 @@ def render_error(code, message):
 @app.errorhandler(400)
 @app.errorhandler(401)
 @app.errorhandler(403)
-@app.errorhandler(404)
 def error_handler(error=None):
     code = getattr(error, "code")
     return render_error(code, str(error))
@@ -109,6 +108,11 @@ def error_swift(error=None):
 @app.route("/")
 def index():
     return redirect(api_blueprint.url_prefix, code=302)
+
+
+@app.errorhandler(404)
+def redirect_v1(error=None):
+    return redirect(api_blueprint.url_prefix + "/" + request.path, code=302)
 
 
 app.register_blueprint(ui_blueprint)
