@@ -18,7 +18,7 @@
     "postcss": "8.2.10",
     "postcss-cli": "8.3.1",
     "sass-lint": "1.13.1",
-    "vanilla-framework": "2.36.0",
+    "vanilla-framework": "3.13.0",
     "watch-cli": "0.2.3"
   },
   "devDependencies": {
