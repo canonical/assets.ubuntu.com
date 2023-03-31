@@ -1,18 +1,15 @@
-# System
-from io import BytesIO
 import os
+from io import BytesIO
+from uuid import uuid4
 
-# Modules
 from more_itertools import unique_everseen
 from pilbox.errors import PilboxError
 from pilbox.image import Image as PilboxImage
 from scour.scour import scourString
 from sh import jpegtran, optipng
-from uuid import uuid4
 from wand.image import Image as WandImage
-import magic
 
-# Local
+from webapp.lib.file_helpers import guess_mime
 from webapp.lib.python_helpers import shared_items
 
 
@@ -54,7 +51,7 @@ class ImageProcessor:
         by making use of the /tmp directory
         """
 
-        mimetype = magic.Magic(mime=True).from_buffer(self.data)
+        mimetype = guess_mime(self.data)
         tmp_filename = "/tmp/" + uuid4().hex
 
         if mimetype == "image/svg+xml":
@@ -99,8 +96,7 @@ class ImageProcessor:
 
         # Operations (region, rotate, resize...)
         # ---
-
-        mimetype = magic.Magic(mime=True).from_buffer(self.data)
+        mimetype = guess_mime(self.data)
 
         if mimetype in ["image/png", "image/jpeg", "image/gif"]:
             operation = self.options.get("op")
