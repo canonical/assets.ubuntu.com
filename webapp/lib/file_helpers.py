@@ -1,6 +1,8 @@
-# System
 import mimetypes
 import os
+import re
+
+import filetype
 
 
 def is_hex(hex_string):
@@ -39,3 +41,29 @@ def get_mimetype(filepath):
     extension = os.path.splitext(filepath)[1]
 
     return mappings.get(extension) or mimetypes.guess_type(filepath)[0]
+
+
+SVG_R = r"(?:<\?xml\b[^>]*>[^<]*)?(?:<!--.*?-->[^<]*)*(?:<svg|<!DOCTYPE svg)\b"
+SVG_RE = re.compile(SVG_R, re.DOTALL)
+
+
+def is_svg(data):
+    content = data.decode("latin_1")
+    return SVG_RE.match(content) is not None
+
+
+def guess_mime(data):
+    """
+    Get the mimetype of the data.
+    This is intented to mainly handle guess image types.
+    args:
+    - data: bytes of data
+    returns:
+    The mimetype: image/png, image/jpeg, image/svg+xml... or None
+    """
+
+    mimetype = filetype.guess_mime(data)
+    # filetype.guess_mime only supports binary content
+    if not mimetype and is_svg(data):
+        return "image/svg+xml"
+    return mimetype
