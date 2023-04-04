@@ -11,6 +11,7 @@ from wand.image import Image
 # Local
 from webapp.database import db_session
 from webapp.lib.processors import ImageProcessor
+from webapp.lib.url_helpers import clean_unicode
 from webapp.models import Asset, Tag
 from webapp.swift import file_manager
 
@@ -64,6 +65,10 @@ class AssetService:
         """
         Create a new asset
         """
+        # escape unicde characters
+        friendly_name = clean_unicode(friendly_name)
+        url_path = clean_unicode(url_path)
+
         encoded_file_content = (b64decode(file_content),)
         if imghdr.what(None, h=file_content) is not None:
             data["image"] = True
