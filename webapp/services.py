@@ -24,23 +24,19 @@ class AssetService:
             query = "%"
         if not file_type:
             file_type = "%"
-
-        tag_condition = Asset.tags.any()
+        conditions = [
+            Asset.file_path.ilike(f"%.{file_type}"),
+            or_(
+                Asset.file_path.ilike(f"%{query}%"),
+                Asset.data.cast(Text).ilike(f"%{query}%"),
+            ),
+        ]
         if tag:
             tag_condition = Asset.tags.any(Tag.name == tag)
-
-        return (
-            db_session.query(Asset)
-            .filter(
-                Asset.file_path.ilike(f"%.{file_type}"),
-                or_(
-                    Asset.file_path.ilike(f"%{query}%"),
-                    Asset.data.cast(Text).ilike(f"%{query}%"),
-                ),
-                tag_condition,
-            )
-            .all()
-        )
+            conditions.append(tag_condition)
+        assets = db_session.query(Asset).filter(*conditions).yield_per(100)
+        for asset in assets:
+            yield asset
 
     def find_asset(self, file_path):
         """
