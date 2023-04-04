@@ -1,5 +1,6 @@
 # Standard library
 import base64
+import json
 import re
 import uuid
 from datetime import datetime
@@ -7,7 +8,14 @@ from distutils.util import strtobool
 from urllib.parse import unquote, urlparse
 
 # Packages
-from flask import Response, abort, jsonify, redirect, request
+from flask import (
+    Response,
+    abort,
+    jsonify,
+    redirect,
+    request,
+    stream_with_context,
+)
 
 # Local
 from webapp.database import db_session
@@ -145,7 +153,18 @@ def get_assets():
     file_type = request.values.get("type", "")
 
     assets = asset_service.find_assets(query=query, file_type=file_type)
-    return jsonify([asset.as_json() for asset in assets])
+
+    def generate_json():
+        yield "["
+        for i, asset in enumerate(assets):
+            if i > 0:
+                yield ","
+            yield json.dumps(asset.as_json())
+        yield "]"
+
+    response = Response(stream_with_context(generate_json()))
+    response.headers["Content-Type"] = "application/json"
+    return response
 
 
 @token_required
