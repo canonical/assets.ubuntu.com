@@ -116,7 +116,7 @@
           function (e) {
             let url = e.target.dataset.url;
             if (url.startsWith("/")) url = `${location.origin}${url}`;
-            copyToClipboard(url);
+            copyToClipboard(encodeURI(url));
           },
           false
         );
