@@ -1,0 +1,69 @@
+domain: assets.ubuntu.com
+image: prod-comms.docker-registry.canonical.com/assets.ubuntu.com
+
+env:
+  - name: FLASK_APP
+    value: webapp.app
+
+  - name: SENTRY_DSN
+    value: https://3bc9aa38eda545d6ae399b121811c8d2@sentry.is.canonical.com//56
+
+  # Postgres
+  - name: DATABASE_URL
+    secretKeyRef:
+      key: database-url
+      name: assets-ubuntu-postgres
+
+  # Swift
+  - name: OS_AUTH_URL
+    secretKeyRef:
+      key: os-auth-url
+      name: assets-ubuntu-swift
+
+  - name: OS_USERNAME
+    secretKeyRef:
+      key: os-username
+      name: assets-ubuntu-swift
+
+  - name: OS_PASSWORD
+    secretKeyRef:
+      key: os-password
+      name: assets-ubuntu-swift
+
+  - name: OS_AUTH_VERSION
+    secretKeyRef:
+      key: os-auth-version
+      name: assets-ubuntu-swift
+
+  - name: OS_TENANT_NAME
+    secretKeyRef:
+      key: os-tenant-name
+      name: assets-ubuntu-swift
+
+  - name: OS_REGION_NAME
+    secretKeyRef:
+      key: os-region-name
+      name: assets-ubuntu-swift
+
+extraHosts:
+  - domain: manager.assets.ubuntu.com
+
+memoryLimit: 256Mi
+
+# Overrides for production
+production:
+  replicas: 2
+  nginxConfigurationSnippet: |
+    if ($host = 'manager.assets.ubuntu.com' ) {
+      rewrite ^ https://assets.ubuntu.com/manager$request_uri? permanent;
+    }
+    more_set_headers "X-Robots-Tag: noindex";
+
+# Overrides for staging
+staging:
+  replicas: 2
+  nginxConfigurationSnippet: |
+    if ($host = 'manager.staging.assets.ubuntu.com' ) {
+      rewrite ^ https://assets.staging.ubuntu.com/manager$request_uri? permanent;
+    }
+    more_set_headers "X-Robots-Tag: noindex";
