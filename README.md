@@ -1,107 +1,121 @@
-# Assets server
+# assets.![ubuntu](https://assets.ubuntu.com/v1/9f61b97f-logo-ubuntu.svg "Ubuntu").com codebase
 
-[![CircleCI build status](https://circleci.com/gh/canonical-web-and-design/assets.ubuntu.com.svg?style=shield)](https://circleci.com/gh/canonical-web-and-design/assets.ubuntu.com)
-[![Coverage Status](https://coveralls.io/repos/github/ubuntudesign/assets-server/badge.svg?branch=main)](https://coveralls.io/github/ubuntudesign/assets-server?branch=main)
+The assets server manages the assets (mainly images and PDFs) for different Canonical and Ubuntu websites.
 
-This is the codebase for [assets.ubuntu.com](https://assets.ubuntu.com), a Restful API service for storing and serving binary assets over HTTP, built with [Django REST framework](http://www.django-rest-framework.org/).
+It has 2 main parts:
 
-## Assets manager
+- https://assets.ubuntu.com/v1 : The API, which is a flask app that provides a RESTful API for storing and serving binary assets over HTTP
+- https://assets.ubuntu.com/manager : The web interface, which is jinja2 templates that provide a web interface for managing the assets server
 
-We have also created [assets-manager](https://github.com/ubuntudesign/assets-manager/), a web interface for managing this assets server. It's hosted at [manager.assets.ubuntu.com](https://manager.assets.ubuntu.com).
+## Summary
 
-## Local development
+- [assets..com codebase](#assetscom-codebase)
+  - [Summary](#summary)
+  - [Creating assets using the web interface](#creating-assets-using-the-web-interface)
+  - [Transforming images](#transforming-images)
+  - [Using the RestAPI](#using-the-restapi)
+    - [Authentication](#authentication)
+    - [Managing tokens](#managing-tokens)
+      - [Generating a new token](#generating-a-new-token)
+      - [Removing a token](#removing-a-token)
+      - [Listing all the tokens](#listing-all-the-tokens)
+    - [Managing assets](#managing-assets)
+      - [Uploading assets](#uploading-assets)
+      - [Deleting assets](#deleting-assets)
+      - [Listing assets](#listing-assets)
+    - [Managing redirects](#managing-redirects)
+      - [Creating redirects](#creating-redirects)
+      - [Updating redirects](#updating-redirects)
+      - [Deleting redirects](#deleting-redirects)
+  - [Security](#security)
+  - [Caching](#caching)
 
-The simplest way to run the site locally is to first [install Docker](https://docs.docker.com/engine/installation/) (on Linux you may need to [add your user to the `docker` group](https://docs.docker.com/engine/installation/linux/linux-postinstall/)), and then use the `./run` script:
+## Creating assets using the web interface
 
-``` bash
-./run
-```
+You will need to login with an SSO account that is in the `canonical-content-people` team.
 
-Once the containers are setup, you can visit <http://127.0.0.1:8017> in your browser.
-
-### Creating tokens locally
-
-To interact with the assets server, you'll need to generate an authentication token. You can do this for a locally running server with:
-
-``` bash
-$ ./run exec ./manage.py gettoken {token-name}
-Token '{token-name}' created
-3fe479a6b8184be4a4cdf42085f19f9a
-```
-
-You can list all tokens with [scripts/list-tokens.sh](scripts/list-tokens.sh) or delete them with [scripts/delete-token.sh](scripts/delete-token.sh).
-
-See the API section below for how to use tokens.
-
-### Tests
-
-You can run all tests with:
-
-``` bash
-./run test
-```
+You can then create assets using the web interface at https://assets.ubuntu.com/manager/create.
 
 ## Transforming images
 
-Images can be transformed using the `op` get option, along with the required arguments.
+When getting an image asset, the asset can be transformed using the `op` (operation) option.
 
 You can manually specify one of these operations along with their corresponding options:
- - `region`
+
+- `region`:
   - `rect`: The region as x,y,w,h; x,y: top-left position, w,h: width/height of region
- - `resize`
+- `resize`:
   - `w`: Width
   - `h`: Height
   - `max-width`
-  - `max-height`
- - `rotate`
+- `max-height`:
+- `rotate`:
   - `deg`: Degrees to rotate the image
 
-The default option is resize and can be used without setting `op`
+The default option is resize and can be used without setting `op`.
+
+The default option is resize and can be used without setting `op`, e.g.:
 
 ```
 https://assets.ubuntu.com/v1/4d7a830e-logo-ubuntuone.png?w=30
 ```
 
-Or you can use another feature, like `region`:
+Or you can use another feature, like `region` e.g.:
 
 ```
 https://assets.ubuntu.com/v1/4d7a830e-logo-ubuntuone.png?op=region&rect=0,0,50,50
 ```
 
-## API functions
+## Using the RestAPI
 
-All API functions will need a token for access. Once you have one, you can then pass this token in the URL for requests to the assets server API. E.g.:
+Creating a new asset can you be done using the [assets manager](https://assets.ubuntu.com/manager), however in case of advanced option such as image transformation or creating redirects, you can use the API directly.
+
+### Authentication
+
+The API uses a token based authentication system. You can specify your token in 3 different ways:
+
+- As a `token` query parameter: e.g. `https://assets.ubuntu.com/v1?token=1234`
+- As an `Authorization` HTTP header:
 
 ```
-https://assets.ubuntu.com/v1/?token=3fe479a6b8184be4a4cdf42085f19f9a  # List all existing assets in JSON format
+Authorization: "token 1234"
 ```
 
-### Authentication tokens
+- In case of a POST request, along with the request body:
 
-You can see all tokens by simply going to "https://assets.ubuntu.com/v1/tokens?token=YOUREXISTINGTOKEN".
-
-Anyone with a token can create another named token through the API using `curl`:
-
-``` bash
-$ curl --request POST --data name={new-token-name} "https://assets.ubuntu.com/v1/tokens?token={your-existing-token}"
-{
-    "message": "Token created", 
-    "name": "{new-token-name}", 
-    "token": "{the-new-generated-token}"
-}
+```
+key: 1234
 ```
 
-Even though at present all tokens have the same access, it's a good idea to generate a new token for each separate platform and each separate user of the API. This is so that if a token gets exposed, it can be easily deleted without impacting other clients.
+### Managing tokens
 
-#### Deleting tokens
+#### Generating a new token
 
-Deleting tokens is similarly straightforward with `curl`:
+You can generate a new token by running the following command:
 
-``` bash
-curl --request DELETE "https://assets.ubuntu.com/v1/tokens/{token-to-be-deleted}?token={your-api-token}"
+```bash
+curl -X POST --data name=token-name https://assets.ubuntu.com/v1/tokens?token={your-exisiting-token}
 ```
 
-### Uploading assets
+#### Removing a token
+
+You can remove a token by running the following command:
+
+```bash
+curl -X DELETE https://assets.ubuntu.com/v1/tokens/{token-to-be-delete}?token={your-token}
+```
+
+#### Listing all the tokens
+
+You can list all the tokens by running the following command:
+
+```bash
+curl https://assets.ubuntu.com/v1/tokens?token={your-token}
+```
+
+### Managing assets
+
+#### Uploading assets
 
 You can upload assets with the cryptically named [`upload-assets`](https://github.com/canonical/canonicalwebteam.upload-assets) tool. This can be installed with `snap install upload-assets` or `sudo pip3 install upload-assets`.
 
@@ -109,25 +123,27 @@ It's usually best to store your API key in your RC file (e.g. `~/.bashrc`) by ad
 
 You can then upload assets:
 
-``` bash
+```bash
 $ upload-asset --api-domain localhost:8017 MY-IMAGE.png
 {'url': u'http://localhost:8017/v1/xxxxx-MY-IMAGE.png', 'image': True, 'created': u'Tue Sep 27 16:13:22 2016', 'file_path': u'xxxxx-MY-IMAGE.png', 'tags': u''}
 ```
 
-You can also use [curl](https://curl.haxx.se/docs/manpage.html):
+You can also directly upload assets using the API:
 
-``` bash
-$ echo "asset=$(base64 -w 0 MY-IMAGE.png)" | \
+```bash
+echo "asset=$(base64 -w 0 MY-IMAGE.png)" | \
   curl --request POST --data @- --data "friendly-name=MY-IMAGE.png" "https://assets.ubuntu.com/v1/?token={your-api-token}"
-{
-    "optimized": false,
-    "created": "Wed Sep 28 11:07:33 2016",
-    "file_path": "xxxxxxxx-MY-IMAGE.png",
-    "tags": ""
-}
 ```
 
-### Deleting assets
+In the example above, we used an option called `friendly-name` which is an option among others:
+
+- `asset`: (**required**) The base64 encoded asset
+- `friendly-name`: (optional) The name of the asset to be included in the asset's URL
+- `url-path`: (optional, default: the SHA1 of the `asset`) The path of the asset as it will be served over HTTP
+- `optimize`: (optional, default: `false`) Whether to optimize the image, only works for images of type PNG, JPEG and SVG, this option is ignored for other types of assets
+- `tags`: (optional, default: `[]`) A comma separated list of tags to be associated with the asset
+
+#### Deleting assets
 
 **Warning: Please read this before deleting anything**
 
@@ -135,13 +151,27 @@ _The assets server serves all assets with a `cache-control` header instructing a
 
 _For this reason it's best to find ways around needing to regularly delete assets._
 
-_This is also why the [assets manager](https://manager.assets.ubuntu.com) doesn't support deleting assets through the interface._
+_This is also why the [assets manager](https://assets.ubuntu.com/manager) doesn't support deleting assets through the interface._
 
 To delete an assets, simply use `curl` with the `DELETE` method:
 
-``` bash
+```bash
 curl --request DELETE "https://assets.ubuntu.com/v1/{asset-filename}?token={your-api-token}"
 ```
+
+#### Listing assets
+
+You can list all the assets by running the following command:
+
+```bash
+curl https://assets.ubuntu.com/v1/?token={your-api-token}
+```
+
+You can also filter the assets by:
+
+- `tag`: Filter the assets by a specific tag
+- `q`: A query string to filter the assets by filename, e.g. `q=ubuntu` will return all the assets with `ubuntu` in their filename
+- `type`: The type of the asset, e.g. `type=png` will return all the assets with the `png` extension
 
 ### Managing redirects
 
@@ -155,12 +185,12 @@ You can set up a new redirect with `curl --data redirect_path={the-path-to-redir
 
 E.g. this would create the `https://assets.ubuntu.com/ubuntu-server-guide` redirect mentioned above:
 
-``` bash
+```bash
 $ curl --data redirect_path=ubuntu-server-guide --data target_url=https://assets.ubuntu.com/v1/25868d7a-ubuntu-server-guide-2022-07-11.pdf "https://assets.ubuntu.com/v1/redirects?token=xxxxxxxxxxx"
 {
-    "permanent": false, 
-    "message": "Redirect created", 
-    "target_url": "https://assets.ubuntu.com/v1/25868d7a-ubuntu-server-guide-2022-07-11.pdf", 
+    "permanent": false,
+    "message": "Redirect created",
+    "target_url": "https://assets.ubuntu.com/v1/25868d7a-ubuntu-server-guide-2022-07-11.pdf",
     "redirect_path": "ubuntu-server-guide"
 }
 ```
@@ -171,11 +201,11 @@ Once a redirect already exists, you can use the `PUT` method to update it using 
 
 E.g. (following the above example):
 
-``` bash
+```bash
 $ curl --request PUT --data target_url=https://assets.ubuntu.com/v1/fe8d7514-ubuntu-server-guide-2022-07-13.pdf "https://assets.ubuntu.com/v1/redirects/ubuntu-server-guide?token=xxxxxxxxx"
 {
-    "target_url": "https://assets.ubuntu.com/v1/fe8d7514-ubuntu-server-guide-2022-07-13.pdf", 
-    "permanent": false, 
+    "target_url": "https://assets.ubuntu.com/v1/fe8d7514-ubuntu-server-guide-2022-07-13.pdf",
+    "permanent": false,
     "redirect_path": "ubuntu-server-guide"
 }
 ```
