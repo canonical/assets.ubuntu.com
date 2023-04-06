@@ -23,8 +23,9 @@ class TestRoutes(unittest.TestCase):
         When given a non-existent URL,
         we should return a 404 status code
         """
-
-        self.assertEqual(self.client.get("/not-found-url").status_code, 404)
+        self.assertEqual(
+            self.client.get("/not-found-url", follow_redirects=True), 404
+        )
 
 
 if __name__ == "__main__":
