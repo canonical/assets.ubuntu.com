@@ -14,7 +14,9 @@
         <input id="input-tags" placeholder="e.g.: button, ubuntu" value="{{ tags }}" type="text" name="tags" />
         <input id="input-optimize" {% if optimize %} checked {% endif%} type="checkbox" name="optimize" />
         <label for="input-optimize">Optimize images</label>
-        <button class="p-button--positive" type="submit">Submit</button>
+        <div class="u-fixed-width">
+          <button class="p-button--positive" type="submit">Submit</button>
+        </div>
       </form>
     </div>
   </div>
