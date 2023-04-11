@@ -59,7 +59,7 @@
     <main id="main-content">{% block content %} {% endblock %}</main>
     <script>
       function generateImageTag(str) {
-        const img = new Image();
+        const img = new Image()
         img.onload = function () {
           imageLoadHandler(`
           \{\{ image \(
@@ -70,56 +70,106 @@
             hi_def=True,
             loading="auto|lazy"
             \) \| safe
-          \}\}`);
-        };
-        img.src = str;
+          \}\}`)
+        }
+        img.src = str
       }
 
       function imageLoadHandler(imageTagContent) {
-        copyToClipboard(imageTagContent);
+        copyToClipboard(imageTagContent)
       }
 
       function copyToClipboard(str) {
-        var el = document.createElement("textarea"); // Create a <textarea> element
-        el.value = str; // Set its value to the string that you want copied
-        el.setAttribute("readonly", ""); // Make it readonly to be tamper-proof
-        el.style.position = "absolute";
-        el.style.left = "-9999px"; // Move outside the screen to make it invisible
-        document.body.appendChild(el); // Append the <textarea> element to the HTML document
+        var el = document.createElement("textarea") // Create a <textarea> element
+        el.value = str // Set its value to the string that you want copied
+        el.setAttribute("readonly", "") // Make it readonly to be tamper-proof
+        el.style.position = "absolute"
+        el.style.left = "-9999px" // Move outside the screen to make it invisible
+        document.body.appendChild(el) // Append the <textarea> element to the HTML document
         var selected =
           document.getSelection().rangeCount > 0 // Check if there is any content selected previously
             ? document.getSelection().getRangeAt(0) // Store selection if found
-            : false; // Mark as false to know no selection existed before
-        el.select(); // Select the <textarea> content
-        document.execCommand("copy"); // Copy - only works as a result of a user action (e.g. click events)
-        document.body.removeChild(el); // Remove the <textarea> element
+            : false // Mark as false to know no selection existed before
+        el.select() // Select the <textarea> content
+        document.execCommand("copy") // Copy - only works as a result of a user action (e.g. click events)
+        document.body.removeChild(el) // Remove the <textarea> element
         if (selected) {
           // If a selection existed before copying
-          document.getSelection().removeAllRanges(); // Unselect everything on the HTML document
-          document.getSelection().addRange(selected); // Restore the original selection
+          document.getSelection().removeAllRanges() // Unselect everything on the HTML document
+          document.getSelection().addRange(selected) // Restore the original selection
         }
       }
 
-      var imageTagButtons = document.querySelectorAll(".js-copy-image-tag");
+      var imageTagButtons = document.querySelectorAll(".js-copy-image-tag")
       imageTagButtons.forEach((button) => {
         button.addEventListener("click", (e) => {
-          let url = e.target.dataset.url;
-          if (url.startsWith("/")) url = `${location.origin}${url}`;
-          generateImageTag(url);
-        });
-      });
+          let url = e.target.dataset.url
+          if (url.startsWith("/")) url = `${location.origin}${url}`
+          generateImageTag(url)
+        })
+      })
 
-      var copyButtons = document.querySelectorAll(".copy-link");
+      var copyButtons = document.querySelectorAll(".copy-link")
       for (var copyButton of copyButtons) {
         copyButton.addEventListener(
           "click",
           function (e) {
-            let url = e.target.dataset.url;
-            if (url.startsWith("/")) url = `${location.origin}${url}`;
-            copyToClipboard(encodeURI(url));
+            let url = e.target.dataset.url
+            if (url.startsWith("/")) url = `${location.origin}${url}`
+            copyToClipboard(encodeURI(url))
+            showNotification("Link copied to clipboard")
           },
           false
-        );
+        )
+      }
+    </script>
+
+    <!-- Notification -->
+    <div class="p-notification--positive u-hide" id="notification">
+      <div class="p-notification__content">
+        <p class="p-notification__message"></p>
+        <button
+          class="p-notification__close"
+          aria-controls="notification"
+          onclick="hideNotification()"
+        ></button>
+      </div>
+    </div>
+    <style>
+      #notification {
+        z-index: 9999;
+        max-width: 20rem;
+        padding: 0.5rem 3rem;
+        margin: 1rem;
+        position: fixed;
+        right: 0;
+        top: 0;
+        background: white;
+      }
+    </style>
+    <script>
+      const notificationEl = document.getElementById("notification")
+      const notificationTimeout = 2000
+      let notificationIsVisible = false
+      let notificationTimeoutId = null
+      const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+      async function showNotification(message) {
+        if (notificationIsVisible) {
+          hideNotification()
+          await sleep(100)
+        }
+        notificationIsVisible = true
+        notificationEl.classList.remove("u-hide")
+        notificationEl.querySelector(".p-notification__message").innerHTML =
+          message
+        // auto close after 5 seconds
+        notificationTimeoutId = setTimeout(hideNotification, 5000)
+      }
+
+      function hideNotification() {
+        notificationIsVisible = false
+        clearTimeout(notificationTimeoutId)
+        notificationEl.classList.add("u-hide")
       }
     </script>
   </body>
