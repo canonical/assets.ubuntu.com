@@ -24,7 +24,10 @@ class TestRoutes(unittest.TestCase):
         we should return a 404 status code
         """
         self.assertEqual(
-            self.client.get("/not-found-url", follow_redirects=True), 404
+            self.client.get(
+                "/not-found-url", follow_redirects=True
+            ).status_code,
+            404,
         )
 
 
