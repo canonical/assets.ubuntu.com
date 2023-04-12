@@ -12,6 +12,7 @@ from wand.image import Image
 from webapp.database import db_session
 from webapp.lib.processors import ImageProcessor
 from webapp.lib.url_helpers import clean_unicode
+from webapp.lib.file_helpers import is_svg
 from webapp.models import Asset, Tag
 from webapp.swift import file_manager
 
@@ -66,11 +67,14 @@ class AssetService:
         url_path = clean_unicode(url_path)
 
         encoded_file_content = (b64decode(file_content),)
-        if imghdr.what(None, h=file_content) is not None:
+        if imghdr.what(None, h=file_content) is not None or is_svg(
+            file_content
+        ):
             data["image"] = True
         else:
             # As it's not an image, there is no need for optimization
             data["optimized"] = False
+
         # Try to optimize the asset if it's an image
         if data.get("image") and optimize:
             try:

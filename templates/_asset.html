@@ -14,9 +14,9 @@
       <span>
         <a href="/manager/update?file-path={{ asset.file_path }}">Tags</a>:
         {% for tag in asset.tags %}
-        <a href="/manager?tag={{ tag.name }}">
-          <span class="p-label">{{tag.name}}</span>
-        </a>
+        <span class="p-label">
+          <a href="/manager?tag={{ tag.name }}">{{tag.name}}</a>
+        </span>
         {% endfor %}
       </span>
     </p>

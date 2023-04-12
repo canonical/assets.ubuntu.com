@@ -23,12 +23,16 @@
     <header id="navigation" class="p-navigation">
       <div class="p-navigation__row">
         <div class="p-navigation__banner">
-          <div class="p-navigation__logo">
+          <div class="p-navigation__tagged-logo">
             <a class="p-navigation__link" href="/manager">
-              <img
-                class="p-navigation__image"
-                src="https://assets.ubuntu.com/v1/c4f35e06-products-hero-ubuntu.svg"
-              />
+              <div class="p-navigation__logo-tag">
+                <img
+                  class="p-navigation__logo-icon"
+                  src="https://assets.ubuntu.com/v1/82818827-CoF_white.svg"
+                  alt=""
+                />
+              </div>
+              <span class="p-navigation__logo-title">Ubuntu assets</span>
             </a>
           </div>
           <a href="#navigation" class="p-navigation__toggle--open" title="menu"
@@ -41,16 +45,16 @@
             >Close menu</a
           >
         </div>
-        <nav class="p-navigation__nav">
-          <span class="u-off-screen">
-            <a href="#main-content">Jump to main content</a>
-          </span>
-          <ul class="p-navigation__links" role="menu">
-            <li class="p-navigation__link p-nav">
-              <a href="/manager">Search assets</a>
+
+        <nav class="p-navigation__nav" aria-label="Example main">
+          <ul class="p-navigation__items">
+            <li class="p-navigation__item">
+              <a class="p-navigation__link" href="/manager">Search assets</a>
             </li>
-            <li class="p-navigation__link p-nav">
-              <a href="/manager/create">Create asset(s)</a>
+            <li class="p-navigation__item">
+              <a class="p-navigation__link" href="/manager/create"
+                >Create asset(s)</a
+              >
             </li>
           </ul>
         </nav>
@@ -59,7 +63,7 @@
     <main id="main-content">{% block content %} {% endblock %}</main>
     <script>
       function generateImageTag(str) {
-        const img = new Image();
+        const img = new Image()
         img.onload = function () {
           imageLoadHandler(`
           \{\{ image \(
@@ -70,57 +74,63 @@
             hi_def=True,
             loading="auto|lazy"
             \) \| safe
-          \}\}`);
-        };
-        img.src = str;
+          \}\}`)
+        }
+        img.src = str
       }
 
       function imageLoadHandler(imageTagContent) {
-        copyToClipboard(imageTagContent);
+        copyToClipboard(imageTagContent)
       }
 
       function copyToClipboard(str) {
-        var el = document.createElement("textarea"); // Create a <textarea> element
-        el.value = str; // Set its value to the string that you want copied
-        el.setAttribute("readonly", ""); // Make it readonly to be tamper-proof
-        el.style.position = "absolute";
-        el.style.left = "-9999px"; // Move outside the screen to make it invisible
-        document.body.appendChild(el); // Append the <textarea> element to the HTML document
+        var el = document.createElement("textarea") // Create a <textarea> element
+        el.value = str // Set its value to the string that you want copied
+        el.setAttribute("readonly", "") // Make it readonly to be tamper-proof
+        el.style.position = "absolute"
+        el.style.left = "-9999px" // Move outside the screen to make it invisible
+        document.body.appendChild(el) // Append the <textarea> element to the HTML document
         var selected =
           document.getSelection().rangeCount > 0 // Check if there is any content selected previously
             ? document.getSelection().getRangeAt(0) // Store selection if found
-            : false; // Mark as false to know no selection existed before
-        el.select(); // Select the <textarea> content
-        document.execCommand("copy"); // Copy - only works as a result of a user action (e.g. click events)
-        document.body.removeChild(el); // Remove the <textarea> element
+            : false // Mark as false to know no selection existed before
+        el.select() // Select the <textarea> content
+        document.execCommand("copy") // Copy - only works as a result of a user action (e.g. click events)
+        document.body.removeChild(el) // Remove the <textarea> element
         if (selected) {
           // If a selection existed before copying
-          document.getSelection().removeAllRanges(); // Unselect everything on the HTML document
-          document.getSelection().addRange(selected); // Restore the original selection
+          document.getSelection().removeAllRanges() // Unselect everything on the HTML document
+          document.getSelection().addRange(selected) // Restore the original selection
         }
       }
 
-      var imageTagButtons = document.querySelectorAll(".js-copy-image-tag");
+      var imageTagButtons = document.querySelectorAll(".js-copy-image-tag")
       imageTagButtons.forEach((button) => {
         button.addEventListener("click", (e) => {
-          let url = e.target.dataset.url;
-          if (url.startsWith("/")) url = `${location.origin}${url}`;
-          generateImageTag(url);
-        });
-      });
+          let url = e.target.dataset.url
+          if (url.startsWith("/")) url = `${location.origin}${url}`
+          generateImageTag(url)
+        })
+      })
 
-      var copyButtons = document.querySelectorAll(".copy-link");
+      var copyButtons = document.querySelectorAll(".copy-link")
       for (var copyButton of copyButtons) {
         copyButton.addEventListener(
           "click",
           function (e) {
-            let url = e.target.dataset.url;
-            if (url.startsWith("/")) url = `${location.origin}${url}`;
-            copyToClipboard(encodeURI(url));
+            let url = e.target.dataset.url
+            if (url.startsWith("/")) url = `${location.origin}${url}`
+            copyToClipboard(encodeURI(url))
           },
           false
-        );
+        )
       }
+
+      document.querySelectorAll(".p-navigation__link").forEach((link) => {
+        if (link.href === location.href) {
+          link.parentElement.classList.add("is-selected")
+        }
+      })
     </script>
   </body>
 </html>
