@@ -32,6 +32,7 @@ class Asset(Base):
     tags = relationship(
         "Tag", secondary=asset_tag_association_table, back_populates="assets"
     )
+    deprecated = Column(Boolean, nullable=False, default=False)
 
     def as_json(self):
         return {
@@ -39,6 +40,7 @@ class Asset(Base):
             "created": self.created.strftime("%a, %d %b %Y %H:%M:%S"),
             "file_path": self.file_path,
             "tags": ", ".join([tag.name for tag in self.tags]),
+            "deprecated": self.deprecated,
         }
 
 

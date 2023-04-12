@@ -12,15 +12,16 @@
     <p><strong>{{ asset.file_path }}</strong></p>
     <p>
       <span>
-        <a href="/manager/update?file-path={{ asset.file_path }}">Tags</a>:
-        {% for tag in asset.tags %}
+        <span>Tags</span>: {% for tag in asset.tags %}
         <span class="p-label">
           <a href="/manager?tag={{ tag.name }}">{{tag.name}}</a>
         </span>
         {% endfor %}
       </span>
     </p>
-    <p><span>Created: {{ asset.created }}</span></p>
+    <p>
+      <span>Created: {{ asset.created.strftime('%d/%m/%Y, %H:%M') }}</span>
+    </p>
     <p>
       <small>Copy:</small>
       <button
@@ -36,6 +37,20 @@
       >
         Image tag
       </button>
+      {% endif %}
+    </p>
+    <p class="asset-additional-edit-row">
+      <a
+        class="p-button--base has-icon"
+        href="/manager/update?file-path={{ asset.file_path }}"
+      >
+        <i class="p-icon--edit"></i>
+        <span>Edit</span>
+      </a>
+      {% if asset.deprecated %}
+      <span class="p-chip--caution">
+        <span class="p-chip__value">Deprecated</span>
+      </span>
       {% endif %}
     </p>
   </div>

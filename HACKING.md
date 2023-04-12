@@ -29,3 +29,17 @@ dotrun
 ```
 
 That's it! The project should now be running at http://localhost:8017/manager.
+
+### Generating API tokens
+
+To generate a new API token, run:
+
+```bash
+dotrun exec flask token create test
+```
+
+To list all the API tokens, run:
+
+```bash
+dotrun exec flask token list
+```

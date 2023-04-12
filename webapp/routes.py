@@ -1,5 +1,6 @@
 # System
 import re
+from distutils.util import strtobool
 
 # Packages
 from flask import Blueprint
@@ -114,9 +115,12 @@ def update():
 
     elif request.method == "POST":
         tags = request.form.get("tags")
+        deprecated = strtobool(request.form.get("deprecated", "false"))
         try:
-            asset = asset_service.update_asset(file_path, tags=tags.split(","))
-            flask.flash("Tags updated", "positive")
+            asset = asset_service.update_asset(
+                file_path, tags=tags.split(","), deprecated=deprecated
+            )
+            flask.flash("Asset updated", "positive")
         except AssetNotFound:
             flask.flash("Asset not found", "negative")
 
