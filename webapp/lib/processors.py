@@ -3,14 +3,20 @@ from io import BytesIO
 from uuid import uuid4
 
 from more_itertools import unique_everseen
-from pilbox.errors import PilboxError
-from pilbox.image import Image as PilboxImage
+from PIL import Image as PILImage
 from scour.scour import scourString
 from sh import jpegtran, optipng
 from wand.image import Image as WandImage
 
 from webapp.lib.file_helpers import guess_mime
 from webapp.lib.python_helpers import shared_items
+
+
+class ImageProcessingError(Exception):
+    def __init__(self, status_code, log_message):
+        self.status_code = status_code
+        self.log_message = log_message
+        super().__init__(log_message)
 
 
 class ImageProcessor:
@@ -81,15 +87,15 @@ class ImageProcessor:
                 self.data = image.make_blob(target_format)
                 return True
         else:
-            raise PilboxError(
+            raise ImageProcessingError(
                 400, log_message="Cannot convert to '{}'".format(target_format)
             )
 
     def transform(self):
         """
         Perform transformations on an image
-        Using Pilbox: https://github.com/nottrobin/pilbox
-        The self.options follow Pilbox's API
+        Using Pillow
+        The self.options follow the provided API
 
         Return True if transformation happened
         """
@@ -113,9 +119,14 @@ class ImageProcessor:
             for operation in operations:
                 if operation or "q" in self.options:
                     try:
-                        self._pilbox_operation(operation)
-                    except (TypeError, AttributeError) as operation_error:
-                        self._missing_param_error(operation_error, operation)
+                        self._pillow_operation(operation)
+                    except (
+                        IndexError,
+                        ValueError,
+                        TypeError,
+                        AttributeError,
+                    ):
+                        self._missing_param_error(operation)
 
             if operation:
                 return True
@@ -123,20 +134,21 @@ class ImageProcessor:
     # Private helper methods
     # ===
 
-    def _pilbox_operation(self, operation):
+    def _pillow_operation(self, operation):
         """
-        Use Pilbox to transform an image
+        Use Pillow to transform an image
         """
 
-        image = PilboxImage(BytesIO(self.data))
+        image = PILImage.open(BytesIO(self.data))
 
         if operation == "region":
-            image.region(self.options.get("rect").split(","))
+            rect = tuple(map(int, self.options.get("rect").split(",")))
+            image = image.crop(rect)
 
         elif operation == "rotate":
-            image.rotate(
-                deg=self.options.get("deg"), expand=self.options.get("expand")
-            )
+            deg = -1 * int(self.options.get("deg"))
+            expand = self.options.get("expand")
+            image = image.rotate(deg, expand=expand)
         elif operation == "resize":
             max_width = self.options.get("max-width")
             max_height = self.options.get("max-height")
@@ -155,60 +167,52 @@ class ImageProcessor:
                 max_height = int(max_height)
 
             # Image size management
-            with WandImage(blob=self.data) as image_info:
-                # Don't allow expanding of images
-                if (resize_width and resize_width > image_info.width) or (
-                    resize_height and resize_height > image_info.height
-                ):
-                    expand_message = (
-                        "Resize error: Maximum dimensions for this image "
-                        "are {0}px wide by {1}px high."
-                    ).format(image_info.width, image_info.height)
+            image_width, image_height = image.size
 
-                    raise PilboxError(400, log_message=expand_message)
+            # Don't allow expanding of images
+            if (resize_width and resize_width > image_width) or (
+                resize_height and resize_height > image_height
+            ):
+                expand_message = (
+                    "Resize error: Maximum dimensions for this image "
+                    "are {0}px wide by {1}px high."
+                ).format(image_width, image_height)
 
-                # Process max_width and max_height
-                if not resize_width and max_width:
-                    if max_width < image_info.width:
-                        resize_width = max_width
+                raise ImageProcessingError(400, log_message=expand_message)
 
-                if not resize_height and max_height:
-                    if max_height < image_info.height:
-                        resize_height = max_height
-                # conserve the image ratio
-                if resize_height and not resize_width:
-                    image_ratio = image_info.height / resize_height
-                    resize_width = image_info.width / image_ratio
-                elif not resize_height and resize_width:
-                    image_ratio = image_info.width / resize_width
-                    resize_height = image_info.height / image_ratio
+            # Process max_width and max_height
+            if not resize_width and max_width:
+                if max_width < image_width:
+                    resize_width = max_width
+
+            if not resize_height and max_height:
+                if max_height < image_height:
+                    resize_height = max_height
+
+            # Conserve the image ratio
+            if resize_height and not resize_width:
+                image_ratio = image_height / resize_height
+                resize_width = int(image_width / image_ratio)
+            elif not resize_height and resize_width:
+                image_ratio = image_width / resize_width
+                resize_height = int(image_height / image_ratio)
+
             if resize_height or resize_width:
-                image.resize(
-                    width=resize_width,
-                    height=resize_height,
-                    mode=self.options.get("mode"),
-                    filter=self.options.get("filter"),
-                    background=self.options.get("bg"),
-                    retain=self.options.get("retain"),
-                    position=self.options.get("pos"),
+                image = image.resize(
+                    (resize_width, resize_height), PILImage.ANTIALIAS
                 )
 
-        self.data = image.save(quality=self.options.get("q")).read()
-
-    def _missing_param_error(self, error, operation):
-        expected_errors = [
-            "int() argument must be a string or a number, not 'NoneType'",
-            "'NoneType' object has no attribute 'split'",
-        ]
-
-        if error.message in expected_errors:
-            message = (
-                "Invalid image operation. '{0}' accepts: {1}. "
-                "See https://github.com/agschwender/pilbox for more detail."
-            ).format(
-                operation, ", ".join(self.operation_parameters[operation])
+        image_format = image.format or "PNG"
+        with BytesIO() as output:
+            image.save(
+                output, format=image_format, quality=self.options.get("q")
             )
+            self.data = output.getvalue()
 
-            raise PilboxError(400, log_message=message)
-        else:
-            raise error
+    def _missing_param_error(self, operation):
+        message = (
+            "Invalid image operation. '{0}' accepts: {1}. "
+            "See https://github.com/agschwender/pilbox for more detail."
+        ).format(operation, ", ".join(self.operation_parameters[operation]))
+
+        raise ImageProcessingError(400, log_message=message)

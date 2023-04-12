@@ -103,7 +103,7 @@ def get_asset(file_path):
 @token_required
 def update_asset(file_path):
     tags = request.values.get("tags", "")
-    deprecated = strtobool(request.values.get("deprecated"))
+    deprecated = strtobool(request.values.get("deprecated", "false"))
     try:
         asset = asset_service.update_asset(
             file_path, tags=tags.split(","), deprecated=deprecated
