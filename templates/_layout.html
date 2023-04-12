@@ -121,9 +121,59 @@
             let url = e.target.dataset.url
             if (url.startsWith("/")) url = `${location.origin}${url}`
             copyToClipboard(encodeURI(url))
+            showNotification("Link copied to clipboard")
           },
           false
         )
+      }
+    </script>
+
+    <!-- Notification -->
+    <div class="p-notification--positive u-hide" id="notification">
+      <div class="p-notification__content">
+        <p class="p-notification__message"></p>
+        <button
+          class="p-notification__close"
+          aria-controls="notification"
+          onclick="hideNotification()"
+        ></button>
+      </div>
+    </div>
+    <style>
+      #notification {
+        z-index: 9999;
+        max-width: 20rem;
+        padding: 0.5rem 3rem;
+        margin: 1rem;
+        position: fixed;
+        right: 0;
+        top: 0;
+        background: white;
+      }
+    </style>
+    <script>
+      const notificationEl = document.getElementById("notification")
+      const notificationTimeout = 2000
+      let notificationIsVisible = false
+      let notificationTimeoutId = null
+      const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+      async function showNotification(message) {
+        if (notificationIsVisible) {
+          hideNotification()
+          await sleep(100)
+        }
+        notificationIsVisible = true
+        notificationEl.classList.remove("u-hide")
+        notificationEl.querySelector(".p-notification__message").innerHTML =
+          message
+        // auto close after 5 seconds
+        notificationTimeoutId = setTimeout(hideNotification, 5000)
+      }
+
+      function hideNotification() {
+        notificationIsVisible = false
+        clearTimeout(notificationTimeoutId)
+        notificationEl.classList.add("u-hide")
       }
 
       document.querySelectorAll(".p-navigation__link").forEach((link) => {
