@@ -22,15 +22,21 @@
       <form method="post">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
         {% if asset.data.image %}
-        <a href="/v1/{{ asset.file_path }}" target="_blank">
-          <img class="p-image--bordered asset-thumbnail" src="/v1/{{ asset.file_path }}">
-        </a>
+        <div class="u-fixed-width">
+          <a href="/v1/{{ asset.file_path }}" target="_blank">
+            <img class="p-image--bordered asset-thumbnail" src="/v1/{{ asset.file_path }}">
+          </a>
+        </div>
         {% endif %}
         <label for="input-tags">Tags:</label>
         <input id="input-tags" placeholder="e.g.: button, ubuntu"
           value="{{ asset.tags | map(attribute='name') | join(', ') }}"
           type="text" name="tags" />
-        <button class="p-button--positive" type="submit">Save</button>
+        <label for="deprecated">Deprecated:</label>
+        <input id="deprecated" type="checkbox" name="deprecated" {% if asset.deprecated %}checked{% endif %} />
+        <div class="u-fixed-width">
+          <button class="p-button--positive" type="submit">Save</button>
+        </div>
       </form>
       {% endif %}
     </div>

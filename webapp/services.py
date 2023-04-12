@@ -156,7 +156,7 @@ class AssetService:
     def normalize_tag_name(self, tag_name):
         return tag_name.strip().lower()
 
-    def update_asset(self, file_path, tags=[]):
+    def update_asset(self, file_path, tags=[], deprecated=None):
         asset = (
             db_session.query(Asset)
             .filter(Asset.file_path == file_path)
@@ -167,7 +167,8 @@ class AssetService:
             raise AssetNotFound(file_path)
         tags = self.create_tags_if_not_exist(tags)
         asset.tags = tags
-
+        if deprecated is not None:
+            asset.deprecated = deprecated
         db_session.commit()
         return asset
 

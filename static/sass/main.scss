@@ -1,6 +1,8 @@
 @import "vanilla-framework";
 @include vanilla;
 
+@import "icons";
+
 .p-label a {
   color: $color-light;
   &:hover {
@@ -11,4 +13,15 @@
 .asset-thumbnail {
   max-height: 100px;
   min-height: 100px;
+}
+
+.asset-additional-edit-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  & > * {
+    margin: 0 !important;
+  }
 }
