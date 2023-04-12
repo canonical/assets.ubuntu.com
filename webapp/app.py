@@ -7,7 +7,6 @@ from canonicalwebteam.flask_base.app import FlaskBase
 from flask import redirect
 from flask_wtf.csrf import CSRFProtect
 from flask.globals import request
-from pilbox.errors import PilboxError
 from swiftclient.exceptions import ClientException as SwiftException
 import flask
 
@@ -17,6 +16,7 @@ from webapp.commands import db_group, token_group
 from webapp.database import db_session
 from webapp.routes import api_blueprint, ui_blueprint
 from webapp.sso import init_sso
+from webapp.lib.processors import ImageProcessingError
 
 app = FlaskBase(
     __name__,
@@ -82,7 +82,7 @@ def error_os(error=None):
     return render_error(status, str(error.strerror))
 
 
-@app.errorhandler(PilboxError)
+@app.errorhandler(ImageProcessingError)
 def error_pillbox(error=None):
     app.extensions["sentry"].captureException()
 
