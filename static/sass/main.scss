@@ -1,11 +1,13 @@
-@charset 'UTF-8';
+@import "vanilla-framework";
+@include vanilla;
 
-$color-navigation-background: #f7f7f7;
+.p-label a {
+  color: $color-light;
+  &:hover {
+    text-decoration: none;
+  }
+}
 
-// import vanilla-framework
-@import 'vanilla-framework/scss/build';
-
-// import site specific patterns and overrides
 .asset-thumbnail {
   max-height: 100px;
   min-height: 100px;

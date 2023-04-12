@@ -23,12 +23,16 @@
     <header id="navigation" class="p-navigation">
       <div class="p-navigation__row">
         <div class="p-navigation__banner">
-          <div class="p-navigation__logo">
+          <div class="p-navigation__tagged-logo">
             <a class="p-navigation__link" href="/manager">
-              <img
-                class="p-navigation__image"
-                src="https://assets.ubuntu.com/v1/c4f35e06-products-hero-ubuntu.svg"
-              />
+              <div class="p-navigation__logo-tag">
+                <img
+                  class="p-navigation__logo-icon"
+                  src="https://assets.ubuntu.com/v1/82818827-CoF_white.svg"
+                  alt=""
+                />
+              </div>
+              <span class="p-navigation__logo-title">Ubuntu assets</span>
             </a>
           </div>
           <a href="#navigation" class="p-navigation__toggle--open" title="menu"
@@ -41,16 +45,16 @@
             >Close menu</a
           >
         </div>
-        <nav class="p-navigation__nav">
-          <span class="u-off-screen">
-            <a href="#main-content">Jump to main content</a>
-          </span>
-          <ul class="p-navigation__links" role="menu">
-            <li class="p-navigation__link p-nav">
-              <a href="/manager">Search assets</a>
+
+        <nav class="p-navigation__nav" aria-label="Example main">
+          <ul class="p-navigation__items">
+            <li class="p-navigation__item">
+              <a class="p-navigation__link" href="/manager">Search assets</a>
             </li>
-            <li class="p-navigation__link p-nav">
-              <a href="/manager/create">Create asset(s)</a>
+            <li class="p-navigation__item">
+              <a class="p-navigation__link" href="/manager/create"
+                >Create asset(s)</a
+              >
             </li>
           </ul>
         </nav>
@@ -171,6 +175,12 @@
         clearTimeout(notificationTimeoutId)
         notificationEl.classList.add("u-hide")
       }
+
+      document.querySelectorAll(".p-navigation__link").forEach((link) => {
+        if (link.href === location.href) {
+          link.parentElement.classList.add("is-selected")
+        }
+      })
     </script>
   </body>
 </html>
