@@ -53,6 +53,7 @@ memoryLimit: 256Mi
 # Overrides for production
 production:
   replicas: 2
+  nginx_proxy_body_size: 50m
   nginxConfigurationSnippet: |
     if ($host = 'manager.assets.ubuntu.com' ) {
       rewrite ^ https://assets.ubuntu.com/manager$request_uri? permanent;
