@@ -1,5 +1,5 @@
 domain: assets.ubuntu.com
-image: prod-comms.docker-registry.canonical.com/assets.ubuntu.com
+image: prod-comms.ps5.docker-registry.canonical.com/assets.ubuntu.com
 
 env:
   - name: FLASK_APP
