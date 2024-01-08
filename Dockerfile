@@ -1,4 +1,4 @@
-FROM ubuntu:focal AS base-dependencies
+FROM ubuntu:jammy AS base-dependencies
 ENV PATH="/root/.local/bin:${PATH}"
 ENV DEBIAN_FRONTEND noninteractive
 ENV LANG C.UTF-8
@@ -26,7 +26,7 @@ RUN --mount=type=cache,target=/root/.cache/pip pip3 install --user --requirement
 
 # Build stage: Install yarn dependencies
 # ===
-FROM node:18 AS yarn-dependencies
+FROM node:21 AS yarn-dependencies
 WORKDIR /srv
 ADD package.json .
 RUN --mount=type=cache,target=/usr/local/share/.cache/yarn yarn install
