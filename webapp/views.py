@@ -35,7 +35,11 @@ from webapp.swift import file_manager
 # ===
 
 
-def get_asset(file_path):
+def get_asset(file_path: str):
+    """
+    Get the asset content.
+    """
+
     request_url = urlparse(request.path)
     # remove multiple slashes
     request_path = re.sub("//+", "/", request_url.path)
@@ -62,6 +66,9 @@ def get_asset(file_path):
         return set_headers_for_type(response, get_mimetype(request_path))
 
     asset_data = file_manager.fetch(file_path)
+    if not asset_data:
+        abort(404, f"No asset found for '{file_path}'")
+
     asset_headers = file_manager.headers(file_path)
 
     def make_datetime(x):
@@ -152,6 +159,10 @@ def get_asset_info(file_path):
 
 @token_required
 def get_assets():
+    """
+    Get a list of assets metadata.
+    """
+
     query = request.values.get("q", "")
     file_type = request.values.get("type", "")
 

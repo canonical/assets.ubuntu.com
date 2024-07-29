@@ -1,22 +1,20 @@
-# System
 import errno
 import http.client
+from typing import Optional
 
-# Packages
+import flask
 from canonicalwebteam.flask_base.app import FlaskBase
 from flask import redirect
-from flask_wtf.csrf import CSRFProtect
 from flask.globals import request
+from flask_wtf.csrf import CSRFProtect
 from swiftclient.exceptions import ClientException as SwiftException
-import flask
+from werkzeug.exceptions import NotFound
 
-
-# Local
 from webapp.commands import db_group, token_group
 from webapp.database import db_session
+from webapp.lib.processors import ImageProcessingError
 from webapp.routes import api_blueprint, ui_blueprint
 from webapp.sso import init_sso
-from webapp.lib.processors import ImageProcessingError
 
 app = FlaskBase(
     __name__,
@@ -111,8 +109,14 @@ def index():
 
 
 @app.errorhandler(404)
-def redirect_v1(error=None):
-    return redirect(api_blueprint.url_prefix + "/" + request.path, code=302)
+def redirect_v1(error: Optional[NotFound] = None):
+    # Redirect to /v1/ if the route is not found
+    if request.path.startswith(api_blueprint.url_prefix):
+        return render_error(404, error.description if error else "Not found")
+    else:
+        return redirect(
+            api_blueprint.url_prefix + "/" + request.path, code=302
+        )
 
 
 app.register_blueprint(ui_blueprint)
