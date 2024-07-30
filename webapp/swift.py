@@ -1,10 +1,12 @@
 # Standard library
 import os
 from hashlib import sha1
+from typing import Optional
 
 # Packages
 import swiftclient
 from swiftclient.exceptions import ClientException as SwiftException
+import swiftclient.exceptions
 
 # Local
 from webapp.lib.url_helpers import normalize
@@ -20,7 +22,7 @@ class FileManager:
     """
 
     container_name = "assets"
-    swift_connection = None
+    swift_connection: swiftclient.client.Connection
 
     def __init__(self, swift_connection):
         self.swift_connection = swift_connection
@@ -50,7 +52,7 @@ class FileManager:
                 self.container_name, normalize(file_path), file_data
             )
 
-    def exists(self, file_path):
+    def exists(self, file_path: str) -> bool:
         file_exists = True
 
         try:
@@ -63,13 +65,18 @@ class FileManager:
 
         return file_exists
 
-    def fetch(self, file_path):
-        asset = self.swift_connection.get_object(
-            self.container_name, normalize(file_path)
-        )
-        return asset[1]
+    def fetch(self, file_path: str) -> Optional[bytes]:
+        try:
+            asset = self.swift_connection.get_object(
+                self.container_name, normalize(file_path)
+            )
+            return asset[1]
+        except swiftclient.exceptions.ClientException as error:
+            if error.http_status == 404:
+                return None
+            raise error
 
-    def headers(self, file_path):
+    def headers(self, file_path: str) -> dict:
         return self.swift_connection.head_object(
             self.container_name, normalize(file_path)
         )
