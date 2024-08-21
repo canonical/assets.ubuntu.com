@@ -198,9 +198,7 @@ class ImageProcessor:
                 resize_height = int(image_height / image_ratio)
 
             if resize_height or resize_width:
-                image = image.resize(
-                    (resize_width, resize_height), PILImage.ANTIALIAS
-                )
+                image = image.resize((resize_width, resize_height))
 
         image_format = image.format or "PNG"
         with BytesIO() as output:
