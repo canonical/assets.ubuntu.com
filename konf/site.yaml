@@ -48,7 +48,7 @@ env:
 extraHosts:
   - domain: manager.assets.ubuntu.com
 
-memoryLimit: 256Mi
+memoryLimit: 512Mi
 
 # Overrides for production
 production:
