@@ -16,8 +16,11 @@ from webapp.lib.file_helpers import get_mimetype, remove_filename_hash
 from webapp.lib.http_helpers import set_headers_for_type
 from webapp.lib.processors import ImageProcessor
 from webapp.models import Asset, Redirect, Token
-from webapp.services import (AssetAlreadyExistException, AssetNotFound,
-                             asset_service)
+from webapp.services import (
+    AssetAlreadyExistException,
+    AssetNotFound,
+    asset_service,
+)
 from webapp.swift import file_manager
 
 # Assets
