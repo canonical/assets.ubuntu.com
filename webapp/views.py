@@ -1,6 +1,5 @@
 # Standard library
 import base64
-import json
 import re
 import uuid
 from datetime import datetime
@@ -8,14 +7,7 @@ from distutils.util import strtobool
 from urllib.parse import unquote, urlparse
 
 # Packages
-from flask import (
-    Response,
-    abort,
-    jsonify,
-    redirect,
-    request,
-    stream_with_context,
-)
+from flask import Response, abort, jsonify, redirect, request
 
 # Local
 from webapp.database import db_session
@@ -24,11 +16,8 @@ from webapp.lib.file_helpers import get_mimetype, remove_filename_hash
 from webapp.lib.http_helpers import set_headers_for_type
 from webapp.lib.processors import ImageProcessor
 from webapp.models import Asset, Redirect, Token
-from webapp.services import (
-    AssetAlreadyExistException,
-    AssetNotFound,
-    asset_service,
-)
+from webapp.services import (AssetAlreadyExistException, AssetNotFound,
+                             asset_service)
 from webapp.swift import file_manager
 
 # Assets
@@ -165,20 +154,27 @@ def get_assets():
 
     query = request.values.get("q", "")
     file_type = request.values.get("type", "")
+    page = request.values.get("page", type=int)
+    per_page = request.values.get("per_page", type=int)
 
-    assets = asset_service.find_assets(query=query, file_type=file_type)
+    page = 1 if not page or page < 1 else page
+    per_page = (
+        20 if not per_page or per_page < 1 or per_page > 100 else per_page
+    )
 
-    def generate_json():
-        yield "["
-        for i, asset in enumerate(assets):
-            if i > 0:
-                yield ","
-            yield json.dumps(asset.as_json())
-        yield "]"
+    assets, total = asset_service.find_assets(
+        query=query, file_type=file_type, page=page, per_page=per_page
+    )
 
-    response = Response(stream_with_context(generate_json()))
-    response.headers["Content-Type"] = "application/json"
-    return response
+    return jsonify(
+        {
+            "assets": [asset.as_json() for asset in assets],
+            "total": total,
+            "page": page,
+            "per_page": per_page,
+            "total_pages": (total // per_page) + 1,
+        }
+    )
 
 
 @token_required

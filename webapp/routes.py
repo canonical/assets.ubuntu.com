@@ -1,11 +1,13 @@
 # System
 import re
 from distutils.util import strtobool
+from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
+
+import flask
 
 # Packages
 from flask import Blueprint
 from flask.globals import request
-import flask
 
 # Local
 from webapp.services import (
@@ -32,12 +34,28 @@ from webapp.views import (
     update_redirect,
 )
 
-
 ui_blueprint = Blueprint("ui_blueprint", __name__, url_prefix="/manager")
 api_blueprint = Blueprint("api_blueprint", __name__, url_prefix="/v1")
 
 # Manager Routes
 # ===
+
+# add jinja helper to either add or replace existing query parameter in the URL
+
+
+def add_query_param(key, value):
+    url = request.url
+    url_parts = list(urlparse(url))
+    query = dict(parse_qsl(url_parts[4]))
+    query[key] = value
+    url_parts[4] = urlencode(query)
+    return urlunparse(url_parts)
+
+
+ui_blueprint.add_app_template_global(
+    add_query_param,
+    "add_query_param",
+)
 
 
 @ui_blueprint.route("/")
@@ -46,16 +64,45 @@ def home():
     query = request.values.get("q", "")
     tag = request.values.get("tag", None)
     asset_type = request.values.get("type")
+    page = request.values.get("page", type=int, default=1)
+    per_page = request.values.get("per_page", type=int)
+    order_by = request.values.get("order_by", type=str)
+    order_dir = request.values.get("order_dir", type=str, default="desc")
 
+    if not per_page or per_page < 1 or per_page > 100:
+        per_page = 20
+    if order_by not in asset_service.order_by_fields():
+        order_by = list(asset_service.order_by_fields().keys())[0]
+    if order_dir not in ["asc", "desc"]:
+        order_dir = "desc"
     if query or tag:
-        assets = asset_service.find_assets(
-            query=query, file_type=asset_type, tag=tag
+        (assets, total) = asset_service.find_assets(
+            query=query,
+            file_type=asset_type,
+            tag=tag,
+            page=page,
+            per_page=per_page,
+            order_by=asset_service.order_by_fields()[order_by],
+            desc_order=order_dir == "desc",
         )
     else:
         assets = []
+        total = 0
 
     return flask.render_template(
-        "index.html", assets=assets, query=query, type=asset_type
+        "index.html",
+        assets=assets,
+        available_extensions=asset_service.available_extensions(),
+        assets_count=len(assets),
+        total_assets=total,
+        page=page,
+        total_pages=(total // per_page) + 1,
+        per_page=per_page,
+        query=query,
+        type=asset_type,
+        order_by=order_by,
+        order_dir=order_dir,
+        order_by_fields=asset_service.order_by_fields(),
     )
 
 
