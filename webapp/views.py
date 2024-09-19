@@ -377,9 +377,6 @@ def get_users(username: str):
     """
 
     headers = {"Authorization": "token " + environ.get("DIRECTORY_API_TOKEN")}
-
-    # Currently directory-api only supports strict comparison of field values,
-    # so we have to send two requests instead of one for first and last names
     response = requests.post(
         "https://directory.wpe.internal/graphql/",
         json={
@@ -388,6 +385,7 @@ def get_users(username: str):
         },
         headers=headers,
         verify=False,
+        timeout=10,
     )
 
     if response.status_code == 200:
