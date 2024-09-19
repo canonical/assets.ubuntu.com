@@ -49,7 +49,9 @@ def home():
     asset_type = request.values.get("type")
 
     if query or tag:
-        assets = asset_service.find_assets(query=query, file_type=asset_type, tag=tag)
+        assets = asset_service.find_assets(
+            query=query, file_type=asset_type, tag=tag
+        )
     else:
         assets = []
 
@@ -133,7 +135,9 @@ def update():
 api_blueprint.add_url_rule("/", view_func=get_assets)
 api_blueprint.add_url_rule("/", view_func=create_asset, methods=["POST"])
 api_blueprint.add_url_rule("/<path:file_path>", view_func=get_asset)
-api_blueprint.add_url_rule("/<path:file_path>", view_func=update_asset, methods=["PUT"])
+api_blueprint.add_url_rule(
+    "/<path:file_path>", view_func=update_asset, methods=["PUT"]
+)
 api_blueprint.add_url_rule(
     "/<path:file_path>", view_func=delete_asset, methods=["DELETE"]
 )
@@ -151,8 +155,12 @@ api_blueprint.add_url_rule(
 
 # Redirects
 api_blueprint.add_url_rule("/redirects", view_func=get_redirects)
-api_blueprint.add_url_rule("/redirects", view_func=create_redirect, methods=["POST"])
-api_blueprint.add_url_rule("/redirects/<path:redirect_path>", view_func=get_redirect)
+api_blueprint.add_url_rule(
+    "/redirects", view_func=create_redirect, methods=["POST"]
+)
+api_blueprint.add_url_rule(
+    "/redirects/<path:redirect_path>", view_func=get_redirect
+)
 api_blueprint.add_url_rule(
     "/redirects/<path:redirect_path>",
     view_func=update_redirect,
