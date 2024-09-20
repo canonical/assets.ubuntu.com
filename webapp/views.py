@@ -3,9 +3,11 @@ import base64
 import json
 import re
 import uuid
+import requests
 from datetime import datetime
 from distutils.util import strtobool
 from urllib.parse import unquote, urlparse
+from os import environ
 
 # Packages
 from flask import (
@@ -20,6 +22,7 @@ from flask import (
 # Local
 from webapp.database import db_session
 from webapp.decorators import token_required
+from webapp.sso import login_required
 from webapp.lib.file_helpers import get_mimetype, remove_filename_hash
 from webapp.lib.http_helpers import set_headers_for_type
 from webapp.lib.processors import ImageProcessor
@@ -373,3 +376,37 @@ def delete_redirect(redirect_path):
     db_session.commit()
 
     return jsonify({}), 204
+
+
+@login_required
+def get_users(username: str):
+    query = """
+    query($name: String!) {
+        employees(filter: { contains: { name: $name }}) {
+            id
+            name
+            email
+            team
+            department
+            jobTitle
+        }
+    }
+    """
+
+    headers = {"Authorization": "token " + environ.get("DIRECTORY_API_TOKEN")}
+    response = requests.post(
+        "https://directory.wpe.internal/graphql/",
+        json={
+            "query": query,
+            "variables": {"name": username.strip()},
+        },
+        headers=headers,
+        verify=False,
+        timeout=10,
+    )
+
+    if response.status_code == 200:
+        users = response.json().get("data", {}).get("employees", [])
+        return jsonify(list(users))
+    else:
+        return jsonify({"error": "Failed to fetch users"}), 500

@@ -30,6 +30,7 @@ from webapp.views import (
     get_tokens,
     update_asset,
     update_redirect,
+    get_users,
 )
 
 
@@ -169,4 +170,9 @@ api_blueprint.add_url_rule(
     "/redirects/<path:redirect_path>",
     view_func=delete_redirect,
     methods=["DELETE"],
+)
+api_blueprint.add_url_rule(
+    "/get-users/<username>",
+    view_func=get_users,
+    methods=["GET"],
 )
