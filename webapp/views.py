@@ -22,6 +22,7 @@ from flask import (
 # Local
 from webapp.database import db_session
 from webapp.decorators import token_required
+from webapp.sso import login_required
 from webapp.lib.file_helpers import get_mimetype, remove_filename_hash
 from webapp.lib.http_helpers import set_headers_for_type
 from webapp.lib.processors import ImageProcessor
@@ -377,7 +378,7 @@ def delete_redirect(redirect_path):
     return jsonify({}), 204
 
 
-@token_required
+@login_required
 def get_users(username: str):
     query = """
     query($name: String!) {
