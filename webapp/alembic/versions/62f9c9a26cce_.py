@@ -23,10 +23,16 @@ def upgrade():
         "product",
         sa.Column("name", sa.String(), nullable=False),
         sa.Column(
-            "created", sa.DateTime(), nullable=False, server_default=str(datetime.now())
+            "created",
+            sa.DateTime(),
+            nullable=False,
+            server_default=str(datetime.now()),
         ),
         sa.Column(
-            "updated", sa.DateTime(), nullable=False, server_default=str(datetime.now())
+            "updated",
+            sa.DateTime(),
+            nullable=False,
+            server_default=str(datetime.now()),
         ),
         sa.PrimaryKeyConstraint("name"),
     )
@@ -58,43 +64,64 @@ def upgrade():
     op.add_column(
         "asset",
         sa.Column(
-            "updated", sa.DateTime(), nullable=False, server_default=str(datetime.now())
+            "updated",
+            sa.DateTime(),
+            nullable=False,
+            server_default=str(datetime.now()),
         ),
     )
     op.add_column(
         "redirect",
         sa.Column(
-            "created", sa.DateTime(), nullable=False, server_default=str(datetime.now())
+            "created",
+            sa.DateTime(),
+            nullable=False,
+            server_default=str(datetime.now()),
         ),
     )
     op.add_column(
         "redirect",
         sa.Column(
-            "updated", sa.DateTime(), nullable=False, server_default=str(datetime.now())
+            "updated",
+            sa.DateTime(),
+            nullable=False,
+            server_default=str(datetime.now()),
         ),
     )
     op.add_column(
         "tag",
         sa.Column(
-            "created", sa.DateTime(), nullable=False, server_default=str(datetime.now())
+            "created",
+            sa.DateTime(),
+            nullable=False,
+            server_default=str(datetime.now()),
         ),
     )
     op.add_column(
         "tag",
         sa.Column(
-            "updated", sa.DateTime(), nullable=False, server_default=str(datetime.now())
+            "updated",
+            sa.DateTime(),
+            nullable=False,
+            server_default=str(datetime.now()),
         ),
     )
     op.add_column(
         "token",
         sa.Column(
-            "created", sa.DateTime(), nullable=False, server_default=str(datetime.now())
+            "created",
+            sa.DateTime(),
+            nullable=False,
+            server_default=str(datetime.now()),
         ),
     )
     op.add_column(
         "token",
         sa.Column(
-            "updated", sa.DateTime(), nullable=False, server_default=str(datetime.now())
+            "updated",
+            sa.DateTime(),
+            nullable=False,
+            server_default=str(datetime.now()),
         ),
     )
 
