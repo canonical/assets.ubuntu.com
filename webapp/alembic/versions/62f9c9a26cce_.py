@@ -6,6 +6,8 @@ Create Date: 2024-09-24 12:56:52.278399
 
 """
 
+from datetime import datetime
+
 import sqlalchemy as sa
 from alembic import op
 
@@ -20,8 +22,12 @@ def upgrade():
     op.create_table(
         "product",
         sa.Column("name", sa.String(), nullable=False),
-        sa.Column("created", sa.DateTime(), nullable=False),
-        sa.Column("updated", sa.DateTime(), nullable=False),
+        sa.Column(
+            "created", sa.DateTime(), nullable=False, server_default=str(datetime.now())
+        ),
+        sa.Column(
+            "updated", sa.DateTime(), nullable=False, server_default=str(datetime.now())
+        ),
         sa.PrimaryKeyConstraint("name"),
     )
     op.create_table(
@@ -49,17 +55,48 @@ def upgrade():
         sa.Column("salesforce_campaign_id", sa.String(), nullable=True),
     )
     op.add_column("asset", sa.Column("language", sa.String(), nullable=True))
-    op.add_column("asset", sa.Column("updated", sa.DateTime(), nullable=False))
     op.add_column(
-        "redirect", sa.Column("created", sa.DateTime(), nullable=False)
+        "asset",
+        sa.Column(
+            "updated", sa.DateTime(), nullable=False, server_default=str(datetime.now())
+        ),
     )
     op.add_column(
-        "redirect", sa.Column("updated", sa.DateTime(), nullable=False)
+        "redirect",
+        sa.Column(
+            "created", sa.DateTime(), nullable=False, server_default=str(datetime.now())
+        ),
     )
-    op.add_column("tag", sa.Column("created", sa.DateTime(), nullable=False))
-    op.add_column("tag", sa.Column("updated", sa.DateTime(), nullable=False))
-    op.add_column("token", sa.Column("created", sa.DateTime(), nullable=False))
-    op.add_column("token", sa.Column("updated", sa.DateTime(), nullable=False))
+    op.add_column(
+        "redirect",
+        sa.Column(
+            "updated", sa.DateTime(), nullable=False, server_default=str(datetime.now())
+        ),
+    )
+    op.add_column(
+        "tag",
+        sa.Column(
+            "created", sa.DateTime(), nullable=False, server_default=str(datetime.now())
+        ),
+    )
+    op.add_column(
+        "tag",
+        sa.Column(
+            "updated", sa.DateTime(), nullable=False, server_default=str(datetime.now())
+        ),
+    )
+    op.add_column(
+        "token",
+        sa.Column(
+            "created", sa.DateTime(), nullable=False, server_default=str(datetime.now())
+        ),
+    )
+    op.add_column(
+        "token",
+        sa.Column(
+            "updated", sa.DateTime(), nullable=False, server_default=str(datetime.now())
+        ),
+    )
 
 
 def downgrade():
