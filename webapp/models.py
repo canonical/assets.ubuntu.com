@@ -96,7 +96,9 @@ class Product(DateTimeMixin):
     __tablename__ = "product"
     name = Column(String, primary_key=True)
     assets = relationship(
-        "Asset", secondary=asset_product_association_table, back_populates="products"
+        "Asset",
+        secondary=asset_product_association_table,
+        back_populates="products",
     )
 
     def as_json(self):
