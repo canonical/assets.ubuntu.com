@@ -15,6 +15,7 @@ from webapp.services import (
     AssetNotFound,
     asset_service,
 )
+from webapp.param_parser import parse_asset_search_params
 from webapp.sso import login_required
 from webapp.views import (
     create_asset,
@@ -63,9 +64,8 @@ ui_blueprint.add_app_template_global(
 @ui_blueprint.route("/")
 @login_required
 def home():
-    query = request.values.get("q", "")
-    tag = request.values.get("tag", None)
-    asset_type = request.values.get("type")
+    search_params = parse_asset_search_params()
+
     page = request.values.get("page", type=int, default=1)
     per_page = request.values.get("per_page", type=int)
     order_by = request.values.get("order_by", type=str)
@@ -80,11 +80,24 @@ def home():
         order_by = list(asset_service.order_by_fields().keys())[0]
     if order_dir not in ["asc", "desc"]:
         order_dir = "desc"
-    if query or tag:
+
+    if any([search_params.tag, search_params.asset_type, search_params.author_email, 
+        search_params.title, search_params.start_date, search_params.end_date, 
+        search_params.sf_campg_id, search_params.language]):  
+
+        # assets = asset_service.find_assets(
+        #     tag=search_params.tag,
+        #     asset_type=search_params.asset_type,
+        #     product_types=search_params.product_types,
+        #     author_email=search_params.author_email,
+        #     title=search_params.title,
+        #     start_date=search_params.start_date,
+        #     end_date=search_params.end_date,
+        #     sf_campg_id=search_params.sf_campg_id,
+        #     language=search_params.language,
+        # )
         (assets, total) = asset_service.find_assets(
-            query=query,
-            file_type=asset_type,
-            tag=tag,
+            tag=search_params.tag,
             page=page,
             per_page=per_page,
             order_by=asset_service.order_by_fields()[order_by],
@@ -104,14 +117,13 @@ def home():
         page=page,
         total_pages=(total // per_page) + 1,
         per_page=per_page,
-        query=query,
-        type=asset_type,
+        query=search_params.query,
+        type=search_params.asset_type,
         order_by=order_by,
         order_dir=order_dir,
         order_by_fields=asset_service.order_by_fields(),
         include_deprecated=include_deprecated,
     )
-
 
 @ui_blueprint.route("/create", methods=["GET", "POST"])
 @login_required

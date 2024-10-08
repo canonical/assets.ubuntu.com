@@ -6,16 +6,18 @@ from typing import Tuple
 
 # Packages
 from sqlalchemy import func
-from sqlalchemy.sql.expression import or_
+from sqlalchemy.sql.expression import or_, and_
 from sqlalchemy.sql.sqltypes import Text
 from wand.image import Image
-
+from sqlalchemy import func
 # Local
 from webapp.database import db_session
 from webapp.lib.file_helpers import is_svg
 from webapp.lib.processors import ImageProcessor
 from webapp.lib.url_helpers import clean_unicode
 from webapp.models import Asset, Tag
+from webapp.lib.file_helpers import is_svg
+from webapp.models import Asset, Tag , Product, Author
 from webapp.swift import file_manager
 from webapp.utils import lru_cache
 
@@ -24,7 +26,15 @@ class AssetService:
     def find_assets(
         self,
         file_type="%",
-        tag=None,
+        tag="abc",
+        asset_type = "png",
+        product_types=["a","b"],
+        author_email="abc@g.com",
+        title="mad",
+        start_date="2024-01-01",
+        end_date="2024-10-14",
+        sf_campg_id="1234",
+        language="en",
         query=None,
         page=1,
         per_page=10,
@@ -35,16 +45,27 @@ class AssetService:
         """
         Find assets that matches the given criterions
         """
-        if not query:
-            query = "%"
-        if not file_type:
-            file_type = "%"
+        tag = "gif"
+        if not tag:
+            tag = "%"
+        if not asset_type:
+            asset_type = "%"
+        if not author_email:
+            author_email = "%"
+        if not title:
+            title = "%"
+        if not language:
+            language = "%"
+        if not sf_campg_id:
+            sf_campg_id = "%"
+    
         conditions = [
-            Asset.file_path.ilike(f"%.{file_type}"),
-            or_(
-                Asset.file_path.ilike(f"%{query}%"),
-                Asset.data.cast(Text).ilike(f"%{query}%"),
-            ),
+            Asset.tags.any(Tag.name == tag),
+            Asset.asset_type == asset_type,
+            Asset.name.ilike(f"%{title}%"),
+            Asset.language == language,
+            Asset.salesforce_campaign_id == sf_campg_id,
+            Asset.author_email == author_email
         ]
         if tag:
             tag_condition = Asset.tags.any(Tag.name == tag)
@@ -59,11 +80,18 @@ class AssetService:
         else:
             order_col = order_by
 
+        if (end_date and start_date):
+            conditions.append(Asset.created.between(start_date, end_date))
+
+        if product_types:
+                conditions.append(Asset.products.any(Product.name.in_(product_types)))
+
         assets_query = (
             db_session.query(Asset)
             .filter(*conditions)
             .order_by(order_col.desc() if desc_order else order_col)
             .offset((page - 1) * per_page)
+            .yield_per(100)
         )
 
         assets = assets_query.limit(per_page).all()
