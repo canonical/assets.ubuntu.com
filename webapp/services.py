@@ -75,6 +75,13 @@ class AssetService:
         optimize,
         url_path=None,
         tags=[],
+        products=[],
+        asset_type=None,
+        author=None,
+        google_drive_link=None,
+        salesforce_campaign_id=None,
+        language=None,
+        deprecated=False,
         data={},
     ):
         """
@@ -137,12 +144,22 @@ class AssetService:
         # Save the file in Swift
         file_manager.create(file_content, url_path)
 
+        tags = self.create_tags_if_not_exist(tags)
+
         # Save file info in Postgres
         asset = Asset(
-            file_path=url_path, data=data, tags=[], created=datetime.utcnow()
+            file_path=url_path,
+            data=data,
+            tags=tags,
+            created=datetime.utcnow(),
+            products=products,
+            asset_type=asset_type,
+            author=author,
+            google_drive_link=google_drive_link,
+            salesforce_campaign_id=salesforce_campaign_id,
+            language=language,
+            deprecated=deprecated,
         )
-        tags = self.create_tags_if_not_exist(tags)
-        asset.tags = tags
         db_session.add(asset)
         db_session.commit()
         return asset
@@ -174,21 +191,48 @@ class AssetService:
     def normalize_tag_name(self, tag_name):
         return tag_name.strip().lower()
 
-    def update_asset(self, file_path, tags=[], deprecated=None):
-        asset = (
-            db_session.query(Asset)
-            .filter(Asset.file_path == file_path)
-            .one_or_none()
-        )
 
-        if not asset:
-            raise AssetNotFound(file_path)
+def update_asset(
+    self,
+    file_path,
+    tags=[],
+    deprecated=None,
+    products=[],
+    asset_type=None,
+    author=None,
+    google_drive_link=None,
+    salesforce_campaign_id=None,
+    language=None,
+):
+    asset = (
+        db_session.query(Asset)
+        .filter(Asset.file_path == file_path)
+        .one_or_none()
+    )
+
+    if not asset:
+        raise AssetNotFound(file_path)
+
+    if tags:
         tags = self.create_tags_if_not_exist(tags)
         asset.tags = tags
-        if deprecated is not None:
-            asset.deprecated = deprecated
-        db_session.commit()
-        return asset
+    if products:
+        asset.products = products
+    if asset_type:
+        asset.asset_type = asset_type
+    if author:
+        asset.author = author
+    if google_drive_link:
+        asset.google_drive_link = google_drive_link
+    if salesforce_campaign_id:
+        asset.salesforce_campaign_id = salesforce_campaign_id
+    if language:
+        asset.language = language
+    if deprecated is not None:
+        asset.deprecated = deprecated
+
+    db_session.commit()
+    return asset
 
 
 class AssetAlreadyExistException(Exception):
