@@ -236,14 +236,9 @@ def create_asset():
     asset_type = request.values.get("asset_type", "")
     author = request.values.get("author", "")
     google_drive_link = request.values.get("google_drive_link", "")
-    salesforce_campaign_id = request.values.get(
-        "salesforce_campaign_id", ""
-    )
+    salesforce_campaign_id = request.values.get("salesforce_campaign_id", "")
     language = request.values.get("language", "")
-    deprecated = (
-        request.values.get("deprecated", "false").lower() == "true"
-    )
-
+    deprecated = request.values.get("deprecated", "false").lower() == "true"
 
     try:
         asset = asset_service.create_asset(
@@ -252,6 +247,7 @@ def create_asset():
             optimize=optimize,
             tags=tags,
             products=products,
+            url_path=url_path,
             asset_type=asset_type,
             author=author,
             google_drive_link=google_drive_link,
