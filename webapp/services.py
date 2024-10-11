@@ -190,6 +190,7 @@ class AssetService:
         file_manager.create(file_content, url_path)
 
         tags = self.create_tags_if_not_exist(tags)
+        products = self.create_products_objects(products)
 
         # Save file info in Postgres
         asset = Asset(
@@ -233,51 +234,64 @@ class AssetService:
         db_session.commit()
         return [*existing_tags, *tags_to_create]
 
+    def create_products_objects(self, product_names):
+        """
+        Create the product objects and return the
+        object from the database
+        """
+        product_objects = []
+        for product_name in product_names:
+            product = Product(name=product_name, assets=[])
+            product_objects.append(product)
+        db_session.add_all(product_objects)
+        db_session.commit()
+        return product_objects
+
     def normalize_tag_name(self, tag_name):
         return tag_name.strip().lower()
 
+    def update_asset(
+        self,
+        file_path,
+        tags=[],
+        deprecated=None,
+        products=[],
+        asset_type=None,
+        author=None,
+        google_drive_link=None,
+        salesforce_campaign_id=None,
+        language=None,
+    ):
+        asset = (
+            db_session.query(Asset)
+            .filter(Asset.file_path == file_path)
+            .one_or_none()
+        )
 
-def update_asset(
-    self,
-    file_path,
-    tags=[],
-    deprecated=None,
-    products=[],
-    asset_type=None,
-    author=None,
-    google_drive_link=None,
-    salesforce_campaign_id=None,
-    language=None,
-):
-    asset = (
-        db_session.query(Asset)
-        .filter(Asset.file_path == file_path)
-        .one_or_none()
-    )
+        if not asset:
+            raise AssetNotFound(file_path)
 
-    if not asset:
-        raise AssetNotFound(file_path)
+        if tags:
+            tags = self.create_tags_if_not_exist(tags)
+            asset.tags = tags
+        if products:
+            products = self.create_products_objects(products)
+            asset.products = products
+        if asset_type:
+            asset.asset_type = asset_type
+        if author:
+            asset.author = author
+        if google_drive_link:
+            asset.google_drive_link = google_drive_link
+        if salesforce_campaign_id:
+            asset.salesforce_campaign_id = salesforce_campaign_id
+        if language:
+            asset.language = language
+        if deprecated is not None:
+            asset.deprecated = deprecated
 
-    if tags:
-        tags = self.create_tags_if_not_exist(tags)
-        asset.tags = tags
-    if products:
-        asset.products = products
-    if asset_type:
-        asset.asset_type = asset_type
-    if author:
-        asset.author = author
-    if google_drive_link:
-        asset.google_drive_link = google_drive_link
-    if salesforce_campaign_id:
-        asset.salesforce_campaign_id = salesforce_campaign_id
-    if language:
-        asset.language = language
-    if deprecated is not None:
-        asset.deprecated = deprecated
-
-    db_session.commit()
-    return asset
+        db_session.commit()
+        return asset
 
     @lru_cache(ttl_seconds=3600)
     def available_extensions(self):
