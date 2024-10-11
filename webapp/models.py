@@ -83,7 +83,14 @@ class Asset(DateTimeMixin):
             "created": self.created.strftime("%a, %d %b %Y %H:%M:%S"),
             "file_path": self.file_path,
             "tags": ", ".join([tag.name for tag in self.tags]),
+            "products": ", ".join([product.name for product in self.products]),
             "deprecated": self.deprecated,
+            "asset_type": self.asset_type,
+            "name": self.name,
+            "author": self.author,
+            "google_drive_link": self.google_drive_link,
+            "salesforce_campaign_id": self.salesforce_campaign_id,
+            "language": self.language,
         }
 
 
