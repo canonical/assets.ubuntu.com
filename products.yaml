@@ -1,4 +1,4 @@
-Products:
+products:
   - name: "Ubuntu Frame"
     slug: "ubuntu-frame"
   - name: "Support"
@@ -71,8 +71,6 @@ Products:
     slug: "microstack"
   - name: "Appliance Portfolio"
     slug: "appliance-portfolio"
-  - name: "Ubuntu Pro"
-    slug: "ubuntu-pro"
   - name: "Networking"
     slug: "networking"
   - name: "Juju"

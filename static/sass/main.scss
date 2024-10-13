@@ -25,3 +25,19 @@
     margin: 0 !important;
   }
 }
+
+.p-filter-panel-section .p-filter-panel-section__chips--no-max-height {
+  @extend .p-filter-panel-section__chips;
+  max-height: unset !important;
+}
+
+.p-filter-panel-section__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.p-filter-panel-section__chips-toggle {
+  padding-top: 6px;
+  margin-bottom: 18px;
+}

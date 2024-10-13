@@ -85,6 +85,7 @@ class AssetService:
         products=[],
         asset_type=None,
         author=None,
+        name=None,
         google_drive_link=None,
         salesforce_campaign_id=None,
         language=None,
@@ -130,13 +131,11 @@ class AssetService:
             except Exception:
                 # Just don't worry if image reading fails
                 pass
-
         asset = (
             db_session.query(Asset)
             .filter(Asset.file_path == url_path)
             .one_or_none()
         )
-
         if asset:
             if "width" not in asset.data and "width" in data:
                 asset.data["width"] = data["width"]
@@ -163,6 +162,7 @@ class AssetService:
             products=products,
             asset_type=asset_type,
             author=author,
+            name=name,
             google_drive_link=google_drive_link,
             salesforce_campaign_id=salesforce_campaign_id,
             language=language,
