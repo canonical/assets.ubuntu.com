@@ -19,11 +19,12 @@
   },
   "dependencies": {
     "autoprefixer": "10.4.14",
-    "sass": "1.61.0",
+    "fuse.js": "7.0.0",
     "postcss": "8.4.21",
     "postcss-cli": "10.1.0",
+    "sass": "1.45.2",
     "sass-lint": "1.13.1",
-    "vanilla-framework": "3.13.0",
+    "vanilla-framework": "4.16.0",
     "watch-cli": "0.2.3"
   },
   "devDependencies": {
