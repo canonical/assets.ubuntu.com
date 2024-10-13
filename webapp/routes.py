@@ -8,6 +8,8 @@ import flask
 # Packages
 from flask import Blueprint
 from flask.globals import request
+import flask
+import yaml
 
 # Local
 from webapp.services import (
@@ -138,6 +140,8 @@ def create():
     created_assets = []
     existing_assets = []
     failed_assets = []
+    with open("products.yaml") as file:
+        products_list = yaml.load(file, Loader=yaml.FullLoader)
 
     if flask.request.method == "POST":
         tags = flask.request.form.get("tags", "")
@@ -165,17 +169,18 @@ def create():
 
         for asset_file in flask.request.files.getlist("assets"):
             try:
-                name = asset_file.filename
+                filename = asset_file.filename
                 content = asset_file.read()
 
                 asset = asset_service.create_asset(
                     file_content=content,
-                    friendly_name=name,
+                    friendly_name=filename,
                     optimize=optimize,
                     tags=tags,
                     products=products,
                     asset_type=asset_type,
                     author=author,
+                    name=name,
                     google_drive_link=google_drive_link,
                     salesforce_campaign_id=salesforce_campaign_id,
                     language=language,
@@ -197,8 +202,7 @@ def create():
             tags=tags,
             optimize=optimize,
         )
-
-    return flask.render_template("create.html")
+    return flask.render_template("create.html", products_list=products_list)
 
 
 @ui_blueprint.route("/update", methods=["GET", "POST"])
