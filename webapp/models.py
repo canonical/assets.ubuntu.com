@@ -45,12 +45,14 @@ asset_product_association_table = Table(
     Column("product_name", ForeignKey("product.name"), primary_key=True),
 )
 
+
 class Author(Base):
-    __tablename__ = 'author'
-    
+    __tablename__ = "author"
+
     first_name = Column(String, nullable=False, primary_key=True)
     last_name = Column(String, nullable=False, primary_key=True)
     email = Column(String, nullable=False, unique=True, primary_key=True)
+
 
 class Asset(DateTimeMixin):
     __tablename__ = "asset"
@@ -83,6 +85,7 @@ class Asset(DateTimeMixin):
             "tags": ", ".join([tag.name for tag in self.tags]),
             "deprecated": self.deprecated,
         }
+
 
 class Tag(DateTimeMixin):
     __tablename__ = "tag"

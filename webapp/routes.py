@@ -41,14 +41,24 @@ api_blueprint = Blueprint("api_blueprint", __name__, url_prefix="/v1")
 # Manager Routes
 # ===
 
+
 @ui_blueprint.route("/")
 @login_required
 def home():
     search_params = parse_asset_search_params()
-    
-    if any([search_params.tag, search_params.asset_type, search_params.author_email, 
-        search_params.title, search_params.start_date, search_params.end_date, 
-        search_params.sf_campg_id, search_params.language]):  
+
+    if any(
+        [
+            search_params.tag,
+            search_params.asset_type,
+            search_params.author_email,
+            search_params.title,
+            search_params.start_date,
+            search_params.end_date,
+            search_params.sf_campg_id,
+            search_params.language,
+        ]
+    ):
 
         assets = asset_service.find_assets(
             tag=search_params.tag,
@@ -65,8 +75,12 @@ def home():
         assets = []
 
     return flask.render_template(
-        "index.html", assets=assets, query=search_params.tag, type=search_params.asset_type
+        "index.html",
+        assets=assets,
+        query=search_params.tag,
+        type=search_params.asset_type,
     )
+
 
 @ui_blueprint.route("/create", methods=["GET", "POST"])
 @login_required

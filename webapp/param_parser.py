@@ -1,5 +1,7 @@
 from flask import request
 from webapp.dataclass import AssetSearchParams
+
+
 def parse_asset_search_params() -> AssetSearchParams:
     """
     Parse request arguments and return AssetSearchParams object with defaults.
