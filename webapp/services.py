@@ -2,6 +2,7 @@
 import imghdr
 from base64 import b64decode
 from datetime import datetime
+from sqlalchemy.dialects import postgresql
 
 # Packages
 from sqlalchemy.sql.expression import or_, and_
@@ -19,42 +20,29 @@ from webapp.swift import file_manager
 
 class AssetService:
 
-    def find_assets(self,tag="abc", asset_type = "png", product_types=["a","b"],author_email="abc@g.com",title="mad",start_date="2024-01-01",end_date="2024-10-14",sf_campg_id="1234",language="en"):
+    def find_assets(self,tag:str, asset_type:str, product_types:list, author_email:str, title:str, start_date:str, end_date:str, sf_campg_id:str, language:str):
         """
         Find assets that matches the given criterions
         """
-        tag = "gif"
-        if not tag:
-            tag = "%"
-        if not asset_type:
-            asset_type = "%"
-        if not author_email:
-            author_email = "%"
-        if not title:
-            title = "%"
-        if not language:
-            language = "%"
-        if not sf_campg_id:
-            sf_campg_id = "%"
-    
-        conditions = [
-            Asset.tags.any(Tag.name == tag),
-            Asset.asset_type == asset_type,
-            Asset.name.ilike(f"%{title}%"),
-            Asset.language == language,
-            Asset.salesforce_campaign_id == sf_campg_id,
-            Asset.author_email == author_email
-        ]
+        conditions = []
+        if tag:
+            conditions.append(Asset.tags.any(Tag.name == tag))
+        if asset_type:
+            conditions.append(Asset.asset_type == asset_type)
+        if author_email:
+            conditions.append(Asset.author_email == author_email)
+        if title:
+            conditions.append(Asset.name.ilike(f"%{title}%"))
+        if  language:
+            conditions.append(Asset.language.ilike(f"{language}"))
+        if sf_campg_id:
+            conditions.append(Asset.salesforce_campaign_id.ilike(f"{sf_campg_id}"))
         if (end_date and start_date):
             conditions.append(Asset.created.between(start_date, end_date))
-
         if product_types:
                 conditions.append(Asset.products.any(Product.name.in_(product_types)))
 
-        # assets = db_session.query(Asset).filter(*conditions).filter(author_conditions).yield_per(100)
         assets = db_session.query(Asset).filter(*conditions).yield_per(100)
-
-        print(assets,"Yeh hai assets \n\n\n")
         for asset in assets:
             yield asset
 

@@ -6,7 +6,7 @@ def parse_asset_search_params() -> AssetSearchParams:
     """
     return AssetSearchParams(
         tag=request.args.get("tag", "").strip(),
-        asset_type=request.args.get("type", "").strip(),
+        asset_type=request.args.get("asset_type", "").strip(),
         product_types=request.args.getlist("product_types") or [],
         author_email=request.args.get("author_email", "").strip(),
         title=request.args.get("title", "").strip(),

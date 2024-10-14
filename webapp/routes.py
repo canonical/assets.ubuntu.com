@@ -45,30 +45,24 @@ api_blueprint = Blueprint("api_blueprint", __name__, url_prefix="/v1")
 @login_required
 def home():
     search_params = parse_asset_search_params()
-
-
+    
     if any([search_params.tag, search_params.asset_type, search_params.author_email, 
         search_params.title, search_params.start_date, search_params.end_date, 
         search_params.sf_campg_id, search_params.language]):  
 
-        # assets = asset_service.find_assets(
-        #     tag=search_params.tag,
-        #     asset_type=search_params.asset_type,
-        #     product_types=search_params.product_types,
-        #     author_email=search_params.author_email,
-        #     title=search_params.title,
-        #     start_date=search_params.start_date,
-        #     end_date=search_params.end_date,
-        #     sf_campg_id=search_params.sf_campg_id,
-        #     language=search_params.language,
-        # )
         assets = asset_service.find_assets(
             tag=search_params.tag,
+            asset_type=search_params.asset_type,
+            product_types=search_params.product_types,
+            author_email=search_params.author_email,
+            title=search_params.title,
+            start_date=search_params.start_date,
+            end_date=search_params.end_date,
+            sf_campg_id=search_params.sf_campg_id,
+            language=search_params.language,
         )
     else:
         assets = []
-
-
 
     return flask.render_template(
         "index.html", assets=assets, query=search_params.tag, type=search_params.asset_type

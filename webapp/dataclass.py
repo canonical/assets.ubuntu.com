@@ -15,3 +15,7 @@ class AssetSearchParams:
     def __post_init__(self):
         if self.product_types is None:
             self.product_types = []
+        for product in self.product_types[:]:
+            product = product.strip()
+            if not product:
+                self.product_types.remove(product)
