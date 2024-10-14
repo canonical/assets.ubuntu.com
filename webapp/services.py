@@ -59,21 +59,23 @@ class AssetService:
         if not sf_campg_id:
             sf_campg_id = "%"
     
-        conditions = [
-            Asset.tags.any(Tag.name == tag),
-            Asset.asset_type == asset_type,
-            Asset.name.ilike(f"%{title}%"),
-            Asset.language == language,
-            Asset.salesforce_campaign_id == sf_campg_id,
-            Asset.author_email == author_email
-        ]
+        conditions = []
         if tag:
-            tag_condition = Asset.tags.any(Tag.name == tag)
-            conditions.append(tag_condition)
-
+            conditions.append(Asset.tags.any(Tag.name == tag))
+        if asset_type:
+            conditions.append(Asset.asset_type == asset_type)
+        if author_email:
+            conditions.append(Asset.author_email == author_email)
+        if title:
+            conditions.append(Asset.name.ilike(f"%{title}%"))
+        if  language:
+            conditions.append(Asset.language.ilike(f"{language}"))
+        if sf_campg_id:
+            conditions.append(Asset.salesforce_campaign_id.ilike(f"{sf_campg_id}"))
+        
         if not include_deprecated:
             conditions.append(Asset.deprecated.is_(False))
-
+        
         if order_by == Asset.file_path:
             # Example: "86293d6f-FortyCloud.png" -> "FortyCloud.png"
             order_col = func.split_part(Asset.file_path, "-", 2)
@@ -82,7 +84,6 @@ class AssetService:
 
         if (end_date and start_date):
             conditions.append(Asset.created.between(start_date, end_date))
-
         if product_types:
                 conditions.append(Asset.products.any(Product.name.in_(product_types)))
 

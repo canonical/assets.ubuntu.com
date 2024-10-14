@@ -85,19 +85,16 @@ def home():
         search_params.title, search_params.start_date, search_params.end_date, 
         search_params.sf_campg_id, search_params.language]):  
 
-        # assets = asset_service.find_assets(
-        #     tag=search_params.tag,
-        #     asset_type=search_params.asset_type,
-        #     product_types=search_params.product_types,
-        #     author_email=search_params.author_email,
-        #     title=search_params.title,
-        #     start_date=search_params.start_date,
-        #     end_date=search_params.end_date,
-        #     sf_campg_id=search_params.sf_campg_id,
-        #     language=search_params.language,
-        # )
         (assets, total) = asset_service.find_assets(
             tag=search_params.tag,
+            asset_type=search_params.asset_type,
+            product_types=search_params.product_types,
+            author_email=search_params.author_email,
+            title=search_params.title,
+            start_date=search_params.start_date,
+            end_date=search_params.end_date,
+            sf_campg_id=search_params.sf_campg_id,
+            language=search_params.language,
             page=page,
             per_page=per_page,
             order_by=asset_service.order_by_fields()[order_by],
