@@ -81,9 +81,18 @@ def home():
     if order_dir not in ["asc", "desc"]:
         order_dir = "desc"
 
-    if any([search_params.tag, search_params.asset_type, search_params.author_email, 
-        search_params.title, search_params.start_date, search_params.end_date, 
-        search_params.sf_campg_id, search_params.language]):  
+    if any(
+        [
+            search_params.tag,
+            search_params.asset_type,
+            search_params.author_email,
+            search_params.title,
+            search_params.start_date,
+            search_params.end_date,
+            search_params.sf_campg_id,
+            search_params.language,
+        ]
+    ):
 
         (assets, total) = asset_service.find_assets(
             tag=search_params.tag,
@@ -114,13 +123,14 @@ def home():
         page=page,
         total_pages=(total // per_page) + 1,
         per_page=per_page,
-        query=search_params.query,
         type=search_params.asset_type,
         order_by=order_by,
         order_dir=order_dir,
         order_by_fields=asset_service.order_by_fields(),
         include_deprecated=include_deprecated,
+        query=search_params.tag,
     )
+
 
 @ui_blueprint.route("/create", methods=["GET", "POST"])
 @login_required

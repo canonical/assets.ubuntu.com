@@ -10,6 +10,7 @@ from sqlalchemy.sql.expression import or_, and_
 from sqlalchemy.sql.sqltypes import Text
 from wand.image import Image
 from sqlalchemy import func
+
 # Local
 from webapp.database import db_session
 from webapp.lib.file_helpers import is_svg
@@ -17,7 +18,7 @@ from webapp.lib.processors import ImageProcessor
 from webapp.lib.url_helpers import clean_unicode
 from webapp.models import Asset, Tag
 from webapp.lib.file_helpers import is_svg
-from webapp.models import Asset, Tag , Product, Author
+from webapp.models import Asset, Tag, Product, Author
 from webapp.swift import file_manager
 from webapp.utils import lru_cache
 
@@ -25,16 +26,16 @@ from webapp.utils import lru_cache
 class AssetService:
     def find_assets(
         self,
-        file_type="%",
-        tag="abc",
-        asset_type = "png",
-        product_types=["a","b"],
-        author_email="abc@g.com",
-        title="mad",
-        start_date="2024-01-01",
-        end_date="2024-10-14",
-        sf_campg_id="1234",
-        language="en",
+        file_type: str = "%",
+        tag:str = "abc",
+        asset_type: str = "png",
+        product_types: list = ["a","b"],
+        author_email: str = "abc@g.com",
+        title: str = "mad",
+        start_date: str = "2024-01-01",
+        end_date: str = "2024-10-14",
+        sf_campg_id: str = "1234",
+        language: str = "en",
         query=None,
         page=1,
         per_page=10,
@@ -68,7 +69,7 @@ class AssetService:
             conditions.append(Asset.author_email == author_email)
         if title:
             conditions.append(Asset.name.ilike(f"%{title}%"))
-        if  language:
+        if language:
             conditions.append(Asset.language.ilike(f"{language}"))
         if sf_campg_id:
             conditions.append(Asset.salesforce_campaign_id.ilike(f"{sf_campg_id}"))
@@ -85,7 +86,9 @@ class AssetService:
         if (end_date and start_date):
             conditions.append(Asset.created.between(start_date, end_date))
         if product_types:
-                conditions.append(Asset.products.any(Product.name.in_(product_types)))
+            conditions.append(
+                Asset.products.any(Product.name.in_(product_types))
+            )
 
         assets_query = (
             db_session.query(Asset)
