@@ -11,7 +11,7 @@ def parse_asset_search_params() -> AssetSearchParams:
         asset_type=request.args.get("asset_type", "").strip(),
         product_types=request.args.getlist("product_types") or [],
         author_email=request.args.get("author_email", "").strip(),
-        title=request.args.get("title", "").strip(),
+        name=request.args.get("name", "").strip(),
         start_date=request.args.get("start_date", None),
         end_date=request.args.get("end_date", None),
         sf_campg_id=request.args.get("sf_campg_id", "").strip(),
