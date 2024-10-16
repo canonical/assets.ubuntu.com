@@ -13,6 +13,7 @@ from webapp.services import (
     AssetNotFound,
     asset_service,
 )
+from webapp.param_parser import parse_asset_search_params
 from webapp.sso import login_required
 from webapp.views import (
     create_asset,
@@ -44,19 +45,40 @@ api_blueprint = Blueprint("api_blueprint", __name__, url_prefix="/v1")
 @ui_blueprint.route("/")
 @login_required
 def home():
-    query = request.values.get("q", "")
-    tag = request.values.get("tag", None)
-    asset_type = request.values.get("type")
+    search_params = parse_asset_search_params()
 
-    if query or tag:
+    if any(
+        [
+            search_params.tag,
+            search_params.asset_type,
+            search_params.author_email,
+            search_params.name,
+            search_params.start_date,
+            search_params.end_date,
+            search_params.sf_campg_id,
+            search_params.language,
+        ]
+    ):
+
         assets = asset_service.find_assets(
-            query=query, file_type=asset_type, tag=tag
+            tag=search_params.tag,
+            asset_type=search_params.asset_type,
+            product_types=search_params.product_types,
+            author_email=search_params.author_email,
+            name=search_params.name,
+            start_date=search_params.start_date,
+            end_date=search_params.end_date,
+            sf_campg_id=search_params.sf_campg_id,
+            language=search_params.language,
         )
     else:
         assets = []
 
     return flask.render_template(
-        "index.html", assets=assets, query=query, type=asset_type
+        "index.html",
+        assets=assets,
+        query=search_params.tag,
+        type=search_params.asset_type,
     )
 
 

@@ -4,8 +4,6 @@ from base64 import b64decode
 from datetime import datetime
 
 # Packages
-from sqlalchemy.sql.expression import or_
-from sqlalchemy.sql.sqltypes import Text
 from wand.image import Image
 
 # Local
@@ -13,29 +11,49 @@ from webapp.database import db_session
 from webapp.lib.processors import ImageProcessor
 from webapp.lib.url_helpers import clean_unicode
 from webapp.lib.file_helpers import is_svg
-from webapp.models import Asset, Tag
+from webapp.models import Asset, Tag, Product
 from webapp.swift import file_manager
 
 
 class AssetService:
-    def find_assets(self, file_type="%", tag=None, query=None):
+
+    def find_assets(
+        self,
+        tag: str,
+        asset_type: str,
+        product_types: list,
+        author_email: str,
+        name: str,
+        start_date: str,
+        end_date: str,
+        sf_campg_id: str,
+        language: str,
+    ):
         """
         Find assets that matches the given criterions
         """
-        if not query:
-            query = "%"
-        if not file_type:
-            file_type = "%"
-        conditions = [
-            Asset.file_path.ilike(f"%.{file_type}"),
-            or_(
-                Asset.file_path.ilike(f"%{query}%"),
-                Asset.data.cast(Text).ilike(f"%{query}%"),
-            ),
-        ]
+        conditions = []
         if tag:
-            tag_condition = Asset.tags.any(Tag.name == tag)
-            conditions.append(tag_condition)
+            conditions.append(Asset.tags.any(Tag.name == tag))
+        if asset_type:
+            conditions.append(Asset.asset_type == asset_type)
+        if author_email:
+            conditions.append(Asset.author_email == author_email)
+        if name:
+            conditions.append(Asset.name.ilike(f"%{name}%"))
+        if language:
+            conditions.append(Asset.language.ilike(f"{language}"))
+        if sf_campg_id:
+            conditions.append(
+                Asset.salesforce_campaign_id.ilike(f"{sf_campg_id}")
+            )
+        if end_date and start_date:
+            conditions.append(Asset.created.between(start_date, end_date))
+        if product_types:
+            conditions.append(
+                Asset.products.any(Product.name.in_(product_types))
+            )
+
         assets = db_session.query(Asset).filter(*conditions).yield_per(100)
         for asset in assets:
             yield asset

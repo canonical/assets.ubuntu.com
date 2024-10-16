@@ -46,18 +46,27 @@ asset_product_association_table = Table(
 )
 
 
+class Author(Base):
+    __tablename__ = "author"
+
+    first_name = Column(String, nullable=False, primary_key=True)
+    last_name = Column(String, nullable=False, primary_key=True)
+    email = Column(String, nullable=False, unique=True, primary_key=True)
+
+
 class Asset(DateTimeMixin):
     __tablename__ = "asset"
 
     id = Column(Integer, primary_key=True)
     asset_type = Column(String, nullable=True)
     name = Column(String, nullable=True)
-    author = Column(String, nullable=True)
     google_drive_link = Column(String, nullable=True)
     salesforce_campaign_id = Column(String, nullable=True)
     language = Column(String, nullable=True)
     data = Column(JSON, nullable=False)
     file_path = Column(String, nullable=False)
+    author_email = Column(String, ForeignKey("author.email"), nullable=True)
+    author = relationship("Author")
     tags = relationship(
         "Tag", secondary=asset_tag_association_table, back_populates="assets"
     )
