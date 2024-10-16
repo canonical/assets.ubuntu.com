@@ -14,6 +14,7 @@ from flask import Response, abort, jsonify, redirect, request
 # Local
 from webapp.database import db_session
 from webapp.decorators import token_required
+from webapp.param_parser import parse_asset_search_params
 from webapp.sso import login_required
 from webapp.lib.file_helpers import get_mimetype, remove_filename_hash
 from webapp.lib.http_helpers import set_headers_for_type
@@ -157,8 +158,8 @@ def get_assets():
     """
     Get a list of assets metadata.
     """
+    search_params = parse_asset_search_params()
 
-    query = request.values.get("q", "")
     file_type = request.values.get("type", "")
     page = request.values.get("page", type=int)
     per_page = request.values.get("per_page", type=int)
@@ -170,13 +171,36 @@ def get_assets():
         20 if not per_page or per_page < 1 or per_page > 100 else per_page
     )
 
-    assets, total = asset_service.find_assets(
-        query=query,
-        file_type=file_type,
-        page=page,
-        per_page=per_page,
-        include_deprecated=include_deprecated,
-    )
+    if any(
+        [
+            search_params.tag,
+            search_params.asset_type,
+            search_params.author_email,
+            search_params.name,
+            search_params.start_date,
+            search_params.end_date,
+            search_params.sf_campg_id,
+            search_params.language,
+        ]
+    ):
+
+        assets, total = asset_service.find_assets(
+            tag=search_params.tag,
+            asset_type=search_params.asset_type,
+            product_types=search_params.product_types,
+            author_email=search_params.author_email,
+            name=search_params.name,
+            start_date=search_params.start_date,
+            end_date=search_params.end_date,
+            sf_campg_id=search_params.sf_campg_id,
+            language=search_params.language,
+            file_type=file_type,
+            page=page,
+            per_page=per_page,
+            include_deprecated=include_deprecated,
+        )
+    else:
+        assets = []
 
     return jsonify(
         {

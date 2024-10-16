@@ -9,7 +9,6 @@ from sqlalchemy import func
 from sqlalchemy.sql.expression import or_, and_
 from sqlalchemy.sql.sqltypes import Text
 from wand.image import Image
-from sqlalchemy import func
 
 # Local
 from webapp.database import db_session
@@ -18,7 +17,7 @@ from webapp.lib.processors import ImageProcessor
 from webapp.lib.url_helpers import clean_unicode
 from webapp.models import Asset, Tag
 from webapp.lib.file_helpers import is_svg
-from webapp.models import Asset, Tag, Product, Author
+from webapp.models import Asset, Tag, Product
 from webapp.swift import file_manager
 from webapp.utils import lru_cache
 
@@ -32,6 +31,7 @@ class AssetService:
         product_types: list = ["a","b"],
         author_email: str = "abc@g.com",
         title: str = "mad",
+        name: str = "%",
         start_date: str = "2024-01-01",
         end_date: str = "2024-10-14",
         sf_campg_id: str = "1234",
@@ -67,8 +67,8 @@ class AssetService:
             conditions.append(Asset.asset_type == asset_type)
         if author_email:
             conditions.append(Asset.author_email == author_email)
-        if title:
-            conditions.append(Asset.name.ilike(f"%{title}%"))
+        if name:
+            conditions.append(Asset.name.ilike(f"%{name}%"))
         if language:
             conditions.append(Asset.language.ilike(f"{language}"))
         if sf_campg_id:

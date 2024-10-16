@@ -7,7 +7,7 @@ class AssetSearchParams:
     asset_type: str = ""
     product_types: list = None
     author_email: str = ""
-    title: str = ""
+    name: str = ""
     start_date: str = None
     end_date: str = None
     sf_campg_id: str = ""
