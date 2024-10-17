@@ -14,6 +14,6 @@ def parse_asset_search_params() -> AssetSearchParams:
         name=request.args.get("name", "").strip(),
         start_date=request.args.get("start_date", None),
         end_date=request.args.get("end_date", None),
-        sf_campg_id=request.args.get("sf_campg_id", "").strip(),
+        salesforce_campaign_id=request.args.get("salesforce_campaign_id", "").strip(),
         language=request.args.get("language", "").strip(),
     )

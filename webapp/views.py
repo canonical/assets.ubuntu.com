@@ -190,7 +190,7 @@ def get_assets():
             search_params.name,
             search_params.start_date,
             search_params.end_date,
-            search_params.sf_campg_id,
+            search_params.salesforce_campaign_id,
             search_params.language,
         ]
     ):
@@ -203,11 +203,11 @@ def get_assets():
             name=search_params.name,
             start_date=search_params.start_date,
             end_date=search_params.end_date,
-            sf_campg_id=search_params.sf_campg_id,
+            salesforce_campaign_id=search_params.salesforce_campaign_id,
             language=search_params.language,
         )
     else:
-        assets = []
+        assets = asset_service.find_all_assets()
 
     def generate_json():
         yield "["

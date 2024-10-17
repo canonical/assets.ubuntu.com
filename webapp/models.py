@@ -87,7 +87,11 @@ class Asset(DateTimeMixin):
             "deprecated": self.deprecated,
             "asset_type": self.asset_type,
             "name": self.name,
-            "author": self.author,
+            "author": {
+                "first_name": self.author.first_name if self.author else None,
+                "last_name": self.author.last_name if self.author else None,
+                "email": self.author.email if self.author else None,
+            } if self.author else None,
             "google_drive_link": self.google_drive_link,
             "salesforce_campaign_id": self.salesforce_campaign_id,
             "language": self.language,

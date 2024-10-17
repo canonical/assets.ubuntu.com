@@ -11,12 +11,19 @@ from webapp.database import db_session
 from webapp.lib.processors import ImageProcessor
 from webapp.lib.url_helpers import clean_unicode
 from webapp.lib.file_helpers import is_svg
-from webapp.models import Asset, Tag, Product
+from webapp.models import Asset, Tag, Product, Author
 from webapp.swift import file_manager
 
 
 class AssetService:
 
+    def find_all_assets(self):
+        """
+        Return all assets in the database as a list
+        """
+        assets = db_session.query(Asset).all()
+        return assets
+        
     def find_assets(
         self,
         tag: str,
@@ -26,7 +33,7 @@ class AssetService:
         name: str,
         start_date: str,
         end_date: str,
-        sf_campg_id: str,
+        salesforce_campaign_id: str,
         language: str,
     ):
         """
@@ -43,9 +50,9 @@ class AssetService:
             conditions.append(Asset.name.ilike(f"%{name}%"))
         if language:
             conditions.append(Asset.language.ilike(f"{language}"))
-        if sf_campg_id:
+        if salesforce_campaign_id:
             conditions.append(
-                Asset.salesforce_campaign_id.ilike(f"{sf_campg_id}")
+                Asset.salesforce_campaign_id.ilike(f"{salesforce_campaign_id}")
             )
         if end_date and start_date:
             conditions.append(Asset.created.between(start_date, end_date))
@@ -143,10 +150,10 @@ class AssetService:
 
         # Save the file in Swift
         file_manager.create(file_content, url_path)
-
         tags = self.create_tags_if_not_exist(tags)
-        products = self.create_products_objects(products)
-
+        products = self.create_products_if_not_exists(products)
+        author = self.create_author_if_not_exist(author)
+        
         # Save file info in Postgres
         asset = Asset(
             file_path=url_path,
@@ -189,18 +196,48 @@ class AssetService:
         db_session.commit()
         return [*existing_tags, *tags_to_create]
 
-    def create_products_objects(self, product_names):
+    def create_products_if_not_exists(self, product_names):
         """
         Create the product objects and return the
         object from the database
         """
+        if product_names == [""]:
+            return []
+
         product_objects = []
         for product_name in product_names:
-            product = Product(name=product_name, assets=[])
-            product_objects.append(product)
-        db_session.add_all(product_objects)
+            existing_product = (
+                db_session.query(Product).filter_by(name=product_name).first()
+            )
+
+            if existing_product:
+                product_objects.append(existing_product)
+            else:
+                product = Product(name=product_name, assets=[])
+                product_objects.append(product)
+                db_session.add(product)
+
         db_session.commit()
         return product_objects
+
+    def create_author_if_not_exist(self, author):
+        """
+        Create the author object and return the object from the database
+        """
+        if not author:
+            return None
+
+        existing_author = (
+            db_session.query(Author).filter_by(email=author["email"]).first()
+        )
+
+        if existing_author:
+            return existing_author
+
+        author = Author(first_name=author["first_name"], last_name=author["last_name"], email=author["email"])
+        db_session.add(author)
+        db_session.commit()
+        return
 
     def normalize_tag_name(self, tag_name):
         return tag_name.strip().lower()
@@ -222,7 +259,6 @@ class AssetService:
             .filter(Asset.file_path == file_path)
             .one_or_none()
         )
-
         if not asset:
             raise AssetNotFound(file_path)
 
@@ -230,12 +266,12 @@ class AssetService:
             tags = self.create_tags_if_not_exist(tags)
             asset.tags = tags
         if products:
-            products = self.create_products_objects(products)
+            products = self.create_products_if_not_exists(products)
             asset.products = products
         if asset_type:
             asset.asset_type = asset_type
         if author:
-            asset.author = author
+            asset.author = self.create_author_if_not_exist(author)
         if google_drive_link:
             asset.google_drive_link = google_drive_link
         if salesforce_campaign_id:
@@ -244,7 +280,6 @@ class AssetService:
             asset.language = language
         if deprecated is not None:
             asset.deprecated = deprecated
-
         db_session.commit()
         return asset
 
