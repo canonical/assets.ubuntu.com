@@ -23,7 +23,7 @@ class AssetService:
         """
         assets = db_session.query(Asset).all()
         return assets
-        
+
     def find_assets(
         self,
         tag: str,
@@ -153,7 +153,7 @@ class AssetService:
         tags = self.create_tags_if_not_exist(tags)
         products = self.create_products_if_not_exists(products)
         author = self.create_author_if_not_exist(author)
-        
+
         # Save file info in Postgres
         asset = Asset(
             file_path=url_path,
@@ -234,7 +234,11 @@ class AssetService:
         if existing_author:
             return existing_author
 
-        author = Author(first_name=author["first_name"], last_name=author["last_name"], email=author["email"])
+        author = Author(
+            first_name=author["first_name"],
+            last_name=author["last_name"],
+            email=author["email"],
+        )
         db_session.add(author)
         db_session.commit()
         return
