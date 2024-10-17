@@ -110,7 +110,7 @@ def create():
         author = {
             "email": author_email,
             "first_name": author_first_name,
-            "last_name": author_last_name
+            "last_name": author_last_name,
         }
 
         for asset_file in flask.request.files.getlist("assets"):
@@ -175,7 +175,7 @@ def update():
         author = {
             "email": author_email,
             "first_name": author_first_name,
-            "last_name": author_last_name
+            "last_name": author_last_name,
         }
 
         try:
