@@ -10,7 +10,7 @@ class AssetSearchParams:
     name: str = ""
     start_date: str = None
     end_date: str = None
-    sf_campg_id: str = ""
+    salesforce_campaign_id: str = ""
     language: str = ""
 
     def __post_init__(self):
