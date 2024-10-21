@@ -201,13 +201,13 @@ class AssetService:
         # Save file info in Postgres
         asset = Asset(
             file_path=url_path,
+            name=friendly_name,
             data=data,
             tags=tags,
             created=datetime.now(tz=timezone.utc),
             products=products,
             asset_type=asset_type,
             author=author,
-            name=name,
             google_drive_link=google_drive_link,
             salesforce_campaign_id=salesforce_campaign_id,
             language=language,

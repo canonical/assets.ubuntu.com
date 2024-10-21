@@ -180,7 +180,6 @@ def create():
                     products=products,
                     asset_type=asset_type,
                     author=author,
-                    name=name,
                     google_drive_link=google_drive_link,
                     salesforce_campaign_id=salesforce_campaign_id,
                     language=language,
@@ -193,7 +192,7 @@ def create():
                 if asset:
                     existing_assets.append(asset)
             except Exception as error:
-                failed_assets.append({"file_path": name, "error": str(error)})
+                failed_assets.append({"file_path": filename, "error": str(error)})
         return flask.render_template(
             "created.html",
             assets=created_assets,
@@ -202,12 +201,14 @@ def create():
             tags=tags,
             optimize=optimize,
         )
-    return flask.render_template("create.html", products_list=products_list)
+    return flask.render_template("create-update.html", products_list=products_list)
 
 
 @ui_blueprint.route("/update", methods=["GET", "POST"])
 @login_required
 def update():
+    with open("products.yaml") as file:
+        products_list = yaml.load(file, Loader=yaml.FullLoader)
     file_path = request.args.get("file-path")
 
     if request.method == "GET":
@@ -248,7 +249,7 @@ def update():
         except AssetNotFound:
             flask.flash("Asset not found", "negative")
 
-    return flask.render_template("update.html", asset=asset)
+    return flask.render_template("create-update.html", products_list=products_list, asset=asset)
 
 
 # API Routes
