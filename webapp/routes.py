@@ -132,7 +132,7 @@ def home():
     )
 
 
-@ui_blueprint.route("/create", methods=["GET", "POST"])
+@ui_blueprint.route("/create", methods=["POST"])
 @login_required
 def create():
     created_assets = []
