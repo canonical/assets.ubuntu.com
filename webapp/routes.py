@@ -55,11 +55,10 @@ def home():
             search_params.name,
             search_params.start_date,
             search_params.end_date,
-            search_params.sf_campg_id,
+            search_params.salesforce_campaign_id,
             search_params.language,
         ]
     ):
-
         assets = asset_service.find_assets(
             tag=search_params.tag,
             asset_type=search_params.asset_type,
@@ -68,7 +67,7 @@ def home():
             name=search_params.name,
             start_date=search_params.start_date,
             end_date=search_params.end_date,
-            sf_campg_id=search_params.sf_campg_id,
+            salesforce_campaign_id=search_params.salesforce_campaign_id,
             language=search_params.language,
         )
     else:
@@ -82,7 +81,7 @@ def home():
     )
 
 
-@ui_blueprint.route("/create", methods=["GET", "POST"])
+@ui_blueprint.route("/create", methods=["POST"])
 @login_required
 def create():
     created_assets = []
@@ -92,8 +91,26 @@ def create():
     if flask.request.method == "POST":
         tags = flask.request.form.get("tags", "")
         tags = re.split(",|\\s", tags)
-
+        products = flask.request.form.get("products", "")
+        products = re.split(",|\\s", products)
+        google_drive_link = flask.request.form.get("google_drive_link", "")
+        salesforce_campaign_id = flask.request.form.get(
+            "salesforce_campaign_id", ""
+        )
+        language = flask.request.form.get("language", "")
+        deprecated = (
+            flask.request.form.get("deprecated", "false").lower() == "true"
+        )
         optimize = flask.request.form.get("optimize", True)
+        asset_type = flask.request.form.get("asset_type", "")
+        author_email = flask.request.form.get("author_email", "")
+        author_first_name = flask.request.form.get("author_first_name", "")
+        author_last_name = flask.request.form.get("author_last_name", "")
+        author = {
+            "email": author_email,
+            "first_name": author_first_name,
+            "last_name": author_last_name,
+        }
 
         for asset_file in flask.request.files.getlist("assets"):
             try:
@@ -105,6 +122,13 @@ def create():
                     friendly_name=name,
                     optimize=optimize,
                     tags=tags,
+                    products=products,
+                    asset_type=asset_type,
+                    author=author,
+                    google_drive_link=google_drive_link,
+                    salesforce_campaign_id=salesforce_campaign_id,
+                    language=language,
+                    deprecated=deprecated,
                 )
 
                 created_assets.append(asset)
@@ -137,11 +161,33 @@ def update():
             flask.flash("Asset not found", "negative")
 
     elif request.method == "POST":
-        tags = request.form.get("tags")
+        tags = request.form.get("tags").split(",")
+        products = request.form.get("products", "").split(",")
         deprecated = strtobool(request.form.get("deprecated", "false"))
+        asset_type = request.form.get("asset_type", "")
+        google_drive_link = request.form.get("google_drive_link", "")
+        salesforce_campaign_id = request.form.get("salesforce_campaign_id", "")
+        language = request.form.get("language", "")
+        author_email = flask.request.form.get("author_email", "")
+        author_first_name = flask.request.form.get("author_first_name", "")
+        author_last_name = flask.request.form.get("author_last_name", "")
+        author = {
+            "email": author_email,
+            "first_name": author_first_name,
+            "last_name": author_last_name,
+        }
+
         try:
             asset = asset_service.update_asset(
-                file_path, tags=tags.split(","), deprecated=deprecated
+                file_path=file_path,
+                tags=tags,
+                deprecated=deprecated,
+                products=products,
+                asset_type=asset_type,
+                author=author,
+                google_drive_link=google_drive_link,
+                salesforce_campaign_id=salesforce_campaign_id,
+                language=language,
             )
             flask.flash("Asset updated", "positive")
         except AssetNotFound:
