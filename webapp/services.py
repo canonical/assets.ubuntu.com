@@ -9,6 +9,7 @@ from sqlalchemy import func
 from sqlalchemy.sql.expression import or_, and_
 from sqlalchemy.sql.sqltypes import Text
 from wand.image import Image
+from typing import List
 
 # Local
 from webapp.database import db_session
@@ -124,17 +125,17 @@ class AssetService:
     def create_asset(
         self,
         file_content,
-        friendly_name,
-        optimize,
+        friendly_name: str,
+        optimize: bool,
         url_path=None,
-        tags=[],
-        products=[],
-        asset_type=None,
-        author=None,
-        google_drive_link=None,
-        salesforce_campaign_id=None,
-        language=None,
-        deprecated=False,
+        tags: List[str] = [],
+        products: List[str] = [],
+        asset_type: str = None,
+        author: str = None,
+        google_drive_link: str = None,
+        salesforce_campaign_id: str = None,
+        language: str = None,
+        deprecated: bool = False,
         data={},
     ):
         """
@@ -205,7 +206,7 @@ class AssetService:
             file_path=url_path,
             data=data,
             tags=tags,
-            created=datetime.utcnow(),
+            created=datetime.now(tz=timezone.utc),
             products=products,
             asset_type=asset_type,
             author=author,
@@ -294,15 +295,15 @@ class AssetService:
 
     def update_asset(
         self,
-        file_path,
-        tags=[],
-        deprecated=None,
-        products=[],
-        asset_type=None,
-        author=None,
-        google_drive_link=None,
-        salesforce_campaign_id=None,
-        language=None,
+        file_path: str,
+        tags: List[str] = [],
+        deprecated: bool = None,
+        products: List[str] = [],
+        asset_type: str = None,
+        author: str = None,
+        google_drive_link: str = None,
+        salesforce_campaign_id: str = None,
+        language: str = None,
     ):
         asset = (
             db_session.query(Asset)
