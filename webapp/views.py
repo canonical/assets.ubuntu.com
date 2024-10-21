@@ -194,7 +194,6 @@ def get_assets():
             search_params.language,
         ]
     ):
-
         assets = asset_service.find_assets(
             tag=search_params.tag,
             asset_type=search_params.asset_type,
