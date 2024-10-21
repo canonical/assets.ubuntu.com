@@ -435,7 +435,8 @@ def get_users(username: str):
     query($name: String!) {
         employees(filter: { contains: { name: $name }}) {
             id
-            name
+            firstName
+            surname
             email
             team
             department
