@@ -71,8 +71,6 @@ Products:
     slug: "microstack"
   - name: "Appliance Portfolio"
     slug: "appliance-portfolio"
-  - name: "Ubuntu Pro"
-    slug: "ubuntu-pro"
   - name: "Networking"
     slug: "networking"
   - name: "Juju"
