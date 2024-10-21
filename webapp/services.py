@@ -1,7 +1,7 @@
 # System
 import imghdr
 from base64 import b64decode
-from datetime import datetime
+from datetime import datetime, timezone
 
 # Packages
 from wand.image import Image
@@ -17,7 +17,6 @@ from webapp.swift import file_manager
 
 
 class AssetService:
-
     def find_all_assets(self):
         """
         Return all assets in the database as a list
