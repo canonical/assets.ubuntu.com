@@ -1,7 +1,7 @@
 # System
 import imghdr
 from base64 import b64decode
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Tuple
 
 # Packages
@@ -24,7 +24,6 @@ from webapp.utils import lru_cache
 
 
 class AssetService:
-
     def find_all_assets(self):
         """
         Return all assets in the database as a list
