@@ -10,7 +10,7 @@
   }
 }
 
-.asset-thumbnail {
+.p-asset-card--thumbnail {
   max-height: 100px;
   min-height: 100px;
 }
@@ -40,4 +40,8 @@
 .p-filter-panel-section__chips-toggle {
   padding-top: 6px;
   margin-bottom: 18px;
+.p-asset-card {
+  padding:0.75rem;
+  background:#f7f7f7;
+  margin-top:2rem;
 }
