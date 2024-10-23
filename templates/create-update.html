@@ -103,9 +103,8 @@
               <div class="p-filter-panel-section">
                 <div class="p-filter-panel-section__header">
                   <h4 class="p-filter-panel-section__heading p-heading--5">Tags</h4>
-                  <a class="p-filter-panel-section__chips-toggle js-expand-chip-panel" tabindex="0">Show more</a>
                 </div>
-                <div class="p-filter-panel-section__chips" aria-expanded="false">
+                <div class="p-filter-panel-section__chips">
                   {% for product in products_list.products %}
                   <button class="p-chip js-{{ product.slug }} js-chip is-inactive {% if product.slug in existing_products %}u-hide{% endif %}" id="{{ product.slug }}" data-name="{{ product.name }}">
                     <span class="p-chip__value">{{ product.name }}</span>
