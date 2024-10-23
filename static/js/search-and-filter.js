@@ -12,7 +12,7 @@
       targetPanel,
       hiddenInput,
       isInSearchActiveComponent: (element, pattern) => {
-        const isActive = pattern.classList.contains('.js-active')
+        const isActive = pattern.classList.contains('js-active')
         return element.closest('.p-search-and-filter') === pattern && !isActive;
       }
     });
@@ -58,11 +58,11 @@ function openPanel(searchContainer, panel, isOpen) {
     if (!isOpen) {
       panel.setAttribute('aria-hidden', 'true');
       searchContainer.setAttribute('aria-expanded', 'false');
-      panel.classList.remove('.js-active');
+      panel.classList.remove('js-active');
     } else {
       panel.setAttribute('aria-hidden', 'false');
       searchContainer.setAttribute('aria-expanded', 'true');
-      panel.classList.add('.js-active');
+      panel.classList.add('js-active');
     }
   }
 }
@@ -86,13 +86,6 @@ function removeChipValueFromHiddenInput(value, input) {
 // Product specific setup
 function setUpProductFilter() {
   const productsPanel = document.querySelector('.js-products');
-  const expandChipPanelToggle = productsPanel.querySelector('.js-expand-chip-panel');
-  expandChipPanelToggle.addEventListener('click', function(e) {
-    e.preventDefault();
-    const isExpanded = chipsContainer.getAttribute('aria-expanded') === 'true';
-    chipsContainer.setAttribute('aria-expanded', isExpanded ? 'false' : 'true');
-    expandChipPanelToggle.textContent = isExpanded ? 'Show more' : 'Show less';
-  });
   const fuse = setupFuse(productsPanel);
   handleInputChange(fuse, productsPanel.querySelector('.js-search-input'));
   // If there are existing chips, because you are updating, handle them
