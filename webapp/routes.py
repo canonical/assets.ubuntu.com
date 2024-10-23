@@ -81,7 +81,7 @@ def home():
     )
 
 
-@ui_blueprint.route("/create", methods=["POST"])
+@ui_blueprint.route("/create", methods=["GET", "POST"])
 @login_required
 def create():
     created_assets = []
@@ -195,6 +195,16 @@ def update():
 
     return flask.render_template("update.html", asset=asset)
 
+@ui_blueprint.route("/details", methods=["GET"])
+@login_required
+def details():
+    file_path = request.args.get("file-path")
+
+    asset = asset_service.find_asset(file_path)
+    if not asset:
+        flask.flash("Asset not found", "negative")
+    
+    return flask.render_template("details.html", asset=asset)
 
 # API Routes
 # ===

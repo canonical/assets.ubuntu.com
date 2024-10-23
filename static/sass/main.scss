@@ -10,18 +10,13 @@
   }
 }
 
-.asset-thumbnail {
+.p-asset-card--thumbnail {
   max-height: 100px;
   min-height: 100px;
 }
 
-.asset-additional-edit-row {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  & > * {
-    margin: 0 !important;
-  }
+.p-asset-card {
+  padding:0.75rem;
+  background:#f7f7f7;
+  margin-top:2rem;
 }
