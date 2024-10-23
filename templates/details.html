@@ -1,0 +1,58 @@
+{% extends "_layout.html" %}
+
+{% block title %}Asset details{% endblock %}
+
+{% block content %}
+<div class="p-strip is-shallow">
+  <div class="row">
+    <div class="col-4">
+      <h2>Asset details</h2>
+      {% if asset.data.image %}
+      <a href="/v1/{{ asset.file_path }}" target="_blank">
+        <img
+          src="/v1/{{ asset.file_path }}"
+        />
+      </a>
+      {% endif %}
+      <p>File path:<strong>{{ file_path }}</strong></p>
+      <p>Name: <strong>{{ asset.name }}</strong></p>
+      <p>File type: <strong>.{{ asset.file_path.split('.', 1)[1] }}</strong></p>
+      <p>Asset type: {{ asset.asset_type }}</p>
+      <p>Image size: <strong>{% if asset.data.width and asset.data.height %}{{asset.data.width}} x {{asset.data.height}}{% else %}Unknown{% endif %}</strong></p>
+      <p>
+        Products:
+        {% for product in asset.products %}
+        <strong>{{ product.name }}{% if not loop.last %},{% endif %}</strong>
+        {% endfor %}
+      </p>
+      <p>
+        Tags: 
+        {% for tag in asset.tags %}
+        <strong>{{ tag.name }}{% if not loop.last %},{% endif %}</strong>
+        {% endfor %}
+      </p>
+      <p>Created: {{ asset.created.strftime('%d %B %Y') }}</p>
+      <p>Updated: {{ asset.updated.strftime('%d %B %Y') }}</p>
+      <p>Google drive link: {{ asset.google_drive_link }}</p>
+      <p>Author email: {{ asset.author_email }}</p>
+      <p>Language: {{ asset.language }}</p>
+      <p>Salesforce campaign ID: {{ asset.salesforce_campaign_id }}</p>
+      <p>Deprecated: {{ asset.deprecated }}</p>
+      <p style="height:100%">
+        <button
+          class="p-button--positive copy-link is-dense"
+          data-url="/v1/{{ asset.file_path }}"
+        >
+          Asset link
+        </button>
+        <button
+          class="p-button is-dense"
+          data-url="/manager/update?file-path={{ asset.file_path }}"
+        >
+          Edit asset
+        </button>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

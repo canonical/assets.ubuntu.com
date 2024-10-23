@@ -1654,7 +1654,7 @@ util@^0.10.3:
 
 vanilla-framework@4.16.0:
   version "4.16.0"
-  resolved "https://registry.npmjs.org/vanilla-framework/-/vanilla-framework-4.16.0.tgz"
+  resolved "https://registry.yarnpkg.com/vanilla-framework/-/vanilla-framework-4.16.0.tgz#54e7a51e073de043d45a7bac37ffaa4f4351ac4a"
   integrity sha512-LrxZLiNOm0cTpG++1X4MMy2efg8Xhc08JUAwNAybeSQ5FaaBGiAodbV1Fx3QvJxlaPFQqsjOdT6uZDwuOD7YJg==
 
 verbalize@^0.1.2:
