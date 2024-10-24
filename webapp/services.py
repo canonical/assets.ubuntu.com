@@ -130,13 +130,11 @@ class AssetService:
             except Exception:
                 # Just don't worry if image reading fails
                 pass
-
         asset = (
             db_session.query(Asset)
             .filter(Asset.file_path == url_path)
             .one_or_none()
         )
-
         if asset:
             if "width" not in asset.data and "width" in data:
                 asset.data["width"] = data["width"]
@@ -157,6 +155,7 @@ class AssetService:
         # Save file info in Postgres
         asset = Asset(
             file_path=url_path,
+            name=friendly_name,
             data=data,
             tags=tags,
             created=datetime.now(tz=timezone.utc),
