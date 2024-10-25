@@ -5,7 +5,6 @@ from datetime import datetime, timezone
 from io import BytesIO
 
 # Packages
-from wand.image import Image
 from typing import List
 from PIL import Image as PillowImage
 
