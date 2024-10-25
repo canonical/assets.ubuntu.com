@@ -128,6 +128,7 @@ class AssetService:
         file_content,
         friendly_name: str,
         optimize: bool,
+        name: str = None,
         url_path=None,
         tags: List[str] = [],
         products: List[str] = [],
@@ -149,7 +150,7 @@ class AssetService:
         # First we ensure it is b64 encoded
         encoded_file_content = b64encode(file_content)
         # Then we can decode it
-        decoded_file_content = (b64decode(encoded_file_content))
+        decoded_file_content = b64decode(encoded_file_content)
 
         if imghdr.what(None, h=file_content) is not None or is_svg(
             file_content
@@ -211,7 +212,7 @@ class AssetService:
         # Save file info in Postgres
         asset = Asset(
             file_path=url_path,
-            name=friendly_name,
+            name=name,
             data=data,
             tags=tags,
             created=datetime.now(tz=timezone.utc),
@@ -304,6 +305,7 @@ class AssetService:
     def update_asset(
         self,
         file_path: str,
+        name: str = None,
         tags: List[str] = [],
         deprecated: bool = None,
         products: List[str] = [],
@@ -324,6 +326,8 @@ class AssetService:
         if tags:
             tags = self.create_tags_if_not_exist(tags)
             asset.tags = tags
+        if name:
+            asset.name = name
         if products:
             products = self.create_products_if_not_exists(products)
             asset.products = products

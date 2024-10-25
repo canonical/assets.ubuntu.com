@@ -166,6 +166,7 @@ def create():
             "first_name": author_first_name,
             "last_name": author_last_name,
         }
+        name = flask.request.form.get("name", "")
 
         for asset_file in flask.request.files.getlist("assets"):
             try:
@@ -175,6 +176,7 @@ def create():
                 asset = asset_service.create_asset(
                     file_content=content,
                     friendly_name=filename,
+                    name=name,
                     optimize=optimize,
                     tags=tags,
                     products=products,
@@ -228,19 +230,21 @@ def update():
         google_drive_link = request.form.get("google_drive_link", "")
         salesforce_campaign_id = request.form.get("salesforce_campaign_id", "")
         language = request.form.get("language", "")
-        author_email = flask.request.form.get("author_email", "")
-        author_first_name = flask.request.form.get("author_first_name", "")
-        author_last_name = flask.request.form.get("author_last_name", "")
+        author_email = request.form.get("author_email", "")
+        author_first_name = request.form.get("author_first_name", "")
+        author_last_name = request.form.get("author_last_name", "")
         author = {
             "email": author_email,
             "first_name": author_first_name,
             "last_name": author_last_name,
         }
+        name = request.form.get("name", "")
 
         try:
             asset = asset_service.update_asset(
                 file_path=file_path,
                 tags=tags,
+                name=name,
                 deprecated=deprecated,
                 products=products,
                 asset_type=asset_type,
@@ -252,10 +256,12 @@ def update():
             flask.flash("Asset updated", "positive")
         except AssetNotFound:
             flask.flash("Asset not found", "negative")
+        return flask.redirect("/manager/details?file-path=" + file_path)
 
     return flask.render_template(
         "create-update.html", products_list=products_list, asset=asset
     )
+
 
 @ui_blueprint.route("/details", methods=["GET"])
 @login_required
@@ -265,8 +271,9 @@ def details():
     asset = asset_service.find_asset(file_path)
     if not asset:
         flask.flash("Asset not found", "negative")
-    
+
     return flask.render_template("details.html", asset=asset)
+
 
 # API Routes
 # ===

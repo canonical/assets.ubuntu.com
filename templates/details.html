@@ -14,10 +14,10 @@
         />
       </a>
       {% endif %}
-      <p>File path:<strong>{{ file_path }}</strong></p>
+      <p>File path:<strong>{{ asset.file_path }}</strong></p>
       <p>Name: <strong>{{ asset.name }}</strong></p>
       <p>File type: <strong>.{{ asset.file_path.split('.', 1)[1] }}</strong></p>
-      <p>Asset type: {{ asset.asset_type }}</p>
+      <p>Asset type: <strong>{{ asset.asset_type }}</strong></p>
       <p>Image size: <strong>{% if asset.data.width and asset.data.height %}{{asset.data.width}} x {{asset.data.height}}{% else %}Unknown{% endif %}</strong></p>
       <p>
         Products:
@@ -31,13 +31,13 @@
         <strong>{{ tag.name }}{% if not loop.last %},{% endif %}</strong>
         {% endfor %}
       </p>
+      <p>Language: <strong>{{ asset.language }}</strong></p>
+      <p>Salesforce campaign ID: <strong>{{ asset.salesforce_campaign_id }}</strong></p>
+      <p>Google drive link: <a href="{{ asset.google_drive_link }}">{{ asset.google_drive_link }}</a></p>
+      <p>Author email: <strong>{{ asset.author_email }}</strong></p>
+      <p>Deprecated: <strong>{{ asset.deprecated }}</strong></p>
       <p>Created: {{ asset.created.strftime('%d %B %Y') }}</p>
       <p>Updated: {{ asset.updated.strftime('%d %B %Y') }}</p>
-      <p>Google drive link: {{ asset.google_drive_link }}</p>
-      <p>Author email: {{ asset.author_email }}</p>
-      <p>Language: {{ asset.language }}</p>
-      <p>Salesforce campaign ID: {{ asset.salesforce_campaign_id }}</p>
-      <p>Deprecated: {{ asset.deprecated }}</p>
       <p style="height:100%">
         <button
           class="p-button--positive copy-link is-dense"
@@ -45,12 +45,12 @@
         >
           Asset link
         </button>
-        <button
-          class="p-button is-dense"
-          data-url="/manager/update?file-path={{ asset.file_path }}"
+        <a
+        class="p-button is-dense"
+        href="/manager/update?file-path={{ asset.file_path }}"
         >
           Edit asset
-        </button>
+        </a>
       </p>
     </div>
   </div>
