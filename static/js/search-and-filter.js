@@ -184,17 +184,22 @@ function handleProductsChipSelection(chip, hiddenInput) {
  **/
 function showAndHideProductChips(chips, query) {
   const allChips = document.querySelectorAll('.js-chip.is-inactive');
+  // If no query, show all chips
   if (!query) {
     allChips.forEach(chip => {
       chip.classList.remove('u-hide');
     });
+    return;
   }
+  // Start by hiding all chips
   allChips.forEach(chip => {
     chip.classList.add('u-hide');
   });
   if (!chips.length) {
+    // If there are no results, show a message
     document.querySelector('.js-no-results').classList.remove('u-hide');
   } else {
+    // If there are results, show those chips
     document.querySelector('.js-no-results').classList.add('u-hide');
     chips.forEach(chip => {
       if (document.querySelector(`.js-${chip.id}.is-active`).classList.contains('u-hide')) {
