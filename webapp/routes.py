@@ -192,7 +192,9 @@ def create():
                 if asset:
                     existing_assets.append(asset)
             except Exception as error:
-                failed_assets.append({"file_path": filename, "error": str(error)})
+                failed_assets.append(
+                    {"file_path": filename, "error": str(error)}
+                )
         return flask.render_template(
             "created.html",
             assets=created_assets,
@@ -201,7 +203,9 @@ def create():
             tags=tags,
             optimize=optimize,
         )
-    return flask.render_template("create-update.html", products_list=products_list)
+    return flask.render_template(
+        "create-update.html", products_list=products_list
+    )
 
 
 @ui_blueprint.route("/update", methods=["GET", "POST"])
@@ -249,7 +253,9 @@ def update():
         except AssetNotFound:
             flask.flash("Asset not found", "negative")
 
-    return flask.render_template("create-update.html", products_list=products_list, asset=asset)
+    return flask.render_template(
+        "create-update.html", products_list=products_list, asset=asset
+    )
 
 
 # API Routes
