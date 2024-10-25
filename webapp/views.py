@@ -116,7 +116,7 @@ def update_asset(file_path):
     tags = request.values.get("tags", "").split(",")
     products = request.values.get("products", "").split(",")
     deprecated = strtobool(request.values.get("deprecated", "false"))
-    asset_type = request.values.get("asset_type", "")
+    asset_type = request.values.get("asset-type", "")
     author = request.values.get("author", "")
     google_drive_link = request.values.get("google_drive_link", "")
     salesforce_campaign_id = request.values.get("salesforce_campaign_id", "")
@@ -232,7 +232,7 @@ def create_asset():
     tags = request.values.get("tags", "").split(",")
     products = request.values.get("products", "").split(",")
     url_path = request.values.get("url-path", "").strip("/")
-    asset_type = request.values.get("asset_type", "")
+    asset_type = request.values.get("asset-type", "")
     author = request.values.get("author", "")
     google_drive_link = request.values.get("google_drive_link", "")
     salesforce_campaign_id = request.values.get("salesforce_campaign_id", "")
@@ -435,7 +435,8 @@ def get_users(username: str):
     query($name: String!) {
         employees(filter: { contains: { name: $name }}) {
             id
-            name
+            firstName
+            surname
             email
             team
             department
