@@ -39,6 +39,9 @@ from webapp.views import (
 ui_blueprint = Blueprint("ui_blueprint", __name__, url_prefix="/manager")
 api_blueprint = Blueprint("api_blueprint", __name__, url_prefix="/v1")
 
+with open("products.yaml") as file:
+    products_list = yaml.load(file, Loader=yaml.FullLoader)
+
 # Manager Routes
 # ===
 
@@ -79,6 +82,7 @@ def home():
         assets=assets,
         query=search_params.tag,
         type=search_params.asset_type,
+        products_list=products_list,
     )
 
 
@@ -88,8 +92,6 @@ def create():
     created_assets = []
     existing_assets = []
     failed_assets = []
-    with open("products.yaml") as file:
-        products_list = yaml.load(file, Loader=yaml.FullLoader)
 
     if flask.request.method == "POST":
         tags = flask.request.form.get("tags", "")
