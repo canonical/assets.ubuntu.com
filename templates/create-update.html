@@ -21,7 +21,7 @@
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
         <div class="p-section">
           {% if is_update %}
-            <p>{{ asset.file_path}}</p>
+            <h3>{{ asset.file_path}}</h3>
             <a href="/v1/{{ asset.file_path }}" target="_blank">
               <img class="p-image--bordered asset-thumbnail" src="/v1/{{ asset.file_path }}">
             </a>
@@ -62,7 +62,7 @@
         <div class="p-section">
           <label class="p-heading--5 u-no-margin--bottom" id="asset-name">Asset name</label>
           <p class="u-text--muted u-no-padding--top">Use any relevant naming conventions for your asset.</p>
-          <input type="text" id="name" name="friendly_name" aria-labelledby="asset-name" value="{% if asset %}{{ asset.name }}{% endif %}">
+          <input type="text" id="name" name="name" aria-labelledby="asset-name" value="{% if asset %}{{ asset.name }}{% endif %}">
         </div>
       </div>
     </div>
@@ -204,7 +204,7 @@
         <div class="p-section">
           <label class="p-heading--5 u-no-margin--bottom">Google Drive link</label>
           <p class="u-text--muted u-no-padding--top">Link to the asset on Google Drive, if applicable.</p>
-          <input type="text" id="google-drive-link" name="google_drive_link" placeholder="Link" {% if is_update %}disabled{% endif %} value="{% if asset and asset.google_drive_link %}{{ asset.google_drive_link }}{% endif %}">
+          <input type="text" id="google-drive-link" name="google_drive_link" placeholder="Link" value="{% if asset and asset.google_drive_link %}{{ asset.google_drive_link }}{% endif %}">
         </div>
       </div>
     </div>
