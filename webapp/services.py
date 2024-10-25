@@ -9,7 +9,6 @@ from io import BytesIO
 from sqlalchemy import func
 from sqlalchemy.sql.expression import or_, and_
 from sqlalchemy.sql.sqltypes import Text
-from wand.image import Image
 from typing import List
 from PIL import Image as PillowImage
 
