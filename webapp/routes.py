@@ -66,10 +66,11 @@ ui_blueprint.add_app_template_global(
 )
 
 
-@ui_blueprint.route("/")
+@ui_blueprint.route("/", methods=["GET"])
 @login_required
 def home():
     search_params = parse_asset_search_params()
+    print("search_params", search_params)
 
     page = request.values.get("page", type=int, default=1)
     per_page = request.values.get("per_page", type=int)
@@ -90,6 +91,7 @@ def home():
         [
             search_params.tag,
             search_params.asset_type,
+            search_params.product_types,
             search_params.author_email,
             search_params.name,
             search_params.start_date,
@@ -118,6 +120,8 @@ def home():
     else:
         assets = []
         total = 0
+
+        print("assets", assets)
 
     return flask.render_template(
         "index.html",
