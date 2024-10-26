@@ -3,29 +3,30 @@ import {
   openPanel,
   addValueToHiddenInput,
   removeValueFromHiddenInput,
+  addValueToQueryParams,
+  removeValueFromQueryParams,
   isInActiveSearchComponent
 } from './main.js';
 
 /* 
- * Function that finds all the search and filter components on the page and
- * sets up the event listeners for opening the panel and handling the chips.
- * Also calls the specific setup functions for each type of search and filter component.
+ * Sets up the event listeners for opening the panel.
+ * Also calls the specific setup function.
  **/
 (function () {
-  const productsSearch = document.querySelector('.js-products-search');
-  productsSearch.addEventListener('focusin', function (e) {
-    if (!isInActiveSearchComponent(e.target, productsSearch)) {
-      openPanel(productsSearch, true);
+  const productsSearchComponent = document.querySelector('.js-products-search');
+  productsSearchComponent.addEventListener('focusin', function (e) {
+    if (!isInActiveSearchComponent(e.target, productsSearchComponent)) {
+      openPanel(productsSearchComponent, true);
       return;
     }
   });
-  productsSearch.addEventListener('focusout', function (e) {
-    if (isInActiveSearchComponent(e.target, productsSearch)) {
+  productsSearchComponent.addEventListener('focusout', function (e) {
+    if (isInActiveSearchComponent(e.target, productsSearchComponent)) {
       return;
     }
-    openPanel(productsSearch, false);
+    openPanel(productsSearchComponent, false);
   });
-  setUpProductFilter();
+  setUpProductSearchField();
 })();
 
 /*
@@ -47,7 +48,7 @@ export default function handleProductsChip(targetChip) {
  * Products comes from a predefined list (products.yaml) and are added to the page on load.
  * By default they are all hidden and are shown and hidden based on the search input.
  **/
-function setUpProductFilter() {
+function setUpProductSearchField() {
   const productsPanel = document.querySelector('.js-products-search');
   handleExistingChips(productsPanel);
   const Fuse = setupFuse(productsPanel);
@@ -130,37 +131,6 @@ function deselectChip(chipId, updateQueryParams) {
   }
 }
 
-/* 
- * Function to add a value to a query parameter.
- * @param {String} key - The query parameter key.
- * @param {String} value - The value to add.
- **/
-function addValueToQueryParams(key, value) {
-  const url = new URL(window.location);
-  const currentValues = url.searchParams.get(key)?.split(',') || [];
-  if (!currentValues.includes(value)) {
-    currentValues.push(value);
-  }
-  url.searchParams.set(key, currentValues.join(','));
-  window.history.replaceState({}, '', url);
-}
-
-/* 
- * Function to add a value to a query parameter.
- * @param {String} key - The query parameter key.
- * @param {String} value - The value to add.
- **/
-function removeValueFromQueryParams(key, value) {
-  const url = new URL(window.location);
-  let currentValues = url.searchParams.get(key)?.split(',') || [];
-  currentValues = currentValues.filter((v) => v !== value);
-  if (currentValues.length) {
-    url.searchParams.set(key, currentValues.join(','));
-  } else {
-    url.searchParams.delete(key);
-  }
-  window.history.replaceState({}, '', url);
-}
 
 /*
  * Specfic handling for the product chips search results.
