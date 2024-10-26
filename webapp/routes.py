@@ -46,15 +46,17 @@ with open("products.yaml") as file:
 # ===
 
 
-@ui_blueprint.route("/")
+@ui_blueprint.route("/", methods=["GET"])
 @login_required
 def home():
     search_params = parse_asset_search_params()
+    print("search_params", search_params)
 
     if any(
         [
             search_params.tag,
             search_params.asset_type,
+            search_params.product_types,
             search_params.author_email,
             search_params.name,
             search_params.start_date,
@@ -76,6 +78,8 @@ def home():
         )
     else:
         assets = []
+
+        print("assets", assets)
 
     return flask.render_template(
         "index.html",

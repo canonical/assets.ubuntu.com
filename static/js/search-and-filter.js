@@ -118,7 +118,7 @@ function setUpProductFilter() {
   const productsPanel = document.querySelector('.js-products');
   const fuse = setupFuse(productsPanel);
   handleProductInputChange(fuse, productsPanel.querySelector('.js-search-input'));
-  // If we are on the /update route, the asset may have existing chips, we need to add them to the page.
+  // If there are existing chips, we need to add them to the page.
   const existingChips = Array.from(productsPanel.querySelectorAll('.js-chip.is-inactive.u-hide'));
   existingChips.forEach(chip => handleProductsChipSelection(chip, productsPanel.querySelector('.js-hidden-input')));
 }
