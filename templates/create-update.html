@@ -67,8 +67,8 @@
       </div>
     </div>
 
+    {% set existing_products = [] %}
     {% if asset %}
-      {% set existing_products = [] %}
       {% for product in asset.products %}
         {% set _ = existing_products.append(product.name) %}
       {% endfor %}
