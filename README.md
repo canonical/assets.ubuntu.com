@@ -23,6 +23,7 @@ It has 2 main parts:
       - [Uploading assets](#uploading-assets)
       - [Deleting assets](#deleting-assets)
       - [Listing assets](#listing-assets)
+        - [Pagination](#pagination)
     - [Managing redirects](#managing-redirects)
       - [Creating redirects](#creating-redirects)
       - [Updating redirects](#updating-redirects)
@@ -172,6 +173,12 @@ You can also filter the assets by:
 - `tag`: Filter the assets by a specific tag
 - `q`: A query string to filter the assets by filename, e.g. `q=ubuntu` will return all the assets with `ubuntu` in their filename
 - `type`: The type of the asset, e.g. `type=png` will return all the assets with the `png` extension
+
+##### Pagination
+
+By default, the API will return the first 20 assets. You can specify the number of assets to return by using the `per_page` query parameter, e.g. `per_page=100`.
+
+You can also specify the page number by using the `page` query parameter, e.g. `page=2` (this will return the second page of assets).
 
 ### Managing redirects
 

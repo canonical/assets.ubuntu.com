@@ -2,7 +2,6 @@
 import imghdr
 from base64 import b64decode
 from datetime import datetime
-from functools import cache
 from typing import Tuple
 
 # Packages
@@ -17,6 +16,7 @@ from webapp.lib.processors import ImageProcessor
 from webapp.lib.url_helpers import clean_unicode
 from webapp.models import Asset, Tag
 from webapp.swift import file_manager
+from webapp.utils import lru_cache
 
 
 class AssetService:
@@ -190,7 +190,7 @@ class AssetService:
         db_session.commit()
         return asset
 
-    @cache
+    @lru_cache(ttl_seconds=3600)
     def available_extensions(self):
         """
         Return a list of available extensions
