@@ -95,7 +95,7 @@
               <div class="p-search-and-filter__box" data-overflowing="false">
                 <label class="u-hide" for="search">Search products</label>
                 <input autocomplete="off" class="p-search-and-filter__input js-search-input" id="search" placeholder="Start typing a product name" type="text" value="" aria-labelledby="product-tags">
-                <input type="text" class="u-hide js-hidden-input" name="products" value="">
+                <input type="text" class="u-hide js-hidden-field" name="products" value="">
                 <button alt="search" class="u-off-screen" type="submit" tabindex="-1">Search</button>
               </div>
             </div>
@@ -143,7 +143,7 @@
               <div class="p-search-and-filter__box" data-overflowing="false">
                 <label class="u-hide" for="search">Search other tags</label>
                 <input autocomplete="off" class="p-search-and-filter__input js-input" type="text" value="" aria-labelledby="tags">
-                <input type="text" class="u-hide js-hidden-input" name="tags" value="">
+                <input type="text" class="u-hide js-hidden-field" name="tags" value="">
               </div>
             </div>
           </div>
@@ -173,9 +173,9 @@
               <div class="p-search-and-filter__box" data-overflowing="false">
                 <label class="u-hide" for="search">Search authors</label>
                 <input autocomplete="off" class="p-search-and-filter__input js-authors-input" placeholder="Search authors" type="text" value="" aria-labelledby="author">
-                <input type="text" class="u-hide js-hidden-input-email" name="author_email" value="{% if asset and asset.author.email %}{{ asset.author.email }}{% endif %}">
-                <input type="text" class="u-hide js-hidden-input-firstname" name="author_first_name" value="{% if asset and asset.author.first_name %}{{ asset.author.first_name }}{% endif %}">
-                <input type="text" class="u-hide js-hidden-input-lastname" name="author_last_name" value="{% if asset and asset.author.last_name %}{{ asset.author.last_name }}{% endif %}">
+                <input type="text" class="u-hide js-hidden-field-email" name="author_email" value="{% if asset and asset.author.email %}{{ asset.author.email }}{% endif %}">
+                <input type="text" class="u-hide js-hidden-field-firstname" name="author_first_name" value="{% if asset and asset.author.first_name %}{{ asset.author.first_name }}{% endif %}">
+                <input type="text" class="u-hide js-hidden-field-lastname" name="author_last_name" value="{% if asset and asset.author.last_name %}{{ asset.author.last_name }}{% endif %}">
                 <button alt="search" class="u-off-screen" type="submit">Search</button>
               </div>
             </div>

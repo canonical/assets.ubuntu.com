@@ -4,6 +4,19 @@ import handleProductsChip from './products-search';
 import './authors-search';
 import handleAuthorsChip from './authors-search';
 
+import './date-picker';
+import './other-fields';
+
+/*
+ * If 'enter' is pressed, submit the form.
+ **/
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Enter') {
+    const form = e.target.closest('form');
+    form.submit();
+  }
+});
+
 /*
  * Event delgation to handle the click event on the document.
  **/
@@ -20,14 +33,6 @@ document.addEventListener('click', function (e) {
       return;
     }
   }
-  const activeSearchComponent = document.querySelector('.js-active-search');
-  if (!activeSearchComponent) {
-    return;
-  }
-  if (!isInActiveSearchComponent(e.target, activeSearchComponent)) {
-    openPanel(activeSearchComponent, false);
-    return;
-  }
 });
 
 /* 
@@ -36,7 +41,7 @@ document.addEventListener('click', function (e) {
  * @param {HTMLElement} panel - Where the chips are displayed.
  * @param {Boolean} isOpen - Whether the panel should end open or closed.
  **/
-export function openPanel(searchComponent, opening = 'false') {
+export function openPanel(searchComponent, opening = 'false', callfrom) {
   const searchContainer = searchComponent.querySelector('.p-search-and-filter__search-container');
   const panel = searchComponent.querySelector('.p-search-and-filter__panel');
   if (panel && searchContainer) {
