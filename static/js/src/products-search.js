@@ -5,8 +5,10 @@ import {
   removeValueFromHiddenInput,
   addValueToQueryParams,
   removeValueFromQueryParams,
-  isInActiveSearchComponent
 } from './main.js';
+
+// Define whether we are in search and thus need to update query params
+const updateQueryParams = document.querySelector('.js-asset-search');
 
 /* 
  * Sets up the event listeners for opening the panel.
@@ -14,19 +16,15 @@ import {
  **/
 (function () {
   const productsSearchComponent = document.querySelector('.js-products-search');
-  productsSearchComponent.addEventListener('focusin', function (e) {
-    if (!isInActiveSearchComponent(e.target, productsSearchComponent)) {
+  if (productsSearchComponent) {
+    productsSearchComponent.addEventListener('focusin', function (e) {
       openPanel(productsSearchComponent, true);
-      return;
-    }
-  });
-  productsSearchComponent.addEventListener('focusout', function (e) {
-    if (isInActiveSearchComponent(e.target, productsSearchComponent)) {
-      return;
-    }
-    openPanel(productsSearchComponent, false);
-  });
-  setUpProductSearchField();
+    });
+    productsSearchComponent.addEventListener('focusout', function (e) {
+      openPanel(productsSearchComponent, false);
+    });
+    setUpProductSearchField();
+  }
 })();
 
 /*
@@ -35,11 +33,10 @@ import {
  * @param {HTMLElement} targetChip - The chip that was clicked.
  **/
 export default function handleProductsChip(targetChip) {
-  const updateQueryParams = document.querySelector('.js-asset-search');
   if (targetChip.classList.contains('js-unselected')) {
-    selectChip(targetChip.id, updateQueryParams);
+    selectProductsChip(targetChip.id, updateQueryParams);
   } else if (targetChip.classList.contains('js-selected')) {
-    deselectChip(targetChip.dataset.id, updateQueryParams);
+    deselectProductsChip(targetChip.dataset.id, updateQueryParams);
   }
 }
 
@@ -60,8 +57,7 @@ function setUpProductSearchField() {
  */
 function handleExistingChips(productsPanel) {
   const existingChips = Array.from(productsPanel.querySelectorAll('.p-chip.js-unselected.u-hide'));
-  const updateQueryParams = document.querySelector('.js-asset-search');
-  existingChips.forEach(chip => selectChip(chip.id, updateQueryParams));
+  existingChips.forEach(chip => selectProductsChip(chip.id, updateQueryParams));
 }
 /*
  * Setup fuse.js, as fuzzy search specfically for the products and return the instance.
@@ -101,12 +97,12 @@ function setupInputChangeListener(fuse, input) {
  * @param {Array} chip - The chip to show.
  * @param {HTMLElement} hiddenInput - The hidden input to store the selected chips value.
  **/
-function selectChip(chipId, updateQueryParams) {
+function selectProductsChip(chipId, updateQueryParams) {
   const unselectedChip = document.querySelector(`.js-${chipId}-chip.js-unselected`);
   const selectedChip = document.querySelector(`.js-${chipId}-chip.js-selected`);
   unselectedChip.classList.add('u-hide');
   selectedChip.classList.remove('u-hide');
-  addValueToHiddenInput(chipId, document.querySelector('.js-products-search .js-hidden-input'));
+  addValueToHiddenInput(chipId, document.querySelector('.js-products-search .js-hidden-field'));
   if (updateQueryParams) {
     addValueToQueryParams('product_types', chipId);
   }
@@ -120,12 +116,12 @@ function selectChip(chipId, updateQueryParams) {
  * @param {Array} chip - The chip to show.
  * @param {HTMLElement} hiddenInput - The hidden input to remove the selected chips value from.
  **/
-function deselectChip(chipId, updateQueryParams) {
+function deselectProductsChip(chipId, updateQueryParams) {
   const unselectedChip = document.querySelector(`.js-${chipId}-chip.js-unselected`);
   const selectedChip = document.querySelector(`.js-${chipId}-chip.js-selected`);
   unselectedChip.classList.remove('u-hide');
   selectedChip.classList.add('u-hide');
-  removeValueFromHiddenInput(chipId, document.querySelector('.js-products-search .js-hidden-input'));
+  removeValueFromHiddenInput(chipId, document.querySelector('.js-products-search .js-hidden-field'));
   if (updateQueryParams) {
     removeValueFromQueryParams('product_types', chipId);
   }
