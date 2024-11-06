@@ -3,9 +3,11 @@ import {
   addValueToHiddenInput, 
   removeValueFromHiddenInput,
   addValueToQueryParams, 
-  removeValueFromQueryParams, 
-  isInActiveSearchComponent
+  removeValueFromQueryParams,
 } from './main.js';
+
+// Define whether we are in search and thus need to update query params
+const updateQueryParams = document.querySelector('.js-asset-search');
 
 /* 
  * Sets up the event listeners for opening the panel.
@@ -13,19 +15,15 @@ import {
  **/
 (function () {
   const authorsSearchComponent = document.querySelector('.js-authors-search');
-  authorsSearchComponent.addEventListener('focusin', function (e) {
-    if (!isInActiveSearchComponent(e.target, authorsSearchComponent)) {
+  if (authorsSearchComponent) {
+    authorsSearchComponent?.addEventListener('focusin', function (e) {
       openPanel(authorsSearchComponent, true);
-      return;
-    }
-  });
-  authorsSearchComponent.addEventListener('focusout', function (e) {
-    if (isInActiveSearchComponent(e.target, authorsSearchComponent)) {
-      return;
-    }
-    openPanel(authorsSearchComponent, false);
-  });
-  setUpAuthorSearchField();
+    });
+    authorsSearchComponent.addEventListener('focusout', function (e) {
+      openPanel(authorsSearchComponent, false);
+    });
+    setUpAuthorSearchField();
+  }
 })();
 
 /*
@@ -62,7 +60,6 @@ function setUpAuthorSearchField() {
  * @param {HTMLElement} targetChip - The chip that was clicked.
  **/
 export default function handleAuthorsChip(targetChip) {
-  const updateQueryParams = document.querySelector('.js-asset-search');
   const selectedAuthorChip = document.querySelector('.js-author-chip');
   if (targetChip.classList.contains('js-unselected')) {
     selectAuthorChip(targetChip, selectedAuthorChip, updateQueryParams);
@@ -109,9 +106,9 @@ function selectAuthorChip(chip, selectedAuthorChip, updateQueryParams) {
   selectedAuthorChip.setAttribute('data-email', chip.dataset.email);
   selectedAuthorChip.setAttribute('data-firstname', chip.dataset.firstname);
   selectedAuthorChip.setAttribute('data-lastname', chip.dataset.lastname);
-  addValueToHiddenInput(chip.dataset.email, document.querySelector('.js-hidden-input-email'), replace = true);
-  addValueToHiddenInput(chip.dataset.firstname, document.querySelector('.js-hidden-input-firstname'), replace = true);
-  addValueToHiddenInput(chip.dataset.lastname, document.querySelector('.js-hidden-input-lastname'), replace = true);
+  addValueToHiddenInput(chip.dataset.email, document.querySelector('.js-hidden-field-email'), replace = true);
+  addValueToHiddenInput(chip.dataset.firstname, document.querySelector('.js-hidden-field-firstname'), replace = true);
+  addValueToHiddenInput(chip.dataset.lastname, document.querySelector('.js-hidden-field-lastname'), replace = true);
   if (updateQueryParams) {
     addValueToQueryParams('author_email', chip.dataset.email, replace = true);
     addValueToQueryParams('author_firstname', chip.dataset.firstname, replace = true);
@@ -122,9 +119,9 @@ function selectAuthorChip(chip, selectedAuthorChip, updateQueryParams) {
 
 function deselectAuthorChip(chip, updateQueryParams) {
   chip.classList.add('u-hide');
-  removeValueFromHiddenInput(chip.dataset.email, document.querySelector('.js-hidden-input-email'));
-  removeValueFromHiddenInput(chip.dataset.firstname, document.querySelector('.js-hidden-input-firstname'));
-  removeValueFromHiddenInput(chip.dataset.lastname, document.querySelector('.js-hidden-input-lastname'));
+  removeValueFromHiddenInput(chip.dataset.email, document.querySelector('.js-hidden-field-email'));
+  removeValueFromHiddenInput(chip.dataset.firstname, document.querySelector('.js-hidden-field-firstname'));
+  removeValueFromHiddenInput(chip.dataset.lastname, document.querySelector('.js-hidden-field-lastname'));
   if (updateQueryParams) {
     removeValueFromQueryParams('author_email', chip.dataset.email);
     removeValueFromQueryParams('author_firstname', chip.dataset.firstname);

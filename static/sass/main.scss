@@ -26,11 +26,9 @@
   }
 }
 
-.p-filter-panel-section .p-filter-panel-section__chips--no-max-height {
-  @extend .p-filter-panel-section__chips;
-  max-height: unset !important;
+.p-filter-panel-section__chips {
+  max-height: 10rem;
 }
-
 .p-filter-panel-section__header {
   display: flex;
   justify-content: space-between;
