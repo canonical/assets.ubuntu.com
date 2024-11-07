@@ -17,10 +17,13 @@ const updateQueryParams = document.querySelector('.js-asset-search');
   const authorsSearchComponent = document.querySelector('.js-authors-search');
   if (authorsSearchComponent) {
     authorsSearchComponent?.addEventListener('focusin', function (e) {
-      openPanel(authorsSearchComponent, true);
+      openPanel(authorsSearchComponent, true, 'focusin');
     });
     authorsSearchComponent.addEventListener('focusout', function (e) {
-      openPanel(authorsSearchComponent, false);
+      if (!e.relatedTarget) {
+        return;
+      }
+      openPanel(authorsSearchComponent, false, 'focusout');
     });
     setUpAuthorSearchField();
   }
@@ -62,9 +65,9 @@ function setUpAuthorSearchField() {
 export default function handleAuthorsChip(targetChip) {
   const selectedAuthorChip = document.querySelector('.js-author-chip');
   if (targetChip.classList.contains('js-unselected')) {
-    selectAuthorChip(targetChip, selectedAuthorChip, updateQueryParams);
+    selectAuthorChip(targetChip, selectedAuthorChip);
   } else {
-    deselectAuthorChip(targetChip, updateQueryParams);
+    deselectAuthorChip(targetChip);
   }
 }
 
@@ -100,7 +103,7 @@ function updateSearchResults(data) {
  * @param {HTMLElement} chip - The chip to select.
  * @param {HTMLElement} activeChipContainer - The container to add the active chip.
  **/
-function selectAuthorChip(chip, selectedAuthorChip, updateQueryParams) {
+function selectAuthorChip(chip, selectedAuthorChip) {
   selectedAuthorChip.classList.remove('u-hide');
   selectedAuthorChip.querySelector('.js-content').textContent = chip.dataset.firstname + ' ' + chip.dataset.lastname;
   selectedAuthorChip.setAttribute('data-email', chip.dataset.email);
@@ -117,7 +120,7 @@ function selectAuthorChip(chip, selectedAuthorChip, updateQueryParams) {
 
 }
 
-function deselectAuthorChip(chip, updateQueryParams) {
+function deselectAuthorChip(chip) {
   chip.classList.add('u-hide');
   removeValueFromHiddenInput(chip.dataset.email, document.querySelector('.js-hidden-field-email'));
   removeValueFromHiddenInput(chip.dataset.firstname, document.querySelector('.js-hidden-field-firstname'));

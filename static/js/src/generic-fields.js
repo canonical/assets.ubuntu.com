@@ -1,3 +1,5 @@
+// Here we define the handlers for generic fields
+
 import { addValueToQueryParams } from "./main";
 
 // Define whether we are in search and thus need to update query params
@@ -9,11 +11,13 @@ const updateQueryParams = document.querySelector('.js-asset-search');
 const multiSelects = document.querySelectorAll('.js-multiselect');
 multiSelects?.forEach(multiSelect => {
   const hiddenField = multiSelect.querySelector('.js-hidden-field');
-  multiSelect = multiSelect.querySelector('select');
+  multiSelect = multiSelect.tagName.toLowerCase() === 'select' ? multiSelect : multiSelect.querySelector('select');
   multiSelect.addEventListener('change', function() {
     const values = Array.from(multiSelect.selectedOptions).map(option => option.value).join(',');
-    hiddenField.value = values
-    addValueToQueryParams(hiddenField.name, values, replace = true);
+    hiddenField.value = values;
+    if (updateQueryParams) {
+      addValueToQueryParams(hiddenField.name, values, replace = true);
+    }
   });
 });
 
