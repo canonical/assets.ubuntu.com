@@ -18,10 +18,13 @@ const updateQueryParams = document.querySelector('.js-asset-search');
   const productsSearchComponent = document.querySelector('.js-products-search');
   if (productsSearchComponent) {
     productsSearchComponent.addEventListener('focusin', function (e) {
-      openPanel(productsSearchComponent, true);
+      openPanel(productsSearchComponent, true, "focusin");
     });
     productsSearchComponent.addEventListener('focusout', function (e) {
-      openPanel(productsSearchComponent, false);
+      if (!e.relatedTarget) {
+        return;
+      }
+      openPanel(productsSearchComponent, false, "focusout");
     });
     setUpProductSearchField();
   }
@@ -34,9 +37,9 @@ const updateQueryParams = document.querySelector('.js-asset-search');
  **/
 export default function handleProductsChip(targetChip) {
   if (targetChip.classList.contains('js-unselected')) {
-    selectProductsChip(targetChip.id, updateQueryParams);
+    selectProductsChip(targetChip.id);
   } else if (targetChip.classList.contains('js-selected')) {
-    deselectProductsChip(targetChip.dataset.id, updateQueryParams);
+    deselectProductsChip(targetChip.dataset.id);
   }
 }
 
@@ -57,7 +60,7 @@ function setUpProductSearchField() {
  */
 function handleExistingChips(productsPanel) {
   const existingChips = Array.from(productsPanel.querySelectorAll('.p-chip.js-unselected.u-hide'));
-  existingChips.forEach(chip => selectProductsChip(chip.id, updateQueryParams));
+  existingChips.forEach(chip => selectProductsChip(chip.id));
 }
 /*
  * Setup fuse.js, as fuzzy search specfically for the products and return the instance.
@@ -97,7 +100,7 @@ function setupInputChangeListener(fuse, input) {
  * @param {Array} chip - The chip to show.
  * @param {HTMLElement} hiddenInput - The hidden input to store the selected chips value.
  **/
-function selectProductsChip(chipId, updateQueryParams) {
+function selectProductsChip(chipId) {
   const unselectedChip = document.querySelector(`.js-${chipId}-chip.js-unselected`);
   const selectedChip = document.querySelector(`.js-${chipId}-chip.js-selected`);
   unselectedChip.classList.add('u-hide');
@@ -116,7 +119,7 @@ function selectProductsChip(chipId, updateQueryParams) {
  * @param {Array} chip - The chip to show.
  * @param {HTMLElement} hiddenInput - The hidden input to remove the selected chips value from.
  **/
-function deselectProductsChip(chipId, updateQueryParams) {
+function deselectProductsChip(chipId) {
   const unselectedChip = document.querySelector(`.js-${chipId}-chip.js-unselected`);
   const selectedChip = document.querySelector(`.js-${chipId}-chip.js-selected`);
   unselectedChip.classList.remove('u-hide');
