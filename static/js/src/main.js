@@ -5,7 +5,7 @@ import './authors-search';
 import handleAuthorsChip from './authors-search';
 
 import './date-picker';
-import './other-fields';
+import './generic-fields';
 
 /*
  * If 'enter' is pressed, submit the form.
@@ -18,10 +18,11 @@ document.addEventListener('keydown', function (e) {
 });
 
 /*
- * Event delgation to handle the click event on the document.
+ * Event delgation to handle the click event for search and filter.
  **/
 document.addEventListener('click', function (e) {
   const targetChip = e.target.closest('.p-chip');
+  // Handle chip clicks
   if (targetChip) {
     e.preventDefault();
     if (targetChip.closest('.js-products-search')) {
@@ -32,16 +33,18 @@ document.addEventListener('click', function (e) {
       handleAuthorsChip(targetChip);
       return;
     }
+  // Handle clicks outside the search and filter
+  } else if (!e.target.closest('.js-active-search')) {
+    openPanel(document.querySelector('.js-active-search'), false, 'click');
   }
 });
 
 /* 
  * Generic function to show and hide the chips selection panel.
  * @param {HTMLElement} searchContainer - The whole pannel container.
- * @param {HTMLElement} panel - Where the chips are displayed.
- * @param {Boolean} isOpen - Whether the panel should end open or closed.
+ * @param {Boolean} opening - Whether the panel should being opening or not. Default is false.
  **/
-export function openPanel(searchComponent, opening = 'false', callfrom) {
+export function openPanel(searchComponent, opening = 'false') {
   const searchContainer = searchComponent.querySelector('.p-search-and-filter__search-container');
   const panel = searchComponent.querySelector('.p-search-and-filter__panel');
   if (panel && searchContainer) {
@@ -62,6 +65,7 @@ export function openPanel(searchComponent, opening = 'false', callfrom) {
  * We have to do this as the chips will not be submitted with the form.
  * @param {String} value - The value of the chip.
  * @param {HTMLElement} input - The hidden input to store the values.
+ * @param {Boolean} replace - Whether to replace the current value or not. Default is false.
  **/
 export function addValueToHiddenInput(value, input, replace = false) {
   let selectedChips = replace ? [] : input.value.split(',').filter(Boolean);
@@ -82,20 +86,11 @@ export function removeValueFromHiddenInput(value, input) {
   input.setAttribute('value', selectedChips.join(','));
 }
 
-/*
- * Generic function to check if a search component is active.
- * @param {HTMLElement} target - The element that triggered the event.
- * @param {HTMLElement} searchComponent - The search component.
- **/ 
-export function isInActiveSearchComponent(target, searchComponent) {
-  const componentIsActive = searchComponent.classList.contains('js-active-search');
-  return target.closest('.p-search-and-filter') === searchComponent && componentIsActive;
-}
-
 /* 
  * Function to add a value to a query parameter.
  * @param {String} key - The query parameter key.
  * @param {String} value - The value to add.
+ * @param {Boolean} replace - Whether to replace the current value or not. Default is false.
  **/
 export function addValueToQueryParams(key, value, replace = false) {
   const url = new URL(window.location);
