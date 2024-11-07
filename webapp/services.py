@@ -1,11 +1,12 @@
 # System
 import imghdr
-from base64 import b64decode
+from base64 import b64decode, b64encode
 from datetime import datetime, timezone
+from io import BytesIO
 
 # Packages
-from wand.image import Image
 from typing import List
+from PIL import Image as PillowImage
 
 # Local
 from webapp.database import db_session
@@ -80,6 +81,7 @@ class AssetService:
         file_content,
         friendly_name: str,
         optimize: bool,
+        name: str = None,
         url_path=None,
         tags: List[str] = [],
         products: List[str] = [],
@@ -98,7 +100,11 @@ class AssetService:
         friendly_name = clean_unicode(friendly_name)
         url_path = clean_unicode(url_path)
 
-        encoded_file_content = (b64decode(file_content),)
+        # First we ensure it is b64 encoded
+        encoded_file_content = b64encode(file_content)
+        # Then we can decode it
+        decoded_file_content = b64decode(encoded_file_content)
+
         if imghdr.what(None, h=file_content) is not None or is_svg(
             file_content
         ):
@@ -107,29 +113,33 @@ class AssetService:
             # As it's not an image, there is no need for optimization
             data["optimized"] = False
 
+        if data.get("image"):
+            try:
+                # Use Pillow to open the image and get dimensions
+                with PillowImage.open(BytesIO(decoded_file_content)) as img:
+                    data["width"] = img.width
+                    data["height"] = img.height
+            except Exception as e:
+                print(f"Error opening image with Pillow: {e}")
+                data["width"] = None
+                data["height"] = None
+
         # Try to optimize the asset if it's an image
         if data.get("image") and optimize:
             try:
-                image = ImageProcessor(encoded_file_content)
+                image = ImageProcessor(decoded_file_content)
                 image.optimize(allow_svg_errors=True)
-                encoded_file_content = image.data
+                decoded_file_content = image.data
                 data["optimized"] = True
             except Exception:
                 # If optimisation failed, just don't bother optimising
                 data["optimized"] = False
+
         if not url_path:
             url_path = file_manager.generate_asset_path(
                 file_content, friendly_name
             )
 
-        if data.get("image"):
-            try:
-                with Image(blob=encoded_file_content) as image_info:
-                    data["width"] = image_info.width
-                    data["height"] = image_info.height
-            except Exception:
-                # Just don't worry if image reading fails
-                pass
         asset = (
             db_session.query(Asset)
             .filter(Asset.file_path == url_path)
@@ -155,7 +165,7 @@ class AssetService:
         # Save file info in Postgres
         asset = Asset(
             file_path=url_path,
-            name=friendly_name,
+            name=name,
             data=data,
             tags=tags,
             created=datetime.now(tz=timezone.utc),
@@ -248,6 +258,7 @@ class AssetService:
     def update_asset(
         self,
         file_path: str,
+        name: str = None,
         tags: List[str] = [],
         deprecated: bool = None,
         products: List[str] = [],
@@ -268,6 +279,8 @@ class AssetService:
         if tags:
             tags = self.create_tags_if_not_exist(tags)
             asset.tags = tags
+        if name:
+            asset.name = name
         if products:
             products = self.create_products_if_not_exists(products)
             asset.products = products

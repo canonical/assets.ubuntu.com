@@ -1,3 +1,7 @@
 {% for asset in assets %}
-  {% include "_asset.html" %}
+  {% if asset.data.image %}
+    {% include "_asset-card-image.html" %}
+  {% else %}
+    {% include "_asset-card.html" %}
+  {% endif %}
 {% endfor %}
