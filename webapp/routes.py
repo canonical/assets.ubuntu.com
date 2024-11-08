@@ -50,8 +50,6 @@ with open("products.yaml") as file:
 @login_required
 def home():
     search_params = parse_asset_search_params()
-    print("search_params", search_params)
-
     if any(
         [
             search_params.tag,
@@ -78,8 +76,6 @@ def home():
         )
     else:
         assets = []
-
-        print("assets", assets)
 
     return flask.render_template(
         "index.html",
