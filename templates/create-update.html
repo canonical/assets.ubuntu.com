@@ -33,22 +33,16 @@
       </div>
     </div>
 
-    {% set asset_types = [
-        "Datasheets", "Guides", "Ebook", "Whitepaper", "Case Study", 
-        "Explainer Video", "Tutorial Video", "Demo", "Infographic", 
-        "Diagram", "Icon", "Illustration", "Image"
-      ] 
-    %}
     <div class="row">
       <div class="col-8 col-start-large-5">
         <div class="p-section js-multiselect">
           <label class="p-heading--5 u-no-margin--bottom is-required" id="asset-type">Asset type(s)</label>
           <p class="u-text--muted u-no-padding--top">For example, image, whitepaper or diagram.</p>
           <select id="asset-type-select" aria-label="Required field: Select asset type" multiple required>
-            {% for asset_type in asset_types %}
-              {% set asset_value = asset_type|lower|replace(' ', '-') %}
-              <option value="{{ asset_value }}" {% if asset and asset_value in asset.asset_type %}selected{% endif %}>
-                {{ asset_type }}
+            {% for asset_type in data.asset_types %}
+              {% set asset_value = asset_type.name|lower|replace(' ', '-') %}
+              <option value="{{ asset_value }}" {% if asset and asset_value in asset.asset_type %}selected{% endif %} {% if asset_type.name == "-" %}disabled{% endif %}>
+                {{ asset_type.name }}
               </option>
             {% endfor %}
           </select>
@@ -86,7 +80,7 @@
             <label class="p-heading--5 u-no-margin--bottom" id="product-tags">Tag the associated products</label>
             <p class="u-text--muted u-no-padding--top">For example, Ubuntu Pro, Juju.</p>
             <div class="p-search-and-filter__search-container" aria-expanded="false">
-              {% for product in products_list.products %}
+              {% for product in data.products %}
                 <span class="p-chip js-{{ product.slug }}-chip js-selected {% if product.slug not in existing_products %}u-hide{% endif %}" data-id="{{ product.slug }}">
                   <span class="p-chip__value">{{ product.name }}</span>
                   <button class="p-chip__dismiss">Dismiss</button>
@@ -104,7 +98,7 @@
                   <h4 class="p-filter-panel-section__heading p-heading--5">Tags</h4>
                 </div>
                 <div class="p-filter-panel-section__chips">
-                  {% for product in products_list.products %}
+                  {% for product in data.products %}
                   <button class="p-chip js-{{ product.slug }}-chip js-unselected {% if product.slug in existing_products %}u-hide{% endif %}" id="{{ product.slug }}" data-name="{{ product.name }}">
                     <span class="p-chip__value">{{ product.name }}</span>
                   </button>
@@ -194,18 +188,6 @@
       </div>
     </div>
 
-    {% set languages = [
-        "Arabic", "Bengali", "Bhojpuri", "Bulgarian", "Catalan", "Chinese", 
-        "Croatian", "Czech", "Danish", "Dutch", "English", "Estonian", 
-        "Finnish", "French", "German", "Greek", "Gujrati", "Hausa", "Hebrew", 
-        "Hindi/Urdu", "Hungarian", "Indonesian", "Italian", "Japanese", 
-        "Javanese", "Korean", "Lithuanian", "Mandarin Chinese", "Marathi", 
-        "Nigerian Pidgin", "Norwegian", "Persian", "Polish", "Portuguese", 
-        "Punjabi", "Romanian", "Russian", "Serbian", "Slovak", "Slovenian", 
-        "Spanish", "Swedish", "Tamil", "Telugu", "Thai", "Turkish", 
-        "Ukrainian", "Vietnamese", "Other"
-      ] 
-    %}
     <div class="row">
       <div class="col-8 col-start-large-5">
         <div class="p-section js-multiselect">
@@ -216,9 +198,9 @@
           aria-labelledby="language"
           multiple>
             <option value="" disabled="disabled" selected="">Select all that apply</option>
-            {% for language in languages %}
-              <option value="{{ language }}" {% if asset and language in asset.language %}selected{% endif %}>
-                {{ language }}
+            {% for language in data.languages %}
+              <option value="{{ language.name }}" {% if asset and language.name in asset.language %}selected{% endif %}>
+                {{ language.name }}
               </option>
             {% endfor %}
           </select>
