@@ -70,7 +70,6 @@ ui_blueprint.add_app_template_global(
 @login_required
 def home():
     search_params = parse_asset_search_params()
-    print("search_params", search_params)
 
     page = request.values.get("page", type=int, default=1)
     per_page = request.values.get("per_page", type=int)
@@ -120,8 +119,6 @@ def home():
     else:
         assets = []
         total = 0
-
-        print("assets", assets)
 
     return flask.render_template(
         "index.html",
