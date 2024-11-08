@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", function () {
   flatpickr(".js-date-picker", {
     mode: "range",
     dateFormat: "Y-m-d",
-    onChange: function(selectedDates, dateStr, instance) {
+    onChange: function(selectedDates) {
       const [startDate, endDate] = selectedDates;
       if (startDate) {
         addValueToHiddenInput(startDate.toISOString(), document.querySelector(".js-hidden-field-startdate"), replace = true);
