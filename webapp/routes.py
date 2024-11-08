@@ -39,8 +39,8 @@ from webapp.views import (
 ui_blueprint = Blueprint("ui_blueprint", __name__, url_prefix="/manager")
 api_blueprint = Blueprint("api_blueprint", __name__, url_prefix="/v1")
 
-with open("products.yaml") as file:
-    products_list = yaml.load(file, Loader=yaml.FullLoader)
+with open("data.yaml") as file:
+    data = yaml.load(file, Loader=yaml.FullLoader)
 
 # Manager Routes
 # ===
@@ -82,7 +82,7 @@ def home():
         assets=assets,
         query=search_params.tag,
         type=search_params.asset_type,
-        products_list=products_list,
+        data=data,
     )
 
 
@@ -156,15 +156,13 @@ def create():
             optimize=optimize,
         )
     return flask.render_template(
-        "create-update.html", products_list=products_list
+        "create-update.html", data=data
     )
 
 
 @ui_blueprint.route("/update", methods=["GET", "POST"])
 @login_required
 def update():
-    with open("products.yaml") as file:
-        products_list = yaml.load(file, Loader=yaml.FullLoader)
     file_path = request.args.get("file-path")
 
     if request.method == "GET":
@@ -209,7 +207,7 @@ def update():
         return flask.redirect("/manager/details?file-path=" + file_path)
 
     return flask.render_template(
-        "create-update.html", products_list=products_list, asset=asset
+        "create-update.html", data=data, asset=asset
     )
 
 

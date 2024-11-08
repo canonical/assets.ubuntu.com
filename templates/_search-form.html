@@ -10,37 +10,18 @@
 
     <div class="col-8">
       <div class="row">
-        {% set asset_types = [
-          "Datasheets", "Guides", "Ebook", "Whitepaper", "Case Study", 
-          "Explainer Video", "Tutorial Video", "Demo", "Infographic", 
-          "Diagram", "Icon", "Illustration", "Image"
-          ] 
-        %}
         <div class="col-2 js-select">
           <label for="asset-type">Asset type</label>
           <select name="asset_type">
             <option value="">Any type</option>
-            {% for asset_type in asset_types %}
-              {% set asset_value = asset_type|lower|replace(' ', '-') %}
-              <option value="{{ asset_value }}" {% if asset_value in params.asset_type %}selected{% endif %}>
-                {{ asset_type }}
+            {% for asset_type in data.asset_types %}
+              {% set asset_value = asset_type.name|lower|replace(' ', '-') %}
+              <option value="{{ asset_value }}" {% if asset_value in params.asset_type %}selected{% endif %} {% if asset_type.name == "-" %}disabled{% endif %}>
+                {{ asset_type.name }}
               </option>
             {% endfor %}
           </select>
         </div>
-
-        {% set languages = [
-          "Arabic", "Bengali", "Bhojpuri", "Bulgarian", "Catalan", "Chinese", 
-          "Croatian", "Czech", "Danish", "Dutch", "English", "Estonian", 
-          "Finnish", "French", "German", "Greek", "Gujrati", "Hausa", "Hebrew", 
-          "Hindi/Urdu", "Hungarian", "Indonesian", "Italian", "Japanese", 
-          "Javanese", "Korean", "Lithuanian", "Mandarin Chinese", "Marathi", 
-          "Nigerian Pidgin", "Norwegian", "Persian", "Polish", "Portuguese", 
-          "Punjabi", "Romanian", "Russian", "Serbian", "Slovak", "Slovenian", 
-          "Spanish", "Swedish", "Tamil", "Telugu", "Thai", "Turkish", 
-          "Ukrainian", "Vietnamese", "Other"
-          ] 
-        %}
 
         <div class="col-2 js-select">
           <label id="language">Language</label>
@@ -49,9 +30,9 @@
           aria-labelledby="language"
           name="language">
             <option value="">Any language</option>
-            {% for language in languages %}
-              <option value="{{ language }}" {% if language in params.language %}selected{% endif %}>
-                {{ language }}
+            {% for language in data.languages %}
+              <option value="{{ language.name }}" {% if language.name in params.language %}selected{% endif %}>
+                {{ language.name }}
               </option>
             {% endfor %}
           </select>
@@ -70,7 +51,7 @@
           aria-labelledby="product"
           name="product">
           <option value="">Any product</option>
-            {% for product in products_list.products %}
+            {% for product in data.products %}
               <option value="{{ product.slug }}" {% if product.slug in params.product_types %}selected{% endif %}>
                 {{ product.name }}
               </option>
