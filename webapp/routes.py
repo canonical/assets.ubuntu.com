@@ -155,9 +155,7 @@ def create():
             tags=tags,
             optimize=optimize,
         )
-    return flask.render_template(
-        "create-update.html", data=data
-    )
+    return flask.render_template("create-update.html", data=data)
 
 
 @ui_blueprint.route("/update", methods=["GET", "POST"])
@@ -206,9 +204,7 @@ def update():
             flask.flash("Asset not found", "negative")
         return flask.redirect("/manager/details?file-path=" + file_path)
 
-    return flask.render_template(
-        "create-update.html", data=data, asset=asset
-    )
+    return flask.render_template("create-update.html", data=data, asset=asset)
 
 
 @ui_blueprint.route("/details", methods=["GET"])
