@@ -16,7 +16,7 @@ const updateQueryParams = document.querySelector('.js-asset-search');
 (function () {
   const authorsSearchComponent = document.querySelector('.js-authors-search');
   if (authorsSearchComponent) {
-    authorsSearchComponent?.addEventListener('focusin', function (e) {
+    authorsSearchComponent.addEventListener('focusin', function () {
       openPanel(authorsSearchComponent, true, 'focusin');
     });
     authorsSearchComponent.addEventListener('focusout', function (e) {
@@ -45,8 +45,6 @@ function setUpAuthorSearchField() {
         if (response.ok) {
           const data = await response.json();
           updateSearchResults(data);
-        } else {
-          console.log("No user found");
         }
       } catch (error) {
         console.error('Error fetching user data:', error);
@@ -73,7 +71,7 @@ export default function handleAuthorsChip(targetChip) {
 
 /*
  * Adds and removes the author chips to the search panel.
- * As this comes from an API call, we can not setupo the chips on load (like with products).
+ * As this comes from an API call, we can not setup the chips on load (like with products).
  * We have to create the chips on the fly. Limited to 10 results.
  * @param {Array} data - The data from the API call.
  **/

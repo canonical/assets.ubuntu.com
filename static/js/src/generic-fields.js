@@ -39,7 +39,7 @@ function handleSelectInputs() {
  */
 function handleTagInput() {
   const tagsInput = document.querySelector('.js-tags');
-  tagsInput?.addEventListener('input', function(e) {
+  tagsInput?.addEventListener('input', function() {
     addValueToQueryParams(tagsInput.name, tagsInput.value, replace = true);
   });
 }
@@ -49,7 +49,7 @@ function handleTagInput() {
  */
 function handleSalesforceIdInput() {
   const salesforceIdInput = document.querySelector('.js-salesforce-campaign-id');
-  salesforceIdInput?.addEventListener('input', function(e) {
+  salesforceIdInput?.addEventListener('input', function() {
     addValueToQueryParams(salesforceIdInput.name, salesforceIdInput.value, replace = true);
   });
 }
