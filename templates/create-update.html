@@ -23,7 +23,15 @@
           {% if is_update %}
             <h3>{{ asset.file_path}}</h3>
             <a href="/v1/{{ asset.file_path }}" target="_blank">
-              <img class="p-image--bordered asset-thumbnail" src="/v1/{{ asset.file_path }}">
+              {% if asset.data.image %}
+                <img
+                  src="/v1/{{ asset.file_path }}"
+                />
+              {% elif asset.asset_type == "whitepaper" %}
+                <img class="p-asset-card--thumbnail" src="https://assets.ubuntu.com/v1/b061c401-White+paper.svg" alt="">
+              {% else %}
+                <img class="p-asset-card--thumbnail" src="https://assets.ubuntu.com/v1/fd84bbdc-Document-open.svg" alt="">
+              {% endif %}
             </a>
           {% else %}
             <label class="p-heading--5 is-required">Upload asset file</label>
