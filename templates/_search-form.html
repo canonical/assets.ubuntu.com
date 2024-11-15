@@ -52,7 +52,7 @@
           name="product">
           <option value="">Any product</option>
             {% for product in data.products %}
-              <option value="{{ product.slug }}" {% if product.slug in params.product_types %}selected{% endif %}>
+              <option value="{{ product.slug }}" {% if product.slug in params.product %}selected{% endif %}>
                 {{ product.name }}
               </option>
             {% endfor %}

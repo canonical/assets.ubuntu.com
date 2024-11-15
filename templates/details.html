@@ -22,7 +22,9 @@
       <p>Name: <strong>{{ asset.name }}</strong></p>
       <p>File type: <strong>.{{ asset.file_path.split('.', 1)[1] }}</strong></p>
       <p>Asset type: <strong>{{ asset.asset_type }}</strong></p>
-      <p>Image size: <strong>{% if asset.data.width and asset.data.height %}{{asset.data.width}} x {{asset.data.height}}{% else %}Unknown{% endif %}</strong></p>
+      {% if asset.data.image %}
+        <p>Image size: <strong>{% if asset.data.width and asset.data.height %}{{asset.data.width}} x {{asset.data.height}}{% else %}Unknown{% endif %}</strong></p>
+      {% endif %}
       <p>
         Products:
         {% for product in asset.products %}
