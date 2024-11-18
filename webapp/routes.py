@@ -39,19 +39,22 @@ from webapp.views import (
 ui_blueprint = Blueprint("ui_blueprint", __name__, url_prefix="/manager")
 api_blueprint = Blueprint("api_blueprint", __name__, url_prefix="/v1")
 
+with open("data.yaml") as file:
+    data = yaml.load(file, Loader=yaml.FullLoader)
+
 # Manager Routes
 # ===
 
 
-@ui_blueprint.route("/")
+@ui_blueprint.route("/", methods=["GET"])
 @login_required
 def home():
     search_params = parse_asset_search_params()
-
     if any(
         [
             search_params.tag,
             search_params.asset_type,
+            search_params.product_types,
             search_params.author_email,
             search_params.name,
             search_params.start_date,
@@ -79,6 +82,7 @@ def home():
         assets=assets,
         query=search_params.tag,
         type=search_params.asset_type,
+        data=data,
     )
 
 
@@ -88,8 +92,6 @@ def create():
     created_assets = []
     existing_assets = []
     failed_assets = []
-    with open("products.yaml") as file:
-        products_list = yaml.load(file, Loader=yaml.FullLoader)
 
     if flask.request.method == "POST":
         tags = flask.request.form.get("tags", "")
@@ -153,16 +155,12 @@ def create():
             tags=tags,
             optimize=optimize,
         )
-    return flask.render_template(
-        "create-update.html", products_list=products_list
-    )
+    return flask.render_template("create-update.html", data=data)
 
 
 @ui_blueprint.route("/update", methods=["GET", "POST"])
 @login_required
 def update():
-    with open("products.yaml") as file:
-        products_list = yaml.load(file, Loader=yaml.FullLoader)
     file_path = request.args.get("file-path")
 
     if request.method == "GET":
@@ -206,9 +204,7 @@ def update():
             flask.flash("Asset not found", "negative")
         return flask.redirect("/manager/details?file-path=" + file_path)
 
-    return flask.render_template(
-        "create-update.html", products_list=products_list, asset=asset
-    )
+    return flask.render_template("create-update.html", data=data, asset=asset)
 
 
 @ui_blueprint.route("/details", methods=["GET"])

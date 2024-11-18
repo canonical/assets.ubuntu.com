@@ -7,18 +7,24 @@
   <div class="row">
     <div class="col-4">
       <h2>Asset details</h2>
-      {% if asset.data.image %}
       <a href="/v1/{{ asset.file_path }}" target="_blank">
-        <img
-          src="/v1/{{ asset.file_path }}"
-        />
+        {% if asset.data.image %}
+          <img
+            src="/v1/{{ asset.file_path }}"
+          />
+        {% elif asset.asset_type == "whitepaper" %}
+          <img class="p-asset-card--thumbnail" src="https://assets.ubuntu.com/v1/b061c401-White+paper.svg" alt="">
+        {% else %}
+          <img class="p-asset-card--thumbnail" src="https://assets.ubuntu.com/v1/fd84bbdc-Document-open.svg" alt="">
+        {% endif %}
       </a>
-      {% endif %}
       <p>File path:<strong>{{ asset.file_path }}</strong></p>
       <p>Name: <strong>{{ asset.name }}</strong></p>
       <p>File type: <strong>.{{ asset.file_path.split('.', 1)[1] }}</strong></p>
       <p>Asset type: <strong>{{ asset.asset_type }}</strong></p>
-      <p>Image size: <strong>{% if asset.data.width and asset.data.height %}{{asset.data.width}} x {{asset.data.height}}{% else %}Unknown{% endif %}</strong></p>
+      {% if asset.data.image %}
+        <p>Image size: <strong>{% if asset.data.width and asset.data.height %}{{asset.data.width}} x {{asset.data.height}}{% else %}Unknown{% endif %}</strong></p>
+      {% endif %}
       <p>
         Products:
         {% for product in asset.products %}

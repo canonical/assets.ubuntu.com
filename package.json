@@ -9,9 +9,12 @@
     "lint": "yarn run lint-scss && yarn run lint-python",
     "format-python": "black --line-length 79 --exclude '(node_modules/.*|[^/]*env[0-9]?/.*)' .",
     "test-python": "python3 -m unittest discover tests",
-    "build": "yarn run build-css",
+    "build": "yarn run build-css && yarn run build-js",
     "build-css": "sass static/sass/main.scss static/css/main.css --load-path=node_modules --style=compressed && postcss --use autoprefixer --replace 'static/css/**/*.css' --no-map",
-    "watch": "watch -p 'static/sass/**/*.scss' -c 'yarn run build'",
+    "build-js": "node build.js",
+    "watch": "concurrently --kill-others --raw 'yarn run watch-css' 'yarn run watch-js'",
+    "watch-css": "watch -p 'static/sass/**/*.scss' -c 'yarn run build-css'",
+    "watch-js": "watch -p 'static/js/**/*.js' -c 'yarn run build-js'",
     "serve": "./entrypoint 0.0.0.0:${PORT}",
     "test": "yarn run lint-scss && yarn run lint-python && yarn run test-python",
     "start": "yarn run build && concurrently --raw 'yarn run watch' 'yarn run serve'",
@@ -19,6 +22,7 @@
   },
   "dependencies": {
     "autoprefixer": "10.4.14",
+    "flatpickr": "4.6.13",
     "fuse.js": "7.0.0",
     "postcss": "8.4.21",
     "postcss-cli": "10.1.0",
@@ -28,6 +32,7 @@
     "watch-cli": "0.2.3"
   },
   "devDependencies": {
-    "concurrently": "8.0.1"
+    "concurrently": "8.0.1",
+    "esbuild": "0.24.0"
   }
 }
