@@ -41,10 +41,11 @@ api_blueprint = Blueprint("api_blueprint", __name__, url_prefix="/v1")
 # Manager Routes
 # ===
 
-# add jinja helper to either add or replace existing query parameter in the URL
-
 
 def add_query_param(key, value):
+    """
+    A jinja helper to upsert query parameter in the URL
+    """
     url = request.url
     url_parts = list(urlparse(url))
     query = dict(parse_qsl(url_parts[4]))
