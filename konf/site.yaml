@@ -68,3 +68,43 @@ staging:
       rewrite ^ https://assets.staging.ubuntu.com/manager$request_uri? permanent;
     }
     more_set_headers "X-Robots-Tag: noindex";
+  env:
+  # Disable proxy for staging-swift
+  - name: NO_PROXY
+    value: .internal,ubuntu.com,.ubuntu.com,snapcraft.io,.snapcraft.io,jujucharms.com,.jujucharms.com,maas.io,.maas.io,conjure-up.io,.conjure-up.io,netplan.io,.netplan.io,canonical.com,.canonical.com,launchpad.net,.launchpad.net,linuxcontainers.org,.linuxcontainers.org,cloud-init.io,.cloud-init.io,vanillaframework.io,.vanillaframework.io,anbox-cloud.io,.anbox-cloud.io,juju.is,.juju.is,dqlite.io,.dqlite.io,charmhub.io,.charmhub.io,staging-swift
+  # Postgres
+  - name: DATABASE_URL
+    secretKeyRef:
+      key: database-url
+      name: assets-ubuntu-swift-staging
+
+  # Swift
+  - name: OS_AUTH_URL
+    secretKeyRef:
+      key: os-auth-url
+      name: assets-ubuntu-swift-staging
+
+  - name: OS_USERNAME
+    secretKeyRef:
+      key: os-username
+      name: assets-ubuntu-swift-staging
+
+  - name: OS_PASSWORD
+    secretKeyRef:
+      key: os-password
+      name: assets-ubuntu-swift-staging
+
+  - name: OS_AUTH_VERSION
+    secretKeyRef:
+      key: os-auth-version
+      name: assets-ubuntu-swift-staging
+
+  - name: OS_TENANT_NAME
+    secretKeyRef:
+      key: os-tenant-name
+      name: assets-ubuntu-swift-staging
+
+  - name: OS_REGION_NAME
+    secretKeyRef:
+      key: os-region-name
+      name: assets-ubuntu-swift-staging
