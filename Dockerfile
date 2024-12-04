@@ -28,14 +28,13 @@ RUN --mount=type=cache,target=/root/.cache/pip pip3 install --user --requirement
 # ===
 FROM node:18 AS yarn-dependencies
 WORKDIR /srv
-ADD package.json .
+ADD . .
 RUN --mount=type=cache,target=/usr/local/share/.cache/yarn yarn install
 
 # Build stage: Run "yarn run build-css"
 # ===
-FROM yarn-dependencies AS build-css
-ADD static/sass static/sass
-RUN yarn run build-css
+FROM yarn-dependencies AS build
+RUN yarn build
 
 # Build the production image
 # ===
@@ -49,7 +48,8 @@ WORKDIR /srv
 # Import code, build assets and mirror list
 ADD . .
 RUN rm -rf package.json yarn.lock requirements.txt
-COPY --from=build-css /srv/static/css static/css
+COPY --from=build /srv/static/css static/css
+COPY --from=build /srv/static/js/dist static/js/dist
 
 # Set revision ID
 ARG BUILD_ID

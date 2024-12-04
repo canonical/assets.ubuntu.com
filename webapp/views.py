@@ -22,6 +22,7 @@ from flask import (
 # Local
 from webapp.database import db_session
 from webapp.decorators import token_required
+from webapp.param_parser import parse_asset_search_params
 from webapp.sso import login_required
 from webapp.lib.file_helpers import get_mimetype, remove_filename_hash
 from webapp.lib.http_helpers import set_headers_for_type
@@ -112,11 +113,25 @@ def get_asset(file_path: str):
 
 @token_required
 def update_asset(file_path):
-    tags = request.values.get("tags", "")
+    tags = request.values.get("tags", "").split(",")
+    products = request.values.get("products", "").split(",")
     deprecated = strtobool(request.values.get("deprecated", "false"))
+    asset_type = request.values.get("asset-type", "")
+    author = request.values.get("author", "")
+    google_drive_link = request.values.get("google_drive_link", "")
+    salesforce_campaign_id = request.values.get("salesforce_campaign_id", "")
+    language = request.values.get("language", "")
     try:
         asset = asset_service.update_asset(
-            file_path, tags=tags.split(","), deprecated=deprecated
+            file_path=file_path,
+            tags=tags,
+            deprecated=deprecated,
+            products=products,
+            asset_type=asset_type,
+            author=author,
+            google_drive_link=google_drive_link,
+            salesforce_campaign_id=salesforce_campaign_id,
+            language=language,
         )
         return jsonify(asset.as_json())
     except AssetNotFound:
@@ -165,11 +180,33 @@ def get_assets():
     """
     Get a list of assets metadata.
     """
+    search_params = parse_asset_search_params()
 
-    query = request.values.get("q", "")
-    file_type = request.values.get("type", "")
-
-    assets = asset_service.find_assets(query=query, file_type=file_type)
+    if any(
+        [
+            search_params.tag,
+            search_params.asset_type,
+            search_params.author_email,
+            search_params.name,
+            search_params.start_date,
+            search_params.end_date,
+            search_params.salesforce_campaign_id,
+            search_params.language,
+        ]
+    ):
+        assets = asset_service.find_assets(
+            tag=search_params.tag,
+            asset_type=search_params.asset_type,
+            product_types=search_params.product_types,
+            author_email=search_params.author_email,
+            name=search_params.name,
+            start_date=search_params.start_date,
+            end_date=search_params.end_date,
+            salesforce_campaign_id=search_params.salesforce_campaign_id,
+            language=search_params.language,
+        )
+    else:
+        assets = asset_service.find_all_assets()
 
     def generate_json():
         yield "["
@@ -193,7 +230,14 @@ def create_asset():
     friendly_name = request.values.get("friendly-name")
     optimize = strtobool(request.values.get("optimize", "false"))
     tags = request.values.get("tags", "").split(",")
+    products = request.values.get("products", "").split(",")
     url_path = request.values.get("url-path", "").strip("/")
+    asset_type = request.values.get("asset-type", "")
+    author = request.values.get("author", "")
+    google_drive_link = request.values.get("google_drive_link", "")
+    salesforce_campaign_id = request.values.get("salesforce_campaign_id", "")
+    language = request.values.get("language", "")
+    deprecated = request.values.get("deprecated", "false").lower() == "true"
 
     try:
         asset = asset_service.create_asset(
@@ -201,7 +245,14 @@ def create_asset():
             friendly_name=friendly_name,
             optimize=optimize,
             tags=tags,
+            products=products,
             url_path=url_path,
+            asset_type=asset_type,
+            author=author,
+            google_drive_link=google_drive_link,
+            salesforce_campaign_id=salesforce_campaign_id,
+            language=language,
+            deprecated=deprecated,
         )
     except AssetAlreadyExistException as error:
         abort(409, error)
@@ -384,7 +435,8 @@ def get_users(username: str):
     query($name: String!) {
         employees(filter: { contains: { name: $name }}) {
             id
-            name
+            firstName
+            surname
             email
             team
             department
