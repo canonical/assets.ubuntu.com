@@ -18,8 +18,8 @@
     "clean": "rm -rf node_modules yarn-error.log css static/css *.log *.sqlite _site/ build/ .jekyll-metadata .bundle"
   },
   "dependencies": {
-    "autoprefixer": "10.4.14",
-    "sass": "1.61.0",
+    "autoprefixer": "10.4.20",
+    "sass": "1.82.0",
     "postcss": "8.4.21",
     "postcss-cli": "10.1.0",
     "sass-lint": "1.13.1",
@@ -27,6 +27,6 @@
     "watch-cli": "0.2.3"
   },
   "devDependencies": {
-    "concurrently": "8.0.1"
+    "concurrently": "8.2.2"
   }
 }
