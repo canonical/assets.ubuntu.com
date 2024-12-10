@@ -23,6 +23,7 @@ It has 2 main parts:
       - [Uploading assets](#uploading-assets)
       - [Deleting assets](#deleting-assets)
       - [Listing assets](#listing-assets)
+        - [Pagination](#pagination)
     - [Managing redirects](#managing-redirects)
       - [Creating redirects](#creating-redirects)
       - [Updating redirects](#updating-redirects)
@@ -172,6 +173,13 @@ You can also filter the assets by:
 - `tag`: Filter the assets by a specific tag
 - `q`: A query string to filter the assets by filename, e.g. `q=ubuntu` will return all the assets with `ubuntu` in their filename
 - `type`: The type of the asset, e.g. `type=png` will return all the assets with the `png` extension
+- `include_deprecated`: Whether to include or not the deprecated assets. Default is `false`
+
+##### Pagination
+
+By default, the API will return the first 20 assets. You can specify the number of assets to return by using the `per_page` query parameter, e.g. `per_page=100`.
+
+You can also specify the page number by using the `page` query parameter, e.g. `page=2` (this will return the second page of assets).
 
 ### Managing redirects
 
@@ -220,4 +228,4 @@ As the server only uses a basic token for authentication, it is paramount that i
 
 ## Caching
 
-The server is intended to be run in production behind a caching layer (e.g. [squid cache](http://www.squid-cache.org/)). And as the server stores assets by default with a unique hash corresponding to the file's contents (e.g. <code><b>a2f56da4</b>-some-image.png</code>), the cache expiration time should be as long as possible to maximise performance.
+The server is intended to be run in production behind a caching layer (e.g. [squid cache](http://www.squid-cache.org/)). And as the server stores assets by default with a unique hash corresponding to the file's contents (e.g. `<code><b>`a2f56da4`</b>`-some-image.png`</code>`), the cache expiration time should be as long as possible to maximise performance.
