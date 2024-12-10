@@ -22,10 +22,10 @@
                     </div>
                     <div class="p-form__group">
                         <div class="p-form__control u-clearfix">
-                            <select name="tag" onchange="this.form.submit()">
-                                <option {% if not tag %}selected{% endif %} value="">any</option>
-                                {% for t in tags %}
-                                    <option {% if t == tag %}selected{% endif %} value="{{ t }}">{{ t }}</option>
+                            <select name="type" onchange="this.form.submit()">
+                                <option value="">all types</option>
+                                {% for file_type in available_extensions %}
+                                    <option {% if file_type == type %}selected{% endif %} value="{{ file_type }}">{{ file_type }}</option>
                                 {% endfor %}
                             </select>
                         </div>
