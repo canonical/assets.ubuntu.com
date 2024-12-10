@@ -22,12 +22,22 @@
                     </div>
                     <div class="p-form__group">
                         <div class="p-form__control u-clearfix">
-                            <select name="type" onchange="this.form.submit()">
-                                <option {% if not type %}selected{% endif %} value="">any</option>
-                                {% for t in available_extensions %}
-                                    <option {% if t == type %}selected{% endif %} value="{{ t }}">{{ t }}</option>
+                            <select name="tag" onchange="this.form.submit()">
+                                <option {% if not tag %}selected{% endif %} value="">any</option>
+                                {% for t in tags %}
+                                    <option {% if t == tag %}selected{% endif %} value="{{ t }}">{{ t }}</option>
                                 {% endfor %}
                             </select>
+                        </div>
+                    </div>
+                    <div class="p-form__group">
+                        <div class="p-form__control u-clearfix">
+                            <label class="p-checkbox">
+                                <input type="checkbox" name="include_deprecated" id="include_deprecated" class="p-checkbox__input" aria-labelledby="deprecatedLabel"
+                                        {% if include_deprecated %}checked{% endif %}
+                                >
+                                <span class="p-checkbox__label" id="deprecatedLabel">Include deprecated</span>
+                            </label>
                         </div>
                     </div>
                     <div class="p-form__group">

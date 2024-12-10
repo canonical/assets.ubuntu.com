@@ -162,14 +162,20 @@ def get_assets():
     file_type = request.values.get("type", "")
     page = request.values.get("page", type=int)
     per_page = request.values.get("per_page", type=int)
-
+    include_deprecated = (
+        strtobool(request.values.get("include_deprecated", "false")) == 1
+    )
     page = 1 if not page or page < 1 else page
     per_page = (
         20 if not per_page or per_page < 1 or per_page > 100 else per_page
     )
 
     assets, total = asset_service.find_assets(
-        query=query, file_type=file_type, page=page, per_page=per_page
+        query=query,
+        file_type=file_type,
+        page=page,
+        per_page=per_page,
+        include_deprecated=include_deprecated,
     )
 
     return jsonify(

@@ -70,6 +70,9 @@ def home():
     per_page = request.values.get("per_page", type=int)
     order_by = request.values.get("order_by", type=str)
     order_dir = request.values.get("order_dir", type=str, default="desc")
+    include_deprecated = request.values.get(
+        "include_deprecated", type=bool, default=False
+    )
 
     if not per_page or per_page < 1 or per_page > 100:
         per_page = 20
@@ -86,6 +89,7 @@ def home():
             per_page=per_page,
             order_by=asset_service.order_by_fields()[order_by],
             desc_order=order_dir == "desc",
+            include_deprecated=include_deprecated,
         )
     else:
         assets = []
@@ -105,6 +109,7 @@ def home():
         order_by=order_by,
         order_dir=order_dir,
         order_by_fields=asset_service.order_by_fields(),
+        include_deprecated=include_deprecated,
     )
 
 

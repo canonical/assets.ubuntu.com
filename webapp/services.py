@@ -5,6 +5,7 @@ from datetime import datetime
 from typing import Tuple
 
 # Packages
+from sqlalchemy import func
 from sqlalchemy.sql.expression import or_
 from sqlalchemy.sql.sqltypes import Text
 from wand.image import Image
@@ -29,6 +30,7 @@ class AssetService:
         per_page=10,
         order_by=Asset.created,
         desc_order=True,
+        include_deprecated=False,
     ) -> Tuple[list, int]:
         """
         Find assets that matches the given criterions
@@ -47,14 +49,25 @@ class AssetService:
         if tag:
             tag_condition = Asset.tags.any(Tag.name == tag)
             conditions.append(tag_condition)
-        assets = (
+
+        if not include_deprecated:
+            conditions.append(Asset.deprecated.is_(False))
+
+        if order_by == Asset.file_path:
+            # Example: "86293d6f-FortyCloud.png" -> "FortyCloud.png"
+            order_col = func.split_part(Asset.file_path, "-", 2)
+        else:
+            order_col = order_by
+
+        assets_query = (
             db_session.query(Asset)
             .filter(*conditions)
-            .order_by(order_by.desc() if desc_order else order_by)
-            .offset((max(page, 1) - 1) * max(per_page, 10))
-            .limit(per_page)
-            .all()
+            .order_by(order_col.desc() if desc_order else order_col)
+            .offset((page - 1) * per_page)
         )
+
+        assets = assets_query.limit(per_page).all()
+
         total = db_session.query(Asset).filter(*conditions).count()
         return assets, total
 
@@ -215,7 +228,6 @@ class AssetService:
         return {
             "Creation date": Asset.created,
             "File name": Asset.file_path,
-            "Deprecated": Asset.deprecated,
         }
 
 
