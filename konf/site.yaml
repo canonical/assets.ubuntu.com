@@ -45,6 +45,11 @@ env:
       key: os-region-name
       name: assets-ubuntu-swift
 
+  - name: DIRECTORY_API_TOKEN
+    secretKeyRef:
+      key: token
+      name: directory-api
+
 extraHosts:
   - domain: manager.assets.ubuntu.com
 

@@ -1,0 +1,51 @@
+<div class="p-asset-card p-equal-height-row__col" style="padding:0.75rem;background:#f7f7f7;margin-top:2rem;">
+  <div class="p-equal-height-row__item">
+    {% if asset.data.image %}
+    <a href="/v1/{{ asset.file_path }}" target="_blank">
+      <img
+        class="p-asset-card--thumbnail"
+        src="/v1/{{ asset.file_path }}"
+      />
+    </a>
+    {% endif %}
+  </div>
+  <div class="p-equal-height-row__item">
+    {% if asset.name %}
+      <p class="u-no-margin--bottom"><strong>{{ asset.name }}</strong></p>
+    {% else %}
+      <p class="u-no-margin--bottom"><strong>{{ asset.file_path.split('.')[0] }}</strong></p>
+    {% endif %}
+    <p>File type: <strong>.{{ asset.file_path.split('.', 1)[1] }}</strong></p>
+    <p class="u-no-margin--bottom">Image size: <strong>{% if asset.data.width and asset.data.height %}{{asset.data.width}} x {{asset.data.height}}{% endif %}</strong></p>
+    <p>
+      Tags: 
+      {% for tag in asset.tags %}
+      <strong>{{ tag.name }}{% if not loop.last %},{% endif %}</strong>
+      {% endfor %}
+    </p>
+    <p>
+      <span>Date created: {{ asset.created.strftime('%d %B %Y') }}</span>
+    </p>
+  </div>
+  <div class="p-equal-height-row__item">
+    <p class="p-text--small">
+      <a href="/manager/details?file-path={{ asset.file_path }}">Full asset details&nbsp;&rsaquo;</a>
+    </p>
+  </div>
+  <div class="p-equal-height-row__item">
+    <p class="u-align--right u-no-margin--bottom" style="height:100%">
+      <button
+        class="p-button--positive copy-link is-dense"
+        data-url="/v1/{{ asset.file_path }}"
+      >
+        Asset link
+      </button>
+      <a
+        class="p-button is-dense"
+        href="/manager/update?file-path={{ asset.file_path }}"
+      >
+        Edit asset
+    </a>
+    </p>
+  </div>
+</div>

@@ -5,8 +5,8 @@ from typing import Optional
 
 # Packages
 import swiftclient
-from swiftclient.exceptions import ClientException as SwiftException
 import swiftclient.exceptions
+from swiftclient.exceptions import ClientException as SwiftException
 
 # Local
 from webapp.lib.url_helpers import normalize
@@ -100,6 +100,8 @@ class FileManager:
 
         return path
 
+# Include staging-swift in NO_PROXY
+os.environ["NO_PROXY"] = f"{os.environ.get('NO_PROXY', '')},staging-swift"
 
 swift_connection = swiftclient.client.Connection(
     os.environ.get("OS_AUTH_URL"),

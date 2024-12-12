@@ -6,6 +6,7 @@ from distutils.util import strtobool
 from flask import Blueprint
 from flask.globals import request
 import flask
+import yaml
 
 # Local
 from webapp.services import (
@@ -13,6 +14,7 @@ from webapp.services import (
     AssetNotFound,
     asset_service,
 )
+from webapp.param_parser import parse_asset_search_params
 from webapp.sso import login_required
 from webapp.views import (
     create_asset,
@@ -37,26 +39,50 @@ from webapp.views import (
 ui_blueprint = Blueprint("ui_blueprint", __name__, url_prefix="/manager")
 api_blueprint = Blueprint("api_blueprint", __name__, url_prefix="/v1")
 
+with open("data.yaml") as file:
+    data = yaml.load(file, Loader=yaml.FullLoader)
+
 # Manager Routes
 # ===
 
 
-@ui_blueprint.route("/")
+@ui_blueprint.route("/", methods=["GET"])
 @login_required
 def home():
-    query = request.values.get("q", "")
-    tag = request.values.get("tag", None)
-    asset_type = request.values.get("type")
-
-    if query or tag:
+    search_params = parse_asset_search_params()
+    if any(
+        [
+            search_params.tag,
+            search_params.asset_type,
+            search_params.product_types,
+            search_params.author_email,
+            search_params.name,
+            search_params.start_date,
+            search_params.end_date,
+            search_params.salesforce_campaign_id,
+            search_params.language,
+        ]
+    ):
         assets = asset_service.find_assets(
-            query=query, file_type=asset_type, tag=tag
+            tag=search_params.tag,
+            asset_type=search_params.asset_type,
+            product_types=search_params.product_types,
+            author_email=search_params.author_email,
+            name=search_params.name,
+            start_date=search_params.start_date,
+            end_date=search_params.end_date,
+            salesforce_campaign_id=search_params.salesforce_campaign_id,
+            language=search_params.language,
         )
     else:
         assets = []
 
     return flask.render_template(
-        "index.html", assets=assets, query=query, type=asset_type
+        "index.html",
+        assets=assets,
+        query=search_params.tag,
+        type=search_params.asset_type,
+        data=data,
     )
 
 
@@ -70,19 +96,46 @@ def create():
     if flask.request.method == "POST":
         tags = flask.request.form.get("tags", "")
         tags = re.split(",|\\s", tags)
-
+        products = flask.request.form.get("products", "")
+        products = re.split(",|\\s", products)
+        google_drive_link = flask.request.form.get("google_drive_link", "")
+        salesforce_campaign_id = flask.request.form.get(
+            "salesforce_campaign_id", ""
+        )
+        language = flask.request.form.get("language", "")
+        deprecated = (
+            flask.request.form.get("deprecated", "false").lower() == "true"
+        )
         optimize = flask.request.form.get("optimize", True)
+        asset_type = flask.request.form.get("asset_type", "")
+        author_email = flask.request.form.get("author_email", "")
+        author_first_name = flask.request.form.get("author_first_name", "")
+        author_last_name = flask.request.form.get("author_last_name", "")
+        author = {
+            "email": author_email,
+            "first_name": author_first_name,
+            "last_name": author_last_name,
+        }
+        name = flask.request.form.get("name", "")
 
         for asset_file in flask.request.files.getlist("assets"):
             try:
-                name = asset_file.filename
+                filename = asset_file.filename
                 content = asset_file.read()
 
                 asset = asset_service.create_asset(
                     file_content=content,
-                    friendly_name=name,
+                    friendly_name=filename,
+                    name=name,
                     optimize=optimize,
                     tags=tags,
+                    products=products,
+                    asset_type=asset_type,
+                    author=author,
+                    google_drive_link=google_drive_link,
+                    salesforce_campaign_id=salesforce_campaign_id,
+                    language=language,
+                    deprecated=deprecated,
                 )
 
                 created_assets.append(asset)
@@ -91,7 +144,9 @@ def create():
                 if asset:
                     existing_assets.append(asset)
             except Exception as error:
-                failed_assets.append({"file_path": name, "error": str(error)})
+                failed_assets.append(
+                    {"file_path": filename, "error": str(error)}
+                )
         return flask.render_template(
             "created.html",
             assets=created_assets,
@@ -100,8 +155,7 @@ def create():
             tags=tags,
             optimize=optimize,
         )
-
-    return flask.render_template("create.html")
+    return flask.render_template("create-update.html", data=data)
 
 
 @ui_blueprint.route("/update", methods=["GET", "POST"])
@@ -115,17 +169,54 @@ def update():
             flask.flash("Asset not found", "negative")
 
     elif request.method == "POST":
-        tags = request.form.get("tags")
+        tags = request.form.get("tags").split(",")
+        products = request.form.get("products", "").split(",")
         deprecated = strtobool(request.form.get("deprecated", "false"))
+        asset_type = request.form.get("asset_type", "")
+        google_drive_link = request.form.get("google_drive_link", "")
+        salesforce_campaign_id = request.form.get("salesforce_campaign_id", "")
+        language = request.form.get("language", "")
+        author_email = request.form.get("author_email", "")
+        author_first_name = request.form.get("author_first_name", "")
+        author_last_name = request.form.get("author_last_name", "")
+        author = {
+            "email": author_email,
+            "first_name": author_first_name,
+            "last_name": author_last_name,
+        }
+        name = request.form.get("name", "")
+
         try:
             asset = asset_service.update_asset(
-                file_path, tags=tags.split(","), deprecated=deprecated
+                file_path=file_path,
+                tags=tags,
+                name=name,
+                deprecated=deprecated,
+                products=products,
+                asset_type=asset_type,
+                author=author,
+                google_drive_link=google_drive_link,
+                salesforce_campaign_id=salesforce_campaign_id,
+                language=language,
             )
             flask.flash("Asset updated", "positive")
         except AssetNotFound:
             flask.flash("Asset not found", "negative")
+        return flask.redirect("/manager/details?file-path=" + file_path)
 
-    return flask.render_template("update.html", asset=asset)
+    return flask.render_template("create-update.html", data=data, asset=asset)
+
+
+@ui_blueprint.route("/details", methods=["GET"])
+@login_required
+def details():
+    file_path = request.args.get("file-path")
+
+    asset = asset_service.find_asset(file_path)
+    if not asset:
+        flask.flash("Asset not found", "negative")
+
+    return flask.render_template("details.html", asset=asset)
 
 
 # API Routes
