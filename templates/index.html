@@ -1,47 +1,81 @@
 {% extends "_layout.html" %}
-
 {% block title %}Search assets{% endblock %}
-
 {% block content %}
-<div class="p-strip is-shallow">
-  <div class="row">
-    <div class="col-12">
-      <form action="/manager" class="p-form p-form--inline search">
-        {% if request.values.get('tag', None) %}
-        <input type="text" class="u-hide" name="tag" value="{{ request.values.get('tag', None) }}">
-        {% endif %} 
-        <div class="p-form__group">
-          <div class="p-form__control u-clearfix">
-            <input type="search" class="p-form__control" name="q" placeholder="Search" value="{{ query }}">
-          </div>
+    <div class="p-strip is-shallow">
+        <div class="row">
+            <div class="col-12">
+                <form action="/manager" class="p-form p-form--inline search">
+                    {% if request.values.get('tag', None) %}
+                        <input type="text"
+                               class="u-hide"
+                               name="tag"
+                               value="{{ request.values.get('tag', None) }}">
+                    {% endif %}
+                    <div class="p-form__group">
+                        <div class="p-form__control u-clearfix">
+                            <input type="search"
+                                   class="p-form__control"
+                                   name="q"
+                                   placeholder="Search"
+                                   value="{{ query }}">
+                        </div>
+                    </div>
+                    <div class="p-form__group">
+                        <div class="p-form__control u-clearfix">
+                            <select name="type" onchange="this.form.submit()">
+                                <option value="">all types</option>
+                                {% for file_type in available_extensions %}
+                                    <option {% if file_type == type %}selected{% endif %} value="{{ file_type }}">{{ file_type }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="p-form__group">
+                        <div class="p-form__control u-clearfix">
+                            <label class="p-checkbox">
+                                <input type="checkbox" name="include_deprecated" id="include_deprecated" class="p-checkbox__input" aria-labelledby="deprecatedLabel"
+                                        {% if include_deprecated %}checked{% endif %}
+                                >
+                                <span class="p-checkbox__label" id="deprecatedLabel">Include deprecated</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="p-form__group">
+                        <label for="order_by" style="margin-right: 10px;">Order by:</label>
+                        <div class="p-form__control u-clearfix">
+                            <select name="order_by" onchange="this.form.submit()">
+                                {% for field in order_by_fields %}
+                                    <option {% if field == order_by %}selected{% endif %} value="{{ field }}">{{ field }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="p-form__group">
+                        <div class="p-form__control u-clearfix">
+                            <select name="order_dir" onchange="this.form.submit()">
+                              <option {% if order_dir == "desc" %}selected{% endif %} value="desc">Descending</option>
+                                <option {% if order_dir == "asc" %}selected{% endif %} value="asc">Ascending</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="p-button--positive">Search</button>
+                </form>
+            </div>
         </div>
-        <div class="p-form__group">
-          <div class="p-form__control u-clearfix">
-            <select name="type" onchange="this.form.submit()">
-              <option {% if not type %} selected {% endif %} value="">any</option>
-              <option {% if type == "svg" %} selected {% endif %} value="svg">svg</option>
-              <option {% if type == "png" %} selected {% endif %} value="png">png</option>
-              <option {% if type == "jpeg" %} selected {% endif %} value="jpeg">jpeg</option>
-              <option {% if type == "jpg" %} selected {% endif %} value="jpg">jpg</option>
-              <option {% if type == "gif" %} selected {% endif %} value="gif">gif</option>
-              <option {% if type == "pdf" %} selected {% endif %} value="pdf">pdf</option>
-            </select>
-          </div>
-        </div>
-        <button class="p-button--positive">Search</button>
-      </form>
     </div>
-  </div>
-</div>
-<div class="p-strip is-shallow">
-  <div class="row u-clearfix">
-    {% if assets %}
-      {% include "_asset-list.html" %}
-    {% elif request.values.get("q", None) %}
-      <h3>No assets found.</h3>
-    {% else %}
-      <h3>Search for a query to show assets.</h3>
-    {% endif %}
-  </div>
-</div>
+    {% include "_pagination.html" %}
+
+    <div class="p-strip is-shallow">
+        <div class="row u-clearfix">
+            {% if assets %}
+                {% include "_asset-list.html" %}
+            {% elif request.values.get("q", None) %}
+                <h3>No assets found.</h3>
+            {% else %}
+                <h3>Search for a query to show assets.</h3>
+            {% endif %}
+        </div>
+    </div>
+{% include "_pagination.html" %}
+
 {% endblock %}

@@ -1,6 +1,5 @@
 # Standard library
 import base64
-import json
 import re
 import uuid
 import requests
@@ -10,14 +9,7 @@ from urllib.parse import unquote, urlparse
 from os import environ
 
 # Packages
-from flask import (
-    Response,
-    abort,
-    jsonify,
-    redirect,
-    request,
-    stream_with_context,
-)
+from flask import Response, abort, jsonify, redirect, request
 
 # Local
 from webapp.database import db_session
@@ -168,20 +160,33 @@ def get_assets():
 
     query = request.values.get("q", "")
     file_type = request.values.get("type", "")
+    page = request.values.get("page", type=int)
+    per_page = request.values.get("per_page", type=int)
+    include_deprecated = (
+        strtobool(request.values.get("include_deprecated", "false")) == 1
+    )
+    page = 1 if not page or page < 1 else page
+    per_page = (
+        20 if not per_page or per_page < 1 or per_page > 100 else per_page
+    )
 
-    assets = asset_service.find_assets(query=query, file_type=file_type)
+    assets, total = asset_service.find_assets(
+        query=query,
+        file_type=file_type,
+        page=page,
+        per_page=per_page,
+        include_deprecated=include_deprecated,
+    )
 
-    def generate_json():
-        yield "["
-        for i, asset in enumerate(assets):
-            if i > 0:
-                yield ","
-            yield json.dumps(asset.as_json())
-        yield "]"
-
-    response = Response(stream_with_context(generate_json()))
-    response.headers["Content-Type"] = "application/json"
-    return response
+    return jsonify(
+        {
+            "assets": [asset.as_json() for asset in assets],
+            "total": total,
+            "page": page,
+            "per_page": per_page,
+            "total_pages": (total // per_page) + 1,
+        }
+    )
 
 
 @token_required

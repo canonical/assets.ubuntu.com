@@ -2,23 +2,36 @@
 import imghdr
 from base64 import b64decode
 from datetime import datetime
+from typing import Tuple
 
 # Packages
+from sqlalchemy import func
 from sqlalchemy.sql.expression import or_
 from sqlalchemy.sql.sqltypes import Text
 from wand.image import Image
 
 # Local
 from webapp.database import db_session
+from webapp.lib.file_helpers import is_svg
 from webapp.lib.processors import ImageProcessor
 from webapp.lib.url_helpers import clean_unicode
-from webapp.lib.file_helpers import is_svg
 from webapp.models import Asset, Tag
 from webapp.swift import file_manager
+from webapp.utils import lru_cache
 
 
 class AssetService:
-    def find_assets(self, file_type="%", tag=None, query=None):
+    def find_assets(
+        self,
+        file_type="%",
+        tag=None,
+        query=None,
+        page=1,
+        per_page=10,
+        order_by=Asset.created,
+        desc_order=True,
+        include_deprecated=False,
+    ) -> Tuple[list, int]:
         """
         Find assets that matches the given criterions
         """
@@ -36,9 +49,27 @@ class AssetService:
         if tag:
             tag_condition = Asset.tags.any(Tag.name == tag)
             conditions.append(tag_condition)
-        assets = db_session.query(Asset).filter(*conditions).yield_per(100)
-        for asset in assets:
-            yield asset
+
+        if not include_deprecated:
+            conditions.append(Asset.deprecated.is_(False))
+
+        if order_by == Asset.file_path:
+            # Example: "86293d6f-FortyCloud.png" -> "FortyCloud.png"
+            order_col = func.split_part(Asset.file_path, "-", 2)
+        else:
+            order_col = order_by
+
+        assets_query = (
+            db_session.query(Asset)
+            .filter(*conditions)
+            .order_by(order_col.desc() if desc_order else order_col)
+            .offset((page - 1) * per_page)
+        )
+
+        assets = assets_query.limit(per_page).all()
+
+        total = db_session.query(Asset).filter(*conditions).count()
+        return assets, total
 
     def find_asset(self, file_path):
         """
@@ -171,6 +202,33 @@ class AssetService:
             asset.deprecated = deprecated
         db_session.commit()
         return asset
+
+    @lru_cache(ttl_seconds=3600)
+    def available_extensions(self):
+        """
+        Return a list of available extensions
+        """
+        # get distinct file_path only the 7 last characters
+        files = (
+            db_session.query(Asset.file_path).distinct(Asset.file_path).all()
+        )
+        extensions = set()
+        for file in files:
+            file_path = file[0]
+            extension = file_path.split(".")[-1].lower()
+            if len(extension) < 7 and len(extension) > 2:
+                extensions.add(extension)
+        return extensions
+
+    @staticmethod
+    def order_by_fields():
+        """
+        Fields that can be used to order assets by.
+        """
+        return {
+            "Creation date": Asset.created,
+            "File name": Asset.file_path,
+        }
 
 
 class AssetAlreadyExistException(Exception):

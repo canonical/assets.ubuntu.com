@@ -1,3 +1,10 @@
+<h5 id="assets_count"></h5>
+<script>
+  // local format number
+  const formattedNumber = new Intl.NumberFormat('en-US').format({{ total_assets }});
+  document.getElementById('assets_count').innerText = `Found ${formattedNumber} assets`;
+</script>
+
 {% for asset in assets %}
-  {% include "_asset.html" %}
+  {% include '_asset.html' %}
 {% endfor %}
