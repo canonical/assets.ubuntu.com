@@ -100,6 +100,7 @@ class FileManager:
 
         return path
 
+
 # Include staging-swift in NO_PROXY
 os.environ["NO_PROXY"] = f"{os.environ.get('NO_PROXY', '')},staging-swift"
 
