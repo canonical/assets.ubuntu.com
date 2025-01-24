@@ -8,16 +8,6 @@ import './date-picker';
 import './generic-fields';
 
 /*
- * If 'enter' is pressed, submit the form.
- **/
-document.addEventListener('keydown', function (e) {
-  if (e.key === 'Enter') {
-    const form = e.target.closest('form');
-    form.submit();
-  }
-});
-
-/*
  * Event delgation to handle the click event for search and filter.
  **/
 document.addEventListener('click', function (e) {
