@@ -212,7 +212,7 @@
           multiple>
             <option value="" disabled="disabled" selected="">Select all that apply</option>
             {% for language in data.languages %}
-              <option value="{{ language.name }}" {% if asset and language.name in asset.language %}selected{% endif %}>
+              <option value="{{ language.name }}" {% if asset and language.name in asset.language %}selected{% endif %} {% if language.name == "-" %}disabled{% endif %}>
                 {{ language.name }}
               </option>
             {% endfor %}
