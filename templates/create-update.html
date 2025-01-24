@@ -49,9 +49,9 @@
     <div class="row">
       <div class="col-8 col-start-large-5">
         <div class="p-section js-multiselect">
-          <label class="p-heading--5 u-no-margin--bottom is-required" id="asset-type">Asset type(s)</label>
+          <label class="p-heading--5 u-no-margin--bottom is-required" id="asset-type">Asset type</label>
           <p class="u-text--muted u-no-padding--top">For example, image, whitepaper or diagram.</p>
-          <select id="asset-type-select" aria-label="Required field: Select asset type" multiple required>
+          <select id="asset-type-select" aria-label="Required field: Select asset type" required>
             {% for asset_type in data.asset_types %}
               {% set asset_value = asset_type.name|lower|replace(' ', '-') %}
               <option value="{{ asset_value }}" {% if asset and asset_value in asset.asset_type %}selected{% endif %} {% if asset_type.name == "-" %}disabled{% endif %}>
