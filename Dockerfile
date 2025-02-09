@@ -28,7 +28,7 @@ RUN --mount=type=cache,target=/root/.cache/pip pip3 install --requirement /tmp/r
 
 # Build stage: Install yarn dependencies
 # ===
-FROM node:20 AS yarn-dependencies
+FROM node:23 AS yarn-dependencies
 WORKDIR /srv
 ADD package.json .
 RUN yarn install
