@@ -1,11 +1,12 @@
-FROM ubuntu:focal AS base-dependencies
-ENV PATH="/root/.local/bin:${PATH}"
-ENV DEBIAN_FRONTEND noninteractive
+# syntax=docker/dockerfile:experimental
+
+FROM ubuntu:noble AS base-dependencies
+ENV PATH="/venv/bin:${PATH}"
 ENV LANG C.UTF-8
-ENV C_INCLUDE_PATH=/usr/include
+
 # Install python and import python dependencies
 RUN apt-get update && apt-get install --no-install-recommends --yes \
-    python3-dev python3-pip python3-setuptools python3-wheel python3-lib2to3 \
+    python3-venv python3-dev python3-pip python3-setuptools python3-wheel python3-lib2to3 \
     python3-pkg-resources ca-certificates libsodium-dev \
     # Wand dependencies
     libmagic1 libmagickwand-dev \
@@ -21,15 +22,16 @@ RUN apt-get update && apt-get install --no-install-recommends --yes \
 # Build stage: Install python dependencies
 # ===
 FROM base-dependencies AS python-dependencies
+RUN python3 -m venv /venv
 ADD requirements.txt /tmp/requirements.txt
-RUN --mount=type=cache,target=/root/.cache/pip pip3 install --user --requirement /tmp/requirements.txt
+RUN --mount=type=cache,target=/root/.cache/pip pip3 install --requirement /tmp/requirements.txt
 
 # Build stage: Install yarn dependencies
 # ===
-FROM node:18 AS yarn-dependencies
+FROM node:20 AS yarn-dependencies
 WORKDIR /srv
 ADD package.json .
-RUN --mount=type=cache,target=/usr/local/share/.cache/yarn yarn install
+RUN yarn install
 
 # Build stage: Run "yarn run build-css"
 # ===
@@ -39,9 +41,7 @@ RUN yarn run build-css
 
 # Build the production image
 # ===
-FROM base-dependencies
-COPY --from=python-dependencies /root/.local/lib/python3.8/site-packages /root/.local/lib/python3.8/site-packages
-COPY --from=python-dependencies /root/.local/bin /root/.local/bin
+FROM base-dependencies AS production
 
 # Set up environment
 WORKDIR /srv
@@ -49,6 +49,7 @@ WORKDIR /srv
 # Import code, build assets and mirror list
 ADD . .
 RUN rm -rf package.json yarn.lock requirements.txt
+COPY --from=python-dependencies /venv /venv
 COPY --from=build-css /srv/static/css static/css
 
 # Set revision ID
