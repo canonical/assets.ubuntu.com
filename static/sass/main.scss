@@ -15,6 +15,27 @@
   min-height: 100px;
 }
 
+.p-asset-card__image-container {
+  
+  display: flex;           
+  justify-content: center;  
+  align-items: center;     
+  position: relative;     
+
+  &.is-deprecated img{
+    opacity: 0.5;
+  }
+
+  &.is-deprecated::after {
+    position: absolute;
+    content: "Deprecated asset";
+    width: max-content;
+    padding: 0.8rem;
+    background: red;
+    color: white;
+  }
+}
+
 .asset-additional-edit-row {
   display: flex;
   flex-direction: row;
