@@ -5,14 +5,16 @@
         {% include "shared/_asset-card-actions.html" %}
       {% endif %}
       <div class="u-sv1">
-        <a href="/v1/{{ asset.file_path }}" target="_blank">
-          <div class="p-asset-card__image-container {% if asset.deprecated %}is-deprecated{% endif %}"
-               style="position: relative">
-            <img class="p-asset-card--thumbnail"
-                 alt=""
-                 src="{% if asset.data.image %}/v1/{{ asset.file_path }}{% elif asset.asset_type == 'whitepaper' %}https://assets.ubuntu.com/v1/b061c401-White+paper.svg{% else %}https://assets.ubuntu.com/v1/fd84bbdc-Document-open.svg {% endif %}">
-          </div>
-        </a>
+        <div class="p-section--shallow">
+          <a href="/v1/{{ asset.file_path }}" target="_blank">
+            <div class="p-asset-card__image-container {% if asset.deprecated %}is-deprecated{% endif %}"
+                 style="position: relative">
+              <img class="p-asset-card--thumbnail"
+                   alt=""
+                   src="{% if asset.data.image %}/v1/{{ asset.file_path }}{% elif asset.asset_type == 'whitepaper' %}https://assets.ubuntu.com/v1/b061c401-White+paper.svg{% else %}https://assets.ubuntu.com/v1/fd84bbdc-Document-open.svg {% endif %}">
+            </div>
+          </a>
+        </div>
         {% if asset.name %}
           <p class="u-no-margin--bottom">
             <strong>{{ asset.name }}</strong>
@@ -47,9 +49,7 @@
           </button>
         {% endfor %}
       </div>
-      {% if not details %}
-        {% include "shared/_asset-card-actions.html" %}
-      {% else %}
+      {% if details %}
         <hr class="p-rule" />
         <p class="u-no-margin--bottom">
           <span>Author:&nbsp;</span>
@@ -66,6 +66,31 @@
         <p class="u-no-margin--bottom">
           Google Drive link:  <a href="{{ asset.google_drive_link }}">{{ asset.google_drive_link }}</a>
         </p>
+      {% elif created %}
+        <div class="p-section--shallow">
+          <div class="u-sv4"></div>
+        </div>
+        <p>
+          <strong>Asset details</strong>
+        </p>
+        <p class="u-no-margin--bottom">
+          <span>Author:&nbsp;</span>
+          <button class="p-chip is-inline is-dense">
+            <span class="p-chip__value">{{ asset.author.first_name }} {{ asset.author.last_name }}</span>
+          </button>
+        </p>
+        <p class="u-no-margin--bottom">Created: {{ asset.created.strftime("%d %B %Y") }}</p>
+        <p class="u-no-margin--bottom">
+          Language: <strong>{{ asset.language }}</strong>
+        </p>
+        <p class="u-no-margin--bottom">
+          Salesforce campaign ID: <strong>{{ asset.salesforce_campaign_id }}</strong>
+        </p>
+        <p class="u-no-margin--bottom">
+          Google Drive link:  <a href="{{ asset.google_drive_link }}">{{ asset.google_drive_link }}</a>
+        </p>
+      {% else %}
+        {% include "shared/_asset-card-actions.html" %}
       {% endif %}
     </div>
   </div>
