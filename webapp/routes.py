@@ -135,7 +135,6 @@ def home():
         order_by_fields=asset_service.order_by_fields(),
         include_deprecated=include_deprecated,
         query=search_params.tag,
-        products_list=products_list,
         data=data,
     )
 
@@ -161,7 +160,7 @@ def create():
             flask.request.form.get("deprecated", "false").lower() == "true"
         )
         optimize = flask.request.form.get("optimize", True)
-        asset_type = flask.request.form.get("asset_type", "")
+        asset_type = flask.request.form.get("asset_type", "") or "image"
         author_email = flask.request.form.get("author_email", "")
         author_first_name = flask.request.form.get("author_first_name", "")
         author_last_name = flask.request.form.get("author_last_name", "")

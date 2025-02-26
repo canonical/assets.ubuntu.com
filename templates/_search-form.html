@@ -4,7 +4,7 @@
 
     <div class="col-4">
       <label for="tag">Tag</label>
-      <input class="js-tags" type="text" name="tag" placeholder="Tag" id="tag" value="{% if params.tag %}{{ params.tag }}{% endif %}">
+      <input class="js-tags" type="text" name="tag" placeholder="Tag" id="tag" value="{%- if params.tag -%}{{ params.tag }}{%- endif -%}">
       <button class="p-button--positive" style="margin-top:45px;">Search</button>
     </div>
 
@@ -41,7 +41,7 @@
 
         <div class="col-2">
           <label>Salesforce ID number</label>
-          <input type="text" class="js-salesforce-campaign-id" id="salesforce-campaign-id-number" name="salesforce_campaign_id" placeholder="Number" value="{% if params.salesforce_campaign_id %}{{ params.salesforce_campaign_id }}{% endif %}">
+          <input type="text" class="js-salesforce-campaign-id" id="salesforce-campaign-id-number" name="salesforce_campaign_id" placeholder="Number" value="{%- if params.salesforce_campaign_id -%}{{ params.salesforce_campaign_id }}{%- endif -%}">
         </div>
 
         <div class="col-2 js-select">
@@ -76,9 +76,9 @@
               {% endif %}
               <div class="p-search-and-filter__box" data-overflowing="false">
                 <input autocomplete="off" class="p-search-and-filter__input js-authors-input" placeholder="Search authors" type="text" value="" id="author-search">
-                <input type="text" class="u-hide js-hidden-field-email" name="author_email" value="{% if params.author_email %}{{ params.author_email }}{% endif %}">
-                <input type="text" class="u-hide js-hidden-field-firstname" name="author_firstname" value="{% if params.author_firstname %}{{ params.author_firstname }}{% endif %}">
-                <input type="text" class="u-hide js-hidden-field-lastname" name="author_lastname" value="{% if params.author_lastname %}{{ params.author_lastname }}{% endif %}">
+                <input type="text" class="u-hide js-hidden-field-email" name="author_email" value="{%- if params.author_email -%}{{ params.author_email }}{%- endif -%}">
+                <input type="text" class="u-hide js-hidden-field-firstname" name="author_firstname" value="{%- if params.author_firstname -%}{{ params.author_firstname }}{%- endif -%}">
+                <input type="text" class="u-hide js-hidden-field-lastname" name="author_lastname" value="{%- if params.author_lastname -%}{{ params.author_lastname }}{%- endif -%}">
               </div>
             </div>
             <div class="p-search-and-filter__panel js-chips-panel" aria-hidden="true">
@@ -105,17 +105,9 @@
           <input type="text" class="u-hide js-hidden-field-startdate">
           <input type="text" class="u-hide js-hidden-field-enddate">
         </div>
+      </div>
 
-        <div class="p-form__group">
-          <div class="p-form__control u-clearfix">
-            <select name="type" onchange="this.form.submit()">
-              <option value="">all types</option>
-              {% for file_type in available_extensions %}
-                <option {% if file_type == type %}selected{% endif %} value="{{ file_type }}">{{ file_type }}</option>
-              {% endfor %}
-            </select>
-          </div>
-        </div>
+      <div class="row">
         <div class="p-form__group">
           <div class="p-form__control u-clearfix">
             <label class="p-checkbox">
@@ -126,25 +118,6 @@
             </label>
           </div>
         </div>
-        <div class="p-form__group">
-          <label for="order_by" style="margin-right: 10px;">Order by:</label>
-          <div class="p-form__control u-clearfix">
-            <select name="order_by" onchange="this.form.submit()">
-              {% for field in order_by_fields %}
-                <option {% if field == order_by %}selected{% endif %} value="{{ field }}">{{ field }}</option>
-              {% endfor %}
-            </select>
-          </div>
-        </div>
-        <div class="p-form__group">
-          <div class="p-form__control u-clearfix">
-            <select name="order_dir" onchange="this.form.submit()">
-              <option {% if order_dir == "desc" %}selected{% endif %} value="desc">Descending</option>
-              <option {% if order_dir == "asc" %}selected{% endif %} value="asc">Ascending</option>
-            </select>
-          </div>
-        </div>
-
       </div>
     </div>
   </div>

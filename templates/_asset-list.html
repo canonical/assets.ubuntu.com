@@ -2,7 +2,9 @@
 <script>
   // local format number
   const formattedNumber = new Intl.NumberFormat('en-US').format({{ total_assets }});
-  document.getElementById('assets_count').innerText = `Found ${formattedNumber} assets`;
+  if formattedNumber {
+    document.getElementById('assets_count').innerText = `Found ${formattedNumber} assets`;
+  }
 </script>
 
 {% for asset in assets %}

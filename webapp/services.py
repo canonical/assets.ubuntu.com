@@ -7,8 +7,6 @@ from io import BytesIO
 
 # Packages
 from sqlalchemy import func
-from sqlalchemy.sql.expression import or_, and_
-from sqlalchemy.sql.sqltypes import Text
 from typing import List
 from PIL import Image as PillowImage
 
@@ -34,18 +32,15 @@ class AssetService:
 
     def find_assets(
         self,
-        file_type: str = "%",
         tag:str = "abc",
-        asset_type: str = "png",
+        asset_type: str = "image",
         product_types: list = ["a","b"],
         author_email: str = "abc@g.com",
-        title: str = "mad",
         name: str = "%",
         start_date: str = "2024-01-01",
         end_date: str = "2024-10-14",
-        sf_campg_id: str = "1234",
+        salesforce_campaign_id: str = "1234",
         language: str = "en",
-        query=None,
         page=1,
         per_page=10,
         order_by=Asset.created,
@@ -54,21 +49,7 @@ class AssetService:
     ) -> Tuple[list, int]:
         """
         Find assets that matches the given criterions
-        """
-        tag = "gif"
-        if not tag:
-            tag = "%"
-        if not asset_type:
-            asset_type = "%"
-        if not author_email:
-            author_email = "%"
-        if not title:
-            title = "%"
-        if not language:
-            language = "%"
-        if not sf_campg_id:
-            sf_campg_id = "%"
-    
+        """    
         conditions = []
         if tag:
             conditions.append(Asset.tags.any(Tag.name == tag))
@@ -80,8 +61,8 @@ class AssetService:
             conditions.append(Asset.name.ilike(f"%{name}%"))
         if language:
             conditions.append(Asset.language.ilike(f"{language}"))
-        if sf_campg_id:
-            conditions.append(Asset.salesforce_campaign_id.ilike(f"{sf_campg_id}"))
+        if salesforce_campaign_id:
+            conditions.append(Asset.salesforce_campaign_id.ilike(f"{salesforce_campaign_id}"))
         
         if not include_deprecated:
             conditions.append(Asset.deprecated.is_(False))
@@ -128,10 +109,10 @@ class AssetService:
         friendly_name: str,
         optimize: bool,
         name: str = None,
-        url_path=None,
+        url_path: str = None,
         tags: List[str] = [],
         products: List[str] = [],
-        asset_type: str = None,
+        asset_type: str = "image",
         author: str = None,
         google_drive_link: str = None,
         salesforce_campaign_id: str = None,
@@ -308,7 +289,7 @@ class AssetService:
         tags: List[str] = [],
         deprecated: bool = None,
         products: List[str] = [],
-        asset_type: str = None,
+        asset_type: str = "image",
         author: str = None,
         google_drive_link: str = None,
         salesforce_campaign_id: str = None,
