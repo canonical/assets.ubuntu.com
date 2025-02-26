@@ -3,9 +3,5 @@
 {% endif %}
 
 {% for asset in assets %}
-  {% if asset.data.image %}
-    {% include "_asset-card-image.html" %}
-  {% else %}
-    {% include "_asset-card.html" %}
-  {% endif %}
+  {% include "_asset-card-image.html" %}
 {% endfor %}
