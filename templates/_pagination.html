@@ -1,67 +1,56 @@
-{%
-set max_pagination_items = 3
-%}
-{% set per_page_options = [20, 50, 100] %}
+{% set max_pagination_items = 3 %}
+
 {% if total_pages > 1 %}
-    <div class=" row">
-        <nav class="p-pagination" aria-label="Pagination">
-            <ol class="p-pagination__items u-align--center">
-                <li class="p-pagination__item">
-                    <a class="p-pagination__link--previous {{ 'is-active' if page == 1 }}"
-                       href="{{ add_query_param('page', page - 1) }}">
-                        <i class="p-icon--chevron-down">Previous page</i>
-                    </a>
-                </li>
-                <li class="p-pagination__item">
-                    <a class="p-pagination__link {{ 'is-active' if page == 1 }}"
-                       href="{{ add_query_param('page', 1) }}">1</a>
-                </li>
-                {% if page > 3 %}<li class="p-pagination__item p-pagination__item--truncation u-hide--small">…</li>{% endif %}
-                {% for p in range(page - 1, page + max_pagination_items) %}
-                    {% if p > 1 and p < total_pages %}
-                        <li class="p-pagination__item">
-                            <a class="p-pagination__link {{ 'is-active' if page == p }}"
-                               href="{{ add_query_param('page', p) }}">{{ p }}</a>
-                        </li>
-                    {% endif %}
-                {% endfor %}
-                {% if page + max_pagination_items < total_pages %}
-                    <li class="p-pagination__item p-pagination__item--truncation u-hide--small">…</li>
-                {% endif %}
-                {% if total_pages > max_pagination_items %}
-                    <li class="p-pagination__item">
-                        <a class="p-pagination__link {{ 'is-active' if page == total_pages }}"
-                           href="{{ add_query_param('page', total_pages) }}">{{ total_pages }}</a>
-                    </li>
-                {% endif %}
-                {% if page < total_pages %}
-                    <li class="p-pagination__item">
-                        <a class="p-pagination__link--next {{ 'is-active' if page == total_pages }}"
-                           href="{{ add_query_param('page', page + 1) }}">
-                            <i class="p-icon--chevron-down">Next page</i>
-                        </a>
-                    </li>
-                {% endif %}
-                <div class="p-form__group" style="margin-left:10px">
-                    <div class="p-form__control u-clearfix">
-                        <select name="per_page" onchange="changePerPage(this)" style="width: 30px">
-                            {% for option in per_page_options %}
-                                <option {% if option == per_page %}selected{% endif %} value="{{ option }}">{{ option }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                </div>
-                <script>
-                              function changePerPage(select) {
-                                  var url = new URL(window.location.href);
-                                  url.searchParams.set('per_page', select.value);
-                                  url.searchParams.set('page', 1);
-                                  window
-                                      .location
-                                      .href = url.href;
-                              }
-                </script>
-            </ol>
-        </nav>
-    </div>
+  <div class=" row">
+    <nav class="p-pagination" aria-label="Pagination">
+      <ol class="p-pagination__items u-align--right">
+        <li class="p-pagination__item">
+          <a class="p-pagination__link--previous u-no-margin--bottom {{ 'is-active' if page == 1 }}"
+            href="{{ add_query_param('page', page - 1) }}">
+            <i class="p-icon--chevron-down">Previous page</i>
+          </a>
+        </li>
+        <li class="p-pagination__item">
+          <a class="p-pagination__link u-no-margin--bottom {{ 'is-active' if page == 1 }}"
+            href="{{ add_query_param('page', 1) }}">1</a>
+        </li>
+        {% if page > 3 %}<li class="p-pagination__item p-pagination__item--truncation u-hide--small">…</li>{% endif %}
+        {% for p in range(page - 1, page + max_pagination_items) %}
+          {% if p > 1 and p < total_pages %}
+            <li class="p-pagination__item">
+              <a class="p-pagination__link u-no-margin--bottom {{ 'is-active' if page == p }}"
+                href="{{ add_query_param('page', p) }}">{{ p }}</a>
+            </li>
+          {% endif %}
+        {% endfor %}
+        {% if page + max_pagination_items < total_pages %}
+          <li class="p-pagination__item p-pagination__item--truncation u-hide--small">…</li>
+        {% endif %}
+        {% if total_pages > max_pagination_items %}
+          <li class="p-pagination__item">
+            <a class="p-pagination__link u-no-margin--bottom {{ 'is-active' if page == total_pages }}"
+              href="{{ add_query_param('page', total_pages) }}">{{ total_pages }}</a>
+          </li>
+        {% endif %}
+        {% if page < total_pages %}
+          <li class="p-pagination__item">
+            <a class="p-pagination__link--next u-no-margin--bottom {{ 'is-active' if page == total_pages }}"
+              href="{{ add_query_param('page', page + 1) }}">
+              <i class="p-icon--chevron-down">Next page</i>
+            </a>
+          </li>
+        {% endif %}
+        <script>
+          function changePerPage(select) {
+            var url = new URL(window.location.href);
+            url.searchParams.set('per_page', select.value);
+            url.searchParams.set('page', 1);
+            window
+              .location
+              .href = url.href;
+          }
+        </script>
+      </ol>
+    </nav>
+  </div>
 {% endif %}

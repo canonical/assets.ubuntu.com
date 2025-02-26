@@ -1,7 +1,6 @@
 <form method="GET" action="/manager" class="p-form p-form--inline js-asset-search">
   {% set params = request.values.to_dict() %}
   <div class="row">
-
     <div class="col-4">
       <label for="tag">Tag</label>
       <input class="js-tags" type="text" name="tag" placeholder="Tag" id="tag" value="{%- if params.tag -%}{{ params.tag }}{%- endif -%}">
@@ -108,7 +107,7 @@
       </div>
 
       <div class="row">
-        <div class="p-form__group">
+        <div class="p-section--shallow p-form__group">
           <div class="p-form__control u-clearfix">
             <label class="p-checkbox">
               <input type="checkbox" name="include_deprecated" id="include_deprecated" class="p-checkbox__input" aria-labelledby="deprecatedLabel"
@@ -120,5 +119,6 @@
         </div>
       </div>
     </div>
+    <hr class="p-rule" />
   </div>
 </form>

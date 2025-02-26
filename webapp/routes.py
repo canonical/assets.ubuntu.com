@@ -80,7 +80,7 @@ def home():
     )
 
     if not per_page or per_page < 1 or per_page > 100:
-        per_page = 20
+        per_page = 8
     if order_by not in asset_service.order_by_fields():
         order_by = list(asset_service.order_by_fields().keys())[0]
     if order_dir not in ["asc", "desc"]:
@@ -100,7 +100,7 @@ def home():
         ]
     ):
 
-        (assets, total) = asset_service.find_assets(
+        assets, total = asset_service.find_assets(
             tag=search_params.tag,
             asset_type=search_params.asset_type,
             product_types=search_params.product_types,

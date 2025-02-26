@@ -1,11 +1,6 @@
-<h5 id="assets_count"></h5>
-<script>
-  // local format number
-  const formattedNumber = new Intl.NumberFormat('en-US').format({{ total_assets }});
-  if formattedNumber {
-    document.getElementById('assets_count').innerText = `Found ${formattedNumber} assets`;
-  }
-</script>
+{% if total_assets %}
+  <h5 id="assets_count" class="u-no-margin--bottom">Found {{ total_assets }} assets</h5>
+{% endif %}
 
 {% for asset in assets %}
   {% if asset.data.image %}
