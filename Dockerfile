@@ -1,8 +1,9 @@
 # syntax=docker/dockerfile:experimental
 
 FROM ubuntu:noble AS base-dependencies
-ENV PATH="/venv/bin:${PATH}"
 ENV LANG C.UTF-8
+WORKDIR /srv
+ADD . .
 
 # Install python and import python dependencies
 RUN apt-get update && apt-get install --no-install-recommends --yes \
@@ -22,9 +23,9 @@ RUN apt-get update && apt-get install --no-install-recommends --yes \
 # Build stage: Install python dependencies
 # ===
 FROM base-dependencies AS python-dependencies
-RUN python3 -m venv /venv
-ADD requirements.txt /tmp/requirements.txt
-RUN --mount=type=cache,target=/root/.cache/pip pip3 install --requirement /tmp/requirements.txt
+RUN --mount=type=cache,target=/root/.cache/pip python3 -m venv .venv \
+    && . .venv/bin/activate \
+    && .venv/bin/pip install -r requirements.txt
 
 # Build stage: Install yarn dependencies
 # ===
@@ -38,15 +39,14 @@ RUN --mount=type=cache,target=/usr/local/share/.cache/yarn yarn install
 FROM yarn-dependencies AS build
 RUN yarn build
 
-# Build the production image
+# Build stage: Build the production image
 # ===
-FROM base-dependencies AS production
+FROM python-dependencies AS production
 
 # Set up environment
 WORKDIR /srv
 
 # Import code, build assets and mirror list
-ADD . .
 RUN rm -rf package.json yarn.lock requirements.txt
 COPY --from=build /srv/static/css static/css
 COPY --from=build /srv/static/js/dist static/js/dist
