@@ -51,12 +51,7 @@
       </div>
       {% if details %}
         <hr class="p-rule" />
-        <p class="u-no-margin--bottom">
-          <span>Author:&nbsp;</span>
-          <button class="p-chip is-inline is-dense">
-            <span class="p-chip__value">{{ asset.author.first_name }} {{ asset.author.last_name }}</span>
-          </button>
-        </p>
+        {% include "shared/_asset-author.html" %}
         <p class="u-no-margin--bottom">
           Language: <strong>{{ asset.language }}</strong>
         </p>
@@ -67,18 +62,11 @@
           Google Drive link:  <a href="{{ asset.google_drive_link }}">{{ asset.google_drive_link }}</a>
         </p>
       {% elif created %}
-        <div class="p-section--shallow">
-          <div class="u-sv4"></div>
-        </div>
+        {% include "shared/_asset-card-actions.html" %}
         <p>
           <strong>Asset details</strong>
         </p>
-        <p class="u-no-margin--bottom">
-          <span>Author:&nbsp;</span>
-          <button class="p-chip is-inline is-dense">
-            <span class="p-chip__value">{{ asset.author.first_name }} {{ asset.author.last_name }}</span>
-          </button>
-        </p>
+        {% include "shared/_asset-author.html" %}
         <p class="u-no-margin--bottom">Created: {{ asset.created.strftime("%d %B %Y") }}</p>
         <p class="u-no-margin--bottom">
           Language: <strong>{{ asset.language }}</strong>

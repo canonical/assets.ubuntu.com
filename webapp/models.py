@@ -53,6 +53,9 @@ class Author(Base):
     last_name = Column(String, nullable=False, primary_key=True)
     email = Column(String, nullable=False, unique=True, primary_key=True)
 
+    def __str__(self):
+        return f"{self.first_name} {self.last_name}"
+
 
 class Asset(DateTimeMixin):
     __tablename__ = "asset"
