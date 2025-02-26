@@ -12,10 +12,8 @@ from PIL import Image as PillowImage
 
 # Local
 from webapp.database import db_session
-from webapp.lib.file_helpers import is_svg
 from webapp.lib.processors import ImageProcessor
 from webapp.lib.url_helpers import clean_unicode
-from webapp.models import Asset, Tag
 from webapp.lib.file_helpers import is_svg
 from webapp.models import Asset, Tag, Product, Author
 from webapp.swift import file_manager
@@ -32,9 +30,9 @@ class AssetService:
 
     def find_assets(
         self,
-        tag:str = "abc",
+        tag: str = "abc",
         asset_type: str = "image",
-        product_types: list = ["a","b"],
+        product_types: list = ["a", "b"],
         author_email: str = "abc@g.com",
         name: str = "%",
         start_date: str = "2024-01-01",
@@ -49,7 +47,7 @@ class AssetService:
     ) -> Tuple[list, int]:
         """
         Find assets that matches the given criterions
-        """    
+        """
         conditions = []
         if tag:
             conditions.append(Asset.tags.any(Tag.name == tag))
@@ -62,18 +60,20 @@ class AssetService:
         if language:
             conditions.append(Asset.language.ilike(f"{language}"))
         if salesforce_campaign_id:
-            conditions.append(Asset.salesforce_campaign_id.ilike(f"{salesforce_campaign_id}"))
-        
+            conditions.append(
+                Asset.salesforce_campaign_id.ilike(f"{salesforce_campaign_id}")
+            )
+
         if not include_deprecated:
             conditions.append(Asset.deprecated.is_(False))
-        
+
         if order_by == Asset.file_path:
             # Example: "86293d6f-FortyCloud.png" -> "FortyCloud.png"
             order_col = func.split_part(Asset.file_path, "-", 2)
         else:
             order_col = order_by
 
-        if (end_date and start_date):
+        if end_date and start_date:
             conditions.append(Asset.created.between(start_date, end_date))
         if product_types:
             conditions.append(
