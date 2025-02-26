@@ -1,15 +1,29 @@
 #! /usr/bin/env bash
 
 set -e
+export FLASK_APP=webapp.app
 
-RUN_COMMAND="talisker.gunicorn webapp.app:app --bind $1 --worker-class sync --workers 3 --name talisker-`hostname`"
+activate() {
+    # Create or activate virtualenv
+    if [ ! -d ./.venv ]; then
+        python3 -m venv .venv
+    fi
+    . ./.venv/bin/activate
+}
 
-if [ "${FLASK_DEBUG}" = true ] || [ "${FLASK_DEBUG}" = 1 ]; then
-    RUN_COMMAND="${RUN_COMMAND} --reload --log-level debug --timeout 9999"
-fi
+{
+    activate
 
-# Run migrations
-alembic upgrade head
+    RUN_COMMAND="talisker.gunicorn webapp.app:app --bind $1 --worker-class sync --workers 3 --name talisker-$(hostname)"
 
-# Start the website
-${RUN_COMMAND}
+    if [ "${FLASK_DEBUG}" = true ] || [ "${FLASK_DEBUG}" = 1 ]; then
+        RUN_COMMAND="${RUN_COMMAND} --reload --log-level debug --timeout 9999"
+    fi
+
+    # Run migrations
+    alembic upgrade head
+
+    # Start the website
+    ${RUN_COMMAND}
+
+}
