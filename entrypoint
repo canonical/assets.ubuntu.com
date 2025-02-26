@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-set -euo pipefail
+set -e
 export FLASK_APP=webapp.app
 
 activate() {
