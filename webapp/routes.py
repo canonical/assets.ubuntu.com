@@ -3,7 +3,6 @@ import re
 from distutils.util import strtobool
 from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
-import flask
 
 # Packages
 from flask import Blueprint

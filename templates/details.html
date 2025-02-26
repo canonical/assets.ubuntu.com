@@ -1,64 +1,17 @@
 {% extends "_layout.html" %}
-
 {% block title %}Asset details{% endblock %}
-
 {% block content %}
-<div class="p-strip is-shallow">
-  <div class="row">
-    <div class="col-4">
-      <h2>Asset details</h2>
-      <a href="/v1/{{ asset.file_path }}" target="_blank">
-        {% if asset.data.image %}
-          <img
-            src="/v1/{{ asset.file_path }}"
-          />
-        {% elif asset.asset_type == "whitepaper" %}
-          <img class="p-asset-card--thumbnail" src="https://assets.ubuntu.com/v1/b061c401-White+paper.svg" alt="">
-        {% else %}
-          <img class="p-asset-card--thumbnail" src="https://assets.ubuntu.com/v1/fd84bbdc-Document-open.svg" alt="">
-        {% endif %}
-      </a>
-      <p>File path:<strong>{{ asset.file_path }}</strong></p>
-      <p>Name: <strong>{{ asset.name }}</strong></p>
-      <p>File type: <strong>.{{ asset.file_path.split('.', 1)[1] }}</strong></p>
-      <p>Asset type: <strong>{{ asset.asset_type }}</strong></p>
-      {% if asset.data.image %}
-        <p>Image size: <strong>{% if asset.data.width and asset.data.height %}{{asset.data.width}} x {{asset.data.height}}{% else %}Unknown{% endif %}</strong></p>
-      {% endif %}
-      <p>
-        Products:
-        {% for product in asset.products %}
-        <strong>{{ product.name }}{% if not loop.last %},{% endif %}</strong>
-        {% endfor %}
-      </p>
-      <p>
-        Tags: 
-        {% for tag in asset.tags %}
-        <strong>{{ tag.name }}{% if not loop.last %},{% endif %}</strong>
-        {% endfor %}
-      </p>
-      <p>Language: <strong>{{ asset.language }}</strong></p>
-      <p>Salesforce campaign ID: <strong>{{ asset.salesforce_campaign_id }}</strong></p>
-      <p>Google drive link: <a href="{{ asset.google_drive_link }}">{{ asset.google_drive_link }}</a></p>
-      <p>Author email: <strong>{{ asset.author_email }}</strong></p>
-      <p>Deprecated: <strong>{{ asset.deprecated }}</strong></p>
-      <p>Created: {{ asset.created.strftime('%d %B %Y') }}</p>
-      <p>Updated: {{ asset.updated.strftime('%d %B %Y') }}</p>
-      <p style="height:100%">
-        <button
-          class="p-button--positive copy-link is-dense"
-          data-url="/v1/{{ asset.file_path }}"
-        >
-          Asset link
-        </button>
-        <a
-        class="p-button is-dense"
-        href="/manager/update?file-path={{ asset.file_path }}"
-        >
-          Edit asset
-        </a>
-      </p>
+  <div class="p-strip is-shallow">
+    <div class="u-fixed-width">
+      <div class="p-section--shallow">
+        <h1 class="p-muted-heading">Asset details</h1>
+        <hr class="p-rule" />
+      </div>
+    </div>
+    <div class="row">
+      {% with details=True %}
+        {% include "_asset-card-image.html" %}
+      {% endwith %}
     </div>
   </div>
-</div>
 {% endblock %}

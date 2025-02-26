@@ -1,0 +1,8 @@
+<p class="u-no-margin--bottom">
+    <span>Author:&nbsp;</span>
+    {% if asset.author | trim %}
+        <button class="p-chip is-inline is-dense">
+            <span class="p-chip__value">{{ asset.author.first_name }} {{ asset.author.last_name }}</span>
+        </button>
+    {% endif %}
+</p>
