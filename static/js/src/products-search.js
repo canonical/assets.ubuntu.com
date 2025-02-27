@@ -232,10 +232,6 @@ function createChip(value, parent_chips_container) {
     const dismissButton = document.createElement("button");
     dismissButton.classList.add("p-chip__dismiss");
     dismissButton.textContent = "Dismiss";
-    dismissButton.addEventListener(
-      "click",
-      removeValueFromHiddenInput(value, input_field)
-    );
     dismissButton.addEventListener("click", () => {
       removeValueFromHiddenInput(value, input_field);
       chip.remove();
