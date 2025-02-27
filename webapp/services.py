@@ -284,7 +284,9 @@ class AssetService:
         )
         db_session.add(author)
         db_session.commit()
-        return
+        return (
+            db_session.query(Author).filter_by(email=author["email"]).first()
+        )
 
     def normalize_tag_name(self, tag_name):
         return tag_name.strip().lower()
