@@ -79,7 +79,7 @@ def home():
     )
 
     if not per_page or per_page < 1 or per_page > 100:
-        per_page = 8
+        per_page = 6
     if order_by not in asset_service.order_by_fields():
         order_by = list(asset_service.order_by_fields().keys())[0]
     if order_dir not in ["asc", "desc"]:

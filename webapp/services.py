@@ -40,7 +40,7 @@ class AssetService:
         salesforce_campaign_id: str = "1234",
         language: str = "en",
         page=1,
-        per_page=8,
+        per_page=6,
         order_by=Asset.created,
         desc_order=True,
         include_deprecated=False,
