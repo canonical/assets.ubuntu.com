@@ -25,7 +25,7 @@
           </p>
         {% endif %}
         <p class="u-no-margin--bottom">
-          File type: <strong>.{{ asset.file_path.split('.', 1)[1] }}</strong>
+          File type: <strong>.{{ asset.file_type or asset.file_path.split(".")[-1].lower() }}</strong>
         </p>
         <p class="u-no-margin--bottom">
           Resolution:

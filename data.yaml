@@ -227,3 +227,11 @@ languages:
   - name: "Ukrainian"
   - name: "Vietnamese"
   - name: "Other"
+
+file_types:
+  - name: "svg"
+  - name: "png"
+  - name: "jpeg"
+  - name: "jpg"
+  - name: "gif"
+  - name: "pdf"
