@@ -5,7 +5,7 @@
     <nav class="p-pagination" aria-label="Pagination">
       <ol class="p-pagination__items u-align--right">
         <li class="p-pagination__item">
-          <a class="p-pagination__link--previous u-no-margin--bottom {{ 'is-active' if page == 1 }}"
+          <a class="p-pagination__link--previous u-no-margin--bottom {{ 'is-active is-disabled p-link--disabled' if page == 1 }}"
             href="{{ add_query_param('page', page - 1) }}">
             <i class="p-icon--chevron-down">Previous page</i>
           </a>
@@ -16,7 +16,7 @@
         </li>
         {% if page > 3 %}<li class="p-pagination__item p-pagination__item--truncation u-hide--small">…</li>{% endif %}
         {% for p in range(page - 1, page + max_pagination_items) %}
-          {% if p > 1 and p < total_pages %}
+          {% if p > 1 and p <= total_pages %}
             <li class="p-pagination__item">
               <a class="p-pagination__link u-no-margin--bottom {{ 'is-active' if page == p }}"
                 href="{{ add_query_param('page', p) }}">{{ p }}</a>
@@ -32,14 +32,12 @@
               href="{{ add_query_param('page', total_pages) }}">{{ total_pages }}</a>
           </li>
         {% endif %}
-        {% if page < total_pages %}
           <li class="p-pagination__item">
-            <a class="p-pagination__link--next u-no-margin--bottom {{ 'is-active' if page == total_pages }}"
+            <a class="p-pagination__link--next u-no-margin--bottom {{ 'is-active is-disabled p-link--disabled' if page == total_pages }}"
               href="{{ add_query_param('page', page + 1) }}">
               <i class="p-icon--chevron-down">Next page</i>
             </a>
           </li>
-        {% endif %}
         <script>
           function changePerPage(select) {
             var url = new URL(window.location.href);

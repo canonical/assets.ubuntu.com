@@ -76,3 +76,7 @@
   justify-content: space-between;
   flex-wrap: wrap
 }
+
+.p-link--disabled {
+  pointer-events: none;
+}
