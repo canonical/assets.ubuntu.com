@@ -1,124 +1,74 @@
-<form method="GET" action="/manager" class="p-form p-form--inline js-asset-search">
+<form method="GET"
+      action="/manager"
+      class="p-form p-form--inline js-asset-search">
+  <div class="u-fixed-width">
+    <h1 class="p-muted-heading">Search and filter</h1>
+    <hr class="p-rule" />
+  </div>
   {% set params = request.values.to_dict() %}
   <div class="row">
-    <div class="col-4">
-      <label for="tag">Search</label>
+    <div class="col-3">
+      <p>
+        <label for="tag">
+          <strong>Search</strong>
+        </label>
+      </p>
       <input class="js-tags" type="text" name="tag" placeholder="Search by asset name and tag(s)" id="tag" value="{%- if params.tag -%}{{ params.tag }}{%- endif -%}">
-      <button class="p-button--positive" style="margin-top:45px;">Search</button>
     </div>
-
-    <div class="col-8">
-      <div class="row">
-        <div class="col-2 js-select">
-          <label for="asset-type">Asset type</label>
-          <select name="asset_type">
-            <option value="">Any type</option>
-            {% for asset_type in data.asset_types %}
-              {% set asset_value = asset_type.name|lower|replace(' ', '-') %}
-              <option value="{{ asset_value }}" {% if asset_value in params.asset_type %}selected{% endif %} {% if asset_type.name == "-" %}disabled{% endif %}>
-                {{ asset_type.name }}
-              </option>
-            {% endfor %}
-          </select>
-        </div>
-
-        <div class="col-2 js-select">
-          <label id="language">Language</label>
-          <select
-          id="language-select"
-          aria-labelledby="language"
-          name="language">
-            <option value="">Any language</option>
-            {% for language in data.languages %}
-              <option value="{{ language.name }}" {% if language.name in params.language %}selected{% endif %}>
-                {{ language.name }}
-              </option>
-            {% endfor %}
-          </select>
-          <input type="text" class="u-hide js-language-select-hidden" name="language">
-        </div>
-
-        <div class="col-2">
-          <label>Salesforce ID number</label>
-          <input type="text" class="js-salesforce-campaign-id" id="salesforce-campaign-id-number" name="salesforce_campaign_id" placeholder="Number" value="{%- if params.salesforce_campaign_id -%}{{ params.salesforce_campaign_id }}{%- endif -%}">
-        </div>
-
-        <div class="col-2 js-select">
-          <label id="product">Product</label>
-          <select
-          id="product-select"
-          aria-labelledby="product"
-          name="product_types">
-          <option value="">Any product</option>
-            {% for product in data.products %}
-              <option value="{{ product.slug }}" {% if product.slug in params.product_types %}selected{% endif %}>
-                {{ product.name }}
-              </option>
-            {% endfor %}
-          </select>
-        </div>
-
-        <div class="col-4">
-          <div class="p-search-and-filter js-authors-search" tabindex="0">
-            <label for="author-search">Author</label>
-            <div class="p-search-and-filter__search-container" aria-expanded="false">
-              {% if params.author_email and params.author_firstname and params.author_lastname %}
-                <span class="p-chip js-author-chip" data-email="{{ params.author_email }}" data-firstname="{{ params.author_firstname }}" data-lastname="{{ params.author_lastname }}">
-                  <span class="p-chip__value js-content">{{ params.author_firstname + " " + params.author_lastname }}</span>
-                  <button class="p-chip__dismiss">Dismiss</button>
-                </span>
-              {% else %}
-                <span class="p-chip js-author-chip u-hide">
-                  <span class="p-chip__value js-content"></span>
-                  <button class="p-chip__dismiss">Dismiss</button>
-                </span>
-              {% endif %}
-              <div class="p-search-and-filter__box" data-overflowing="false">
-                <input autocomplete="off" class="p-search-and-filter__input js-authors-input" placeholder="Search authors" type="text" value="" id="author-search">
-                <input type="text" class="u-hide js-hidden-field-email" name="author_email" value="{%- if params.author_email -%}{{ params.author_email }}{%- endif -%}">
-                <input type="text" class="u-hide js-hidden-field-firstname" name="author_firstname" value="{%- if params.author_firstname -%}{{ params.author_firstname }}{%- endif -%}">
-                <input type="text" class="u-hide js-hidden-field-lastname" name="author_lastname" value="{%- if params.author_lastname -%}{{ params.author_lastname }}{%- endif -%}">
-              </div>
-            </div>
-            <div class="p-search-and-filter__panel js-chips-panel" aria-hidden="true">
-              <div class="p-filter-panel-section">
-                <div class="p-filter-panel-section__header">
-                  <h4 class="p-filter-panel-section__heading p-heading--5">Authors</h4>
-                </div>
-                <div class="p-filter-panel-section__chips js-authors-chip-container">
-                  <p><strong>No results found...</strong></p>
-                </div>
-                <template id="author-unselected-chip-template">
-                  <button class="p-chip js-unselected">
-                    <span class="p-chip__value js-content"></span>
-                  </button>
-                </template>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-3">
-          <label for="date-range">Date range</label>
-          <input type="text" id="date-range" name="start_date" placeholder="Select date..." class="js-date-picker">
-          <input type="text" class="u-hide js-hidden-field-startdate">
-          <input type="text" class="u-hide js-hidden-field-enddate">
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="p-section--shallow p-form__group">
-          <div class="p-form__control u-clearfix">
-            <label class="p-checkbox">
-              <input type="checkbox" name="include_deprecated" id="include_deprecated" class="p-checkbox__input" aria-labelledby="deprecatedLabel"
-                      {% if include_deprecated %}checked{% endif %}
-              >
-              <span class="p-checkbox__label" id="deprecatedLabel">Include deprecated</span>
-            </label>
-          </div>
-        </div>
+    <div class="col-3">
+      <div class="js-select">
+        <p>
+          <label for="asset-type">
+            <strong>Asset type</strong>
+          </label>
+        </p>
+        <select name="asset_type">
+          <option value="">All asset types</option>
+          {% for asset_type in data.asset_types %}
+            {% set asset_value = asset_type.name|lower|replace(' ', '-') %}
+            <option value="{{ asset_value }}"
+                    {% if asset_value in params.asset_type %}selected{% endif %}
+                    {% if asset_type.name == "-" %}disabled{% endif %}>{{ asset_type.name }}</option>
+          {% endfor %}
+        </select>
       </div>
     </div>
-    <hr class="p-rule" />
+    <div class="col-3">
+      <div class="js-select">
+        <p>
+          <label for="asset-type">
+            <strong>Category</strong>
+          </label>
+        </p>
+        <select id="product-select" aria-labelledby="product" name="product_types">
+          <option value="">All products or departments</option>
+          {% for product in data.products %}
+            <option value="{{ product.slug }}"
+                    {% if product.slug in params.product_types %}selected{% endif %}>{{ product.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="col-3">
+      <div class="js-select">
+        <p>
+          <label for="asset-type">
+            <strong>File type</strong>
+          </label>
+        </p>
+        <select id="product-select" aria-labelledby="product" name="file_types">
+          <option value="">All file types</option>
+          {% for file_type in data.file_types %}
+            <option value="{{ file_type.name }}"
+                    {% if file_type.name in params.file_types %}selected{% endif %}>{{ file_type.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="u-fixed-width" style="margin-top: 36px;">
+    <div class="u-align--right">
+      <button type="submit" class="p-button--positive">Search</button>
+    </div>
   </div>
 </form>

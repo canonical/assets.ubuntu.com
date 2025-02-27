@@ -1,7 +1,3 @@
-{% if total_assets %}
-  <h5 id="assets_count" class="u-no-margin--bottom">Found {{ total_assets }} assets</h5>
-{% endif %}
-
 {% for asset in assets %}
   {% include "_asset-card-image.html" %}
 {% endfor %}
