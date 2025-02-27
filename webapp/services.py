@@ -6,7 +6,7 @@ from typing import Tuple
 from io import BytesIO
 
 # Packages
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from typing import List
 from PIL import Image as PillowImage
 
@@ -50,7 +50,12 @@ class AssetService:
         """
         conditions = []
         if tag:
-            conditions.append(Asset.tags.any(Tag.name == tag))
+            conditions.append(
+                or_(
+                    Asset.tags.any(Tag.name == tag),
+                    Asset.file_path.ilike(f"%{tag}%"),
+                )
+            )
         if asset_type:
             conditions.append(Asset.asset_type == asset_type)
         if author_email:
