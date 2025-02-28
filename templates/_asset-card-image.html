@@ -9,9 +9,19 @@
           <a href="{% if details or created %}/v1/{{ asset.file_path }}{% else %}/manager/details?file-path={{ asset.file_path }}{% endif %}"
              target="{% if details or created %}_blank{% else %}_self{% endif %}">
             <div class="p-asset-card-image__container {% if asset.deprecated %}is-deprecated{% endif %}">
+              {% if asset.data.image %}
               <img class="p-asset-card--thumbnail"
                    alt=""
-                   src="{% if asset.data.image %}/v1/{{ asset.file_path }}{% elif asset.asset_type == 'whitepaper' %}https://assets.ubuntu.com/v1/b061c401-White+paper.svg{% else %}https://assets.ubuntu.com/v1/fd84bbdc-Document-open.svg {% endif %}">
+                   src="/v1/{{ asset.file_path }}" />
+              {% elif asset.asset_type == 'whitepaper' %}
+              <img class="p-asset-card--thumbnail-small"
+                   alt=""
+                   src="https://assets.ubuntu.com/v1/b061c401-White+paper.svg" />     
+              {% else %}
+              <img class="p-asset-card--thumbnail-small"
+                   alt=""
+                   src="https://assets.ubuntu.com/v1/fd84bbdc-Document-open.svg" />
+              {% endif %}
             </div>
           </a>
         </div>
