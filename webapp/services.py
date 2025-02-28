@@ -53,7 +53,9 @@ class AssetService:
             conditions.append(
                 or_(
                     Asset.tags.any(Tag.name == tag),
+                    Asset.products.any(Product.name == tag),
                     Asset.name.ilike(f"%{tag}%"),
+                    Asset.file_path.ilike(f"%{tag}%"),
                 )
             )
         if asset_type:
