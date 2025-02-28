@@ -34,7 +34,6 @@ class AssetService:
         asset_type: str = "image",
         product_types: list = ["a", "b"],
         author_email: str = "abc@g.com",
-        name: str = "%",
         start_date: str = "2024-01-01",
         end_date: str = "2024-10-14",
         salesforce_campaign_id: str = "1234",
@@ -53,15 +52,13 @@ class AssetService:
             conditions.append(
                 or_(
                     Asset.tags.any(Tag.name == tag),
-                    Asset.file_path.ilike(f"%{tag}%"),
+                    Asset.name.ilike(f"%{tag}%"),
                 )
             )
         if asset_type:
             conditions.append(Asset.asset_type == asset_type)
         if author_email:
             conditions.append(Asset.author_email == author_email)
-        if name:
-            conditions.append(Asset.name.ilike(f"%{name}%"))
         if language:
             conditions.append(Asset.language.ilike(f"{language}"))
         if salesforce_campaign_id:
