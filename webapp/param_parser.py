@@ -18,4 +18,5 @@ def parse_asset_search_params() -> AssetSearchParams:
             "salesforce_campaign_id", ""
         ).strip(),
         language=request.args.get("language", "").strip(),
+        file_types=request.args.getlist("file_types") or [],
     )

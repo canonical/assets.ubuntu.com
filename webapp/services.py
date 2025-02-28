@@ -43,6 +43,7 @@ class AssetService:
         order_by=Asset.created,
         desc_order=True,
         include_deprecated=False,
+        file_types: list = ["a", "b"],
     ) -> Tuple[list, int]:
         """
         Find assets that matches the given criterions
@@ -81,6 +82,9 @@ class AssetService:
             conditions.append(
                 Asset.products.any(Product.name.in_(product_types))
             )
+
+        if file_types:
+            conditions.append(Asset.file_type.in_(file_types))
 
         assets_query = (
             db_session.query(Asset)
@@ -205,6 +209,7 @@ class AssetService:
             salesforce_campaign_id=salesforce_campaign_id,
             language=language,
             deprecated=deprecated,
+            file_type=url_path.split(".")[-1].lower(),
         )
         db_session.add(asset)
         db_session.commit()

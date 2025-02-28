@@ -95,6 +95,7 @@ def home():
             search_params.end_date,
             search_params.salesforce_campaign_id,
             search_params.language,
+            search_params.file_types,
         ]
     ):
 
@@ -112,6 +113,7 @@ def home():
             order_by=asset_service.order_by_fields()[order_by],
             desc_order=order_dir == "desc",
             include_deprecated=include_deprecated,
+            file_types=search_params.file_types,
         )
     else:
         assets = []

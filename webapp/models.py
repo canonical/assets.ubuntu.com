@@ -78,6 +78,7 @@ class Asset(DateTimeMixin):
         secondary=asset_product_association_table,
         back_populates="assets",
     )
+    file_type = Column(String, nullable=True)
     deprecated = Column(Boolean, nullable=False, default=False)
 
     def as_json(self):
@@ -106,6 +107,7 @@ class Asset(DateTimeMixin):
             "google_drive_link": self.google_drive_link,
             "salesforce_campaign_id": self.salesforce_campaign_id,
             "language": self.language,
+            "file_type": self.file_type,
         }
 
 
