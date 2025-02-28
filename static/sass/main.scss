@@ -17,15 +17,22 @@
   object-position: top;
 }
 
-.p-asset-card-image__container {    
+.p-asset-card--thumbnail--small {
+  max-width: 30%;
+  max-height: 30%;
+  object-fit: scale-down;
+  object-position: center;
+}
+
+.p-asset-card-image__container {
   position: relative;
   min-height: 200px;
-  max-height: 200px;  
+  max-height: 200px;
   overflow: hidden;
   display: grid;
   place-items: center;
 
-  &.is-deprecated img{
+  &.is-deprecated img {
     opacity: 0.5;
   }
 
@@ -69,18 +76,22 @@
 }
 
 .p-asset-card {
-  padding:0.75rem;
-  background:#f7f7f7;
-  margin-top:2rem;
+  padding: 0.75rem;
+  background: #f7f7f7;
+  margin-top: 2rem;
 }
 
 .p-asset-created-details__header {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  flex-wrap: wrap
+  flex-wrap: wrap;
 }
 
 .p-link--disabled {
   pointer-events: none;
+}
+
+.added-chips {
+  background-color: #f7f7f7;
 }
