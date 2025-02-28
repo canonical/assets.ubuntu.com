@@ -1,7 +1,5 @@
 {% extends "_layout.html" %}
-
 {% block title %}Create assets{% endblock %}
-
 {% block content %}
 
 {% set is_update = request.path == "/manager/update" %}
@@ -218,5 +216,47 @@
     </div>
   </form>
 </div>
-
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const form = document.querySelector('.js-create-update-form');
+    const formElements = form.querySelectorAll("input, select, textarea");
+  
+    function saveFormData() {
+      const formData = {};
+      formElements.forEach(element => {
+        if (element.name === "assets" || element.name === "search"){
+          return; // Skip
+        }
+        if (element.name) {
+          formData[element.name] = element.value;
+        } else if (element.id) {
+          if (element.type === 'select-multiple') {
+            // Handle multiple select - store array of selected values
+            formData[element.id] = Array.from(element.selectedOptions)
+              .map(option => option.value);
+          } else {
+            formData[element.id] = element.value;
+          }
+        }
+      });
+      sessionStorage.setItem('formData', JSON.stringify(formData));
+    }
+    form.addEventListener('submit', saveFormData);
+  
+    const storedFormData = sessionStorage.getItem('formData');
+    if (!storedFormData) return;
+    const formData = JSON.parse(storedFormData);
+    formElements.forEach(element => {
+      if (element.name && formData[element.name] !== undefined) {
+        element.value = formData[element.name];
+      } else if (element.id && formData[element.id] !== undefined){
+        if (element.type === 'select-multiple' && Array.isArray(formData[element.name])) {
+          for (const option of element.options) {
+            option.selected = formData[element.name].includes(option.value);
+          }
+        }
+      }
+    });
+  });
+</script>
 {% endblock %}
