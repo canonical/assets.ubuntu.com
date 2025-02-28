@@ -2,8 +2,8 @@
   {% set params = request.values.to_dict() %}
   <div class="row">
     <div class="col-4">
-      <label for="tag">Tag</label>
-      <input class="js-tags" type="text" name="tag" placeholder="Tag" id="tag" value="{%- if params.tag -%}{{ params.tag }}{%- endif -%}">
+      <label for="tag">Search</label>
+      <input class="js-tags" type="text" name="tag" placeholder="Search by asset name and tag(s)" id="tag" value="{%- if params.tag -%}{{ params.tag }}{%- endif -%}">
       <button class="p-button--positive" style="margin-top:45px;">Search</button>
     </div>
 
