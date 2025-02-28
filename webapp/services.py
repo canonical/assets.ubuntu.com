@@ -277,12 +277,12 @@ class AssetService:
         if existing_author:
             return existing_author
 
-        author = Author(
+        author_data = Author(
             first_name=author["first_name"],
             last_name=author["last_name"],
             email=author["email"],
         )
-        db_session.add(author)
+        db_session.add(author_data)
         db_session.commit()
         return (
             db_session.query(Author).filter_by(email=author["email"]).first()

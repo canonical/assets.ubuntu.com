@@ -17,6 +17,13 @@
   object-position: top;
 }
 
+.p-asset-card--thumbnail--small {
+  max-width: 30%;
+  max-height: 30%;
+  object-fit: scale-down;
+  object-position: center;
+}
+
 .p-asset-card-image__container {    
   position: relative;
   min-height: 200px;
