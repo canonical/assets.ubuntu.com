@@ -13,16 +13,17 @@
 .p-asset-card--thumbnail {
   max-width: 100%;
   max-height: 100%;
+  object-fit: scale-down;
+  object-position: top;
 }
 
-.p-asset-card-image__container {
-  display: flex;           
-  justify-content: center;  
-  align-items: center;     
+.p-asset-card-image__container {    
   position: relative;
   min-height: 200px;
   max-height: 200px;  
   overflow: hidden;
+  display: grid;
+  place-items: center;
 
   &.is-deprecated img{
     opacity: 0.5;
@@ -30,6 +31,9 @@
 
   &.is-deprecated::after {
     position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     content: "Deprecated asset";
     width: max-content;
     padding: 0.8rem;
