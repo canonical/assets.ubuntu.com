@@ -47,7 +47,7 @@
                 <select id="asset-type-select" aria-label="Required field: Select asset type" required>
                   {% for asset_type in data.asset_types %}
                     {% set asset_value = asset_type.name|lower|replace(' ', '-') %}
-                    <option value="{{ asset_value }}" {% if asset and asset_value in asset.asset_type %}selected{% endif %} {% if asset_type.name == "-" %}disabled{% endif %}>
+                    <option value="{{ asset_value }}" {% if (asset and asset_value in asset.asset_type) or (form_session_data and asset_value in form_session_data.asset_type) %}selected{% endif %} {% if asset_type.name == "-" %}disabled{% endif %}>
                       {{ asset_type.name }}
                     </option>
                   {% endfor %}
@@ -216,47 +216,4 @@
     </div>
   </form>
 </div>
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const form = document.querySelector('.js-create-update-form');
-    const formElements = form.querySelectorAll("input, select, textarea");
-  
-    function saveFormData() {
-      const formData = {};
-      formElements.forEach(element => {
-        if (element.name === "assets" || element.name === "search"){
-          return; // Skip
-        }
-        if (element.name) {
-          formData[element.name] = element.value;
-        } else if (element.id) {
-          if (element.type === 'select-multiple') {
-            // Handle multiple select - store array of selected values
-            formData[element.id] = Array.from(element.selectedOptions)
-              .map(option => option.value);
-          } else {
-            formData[element.id] = element.value;
-          }
-        }
-      });
-      sessionStorage.setItem('formData', JSON.stringify(formData));
-    }
-    form.addEventListener('submit', saveFormData);
-  
-    const storedFormData = sessionStorage.getItem('formData');
-    if (!storedFormData) return;
-    const formData = JSON.parse(storedFormData);
-    formElements.forEach(element => {
-      if (element.name && formData[element.name] !== undefined) {
-        element.value = formData[element.name];
-      } else if (element.id && formData[element.id] !== undefined){
-        if (element.type === 'select-multiple' && Array.isArray(formData[element.name])) {
-          for (const option of element.options) {
-            option.selected = formData[element.name].includes(option.value);
-          }
-        }
-      }
-    });
-  });
-</script>
 {% endblock %}
