@@ -1,218 +1,295 @@
 {% extends "_layout.html" %}
 {% block title %}Create assets{% endblock %}
 {% block content %}
-
-{% set is_update = request.path == "/manager/update" %}
-<div class="p-strip">
-  <form method="POST" enctype="multipart/form-data" id="create-update-asset">
-    <div class="u-fixed-width">
-      <h1 class="p-text--small-caps">Upload Asset(s)</h1>
-      <hr class="p-rule" />
-      <div class="p-section">
-        <div class="row--50-50">
-          <div class="col"> 
+  {% set is_update = request.path == "/manager/update" %}
+  <div class="p-strip">
+    <form method="post" enctype="multipart/form-data" id="create-update-asset">
+      <div class="u-fixed-width">
+        <h1 class="p-text--small-caps">Upload Asset(s)</h1>
+        <hr class="p-rule" />
+        <div class="p-section">
+          <div class="row--50-50">
+            <div class="col">
               <h2>Add a file and fill in mandatory information</h2>
-          </div>
-          <div class="col">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-            <div class="p-section--shallow">
-              {% if is_update %}
+            </div>
+            <div class="col">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
               <div class="p-section--shallow">
-                <h3>{{ asset.file_path}}</h3>
-                  <a href="/v1/{{ asset.file_path }}" target="_blank">
-                    {% if asset.data.image %}
-                      <img
-                        src="/v1/{{ asset.file_path }}"
-                      />
-                    {% elif asset.asset_type == "whitepaper" %}
-                      <img class="p-asset-card--thumbnail-small" src="https://assets.ubuntu.com/v1/b061c401-White+paper.svg" alt="" >
-                    {% else %}
-                      <img class="p-asset-card--thumbnail-small" src="https://assets.ubuntu.com/v1/fd84bbdc-Document-open.svg" alt="">
-                    {% endif %}
-                  </a>
-                </p>
-                <label for="depracted" class="p-heading--5">Deprecated:</label>
-                <input type="checkbox" name="deprecated" {% if asset.deprecated %}checked{% endif %}>
-              </div>
+                {% if is_update %}
+                  <div class="p-section--shallow">
+                    <h3>{{ asset.file_path }}</h3>
+                    <a href="/v1/{{ asset.file_path }}" target="_blank">
+                      {% if asset.data.image %}
+                        <img src="/v1/{{ asset.file_path }}" />
+                      {% elif asset.asset_type == "whitepaper" %}
+                        <img class="p-asset-card--thumbnail-small"
+                             src="https://assets.ubuntu.com/v1/b061c401-White+paper.svg"
+                             alt="">
+                      {% else %}
+                        <img class="p-asset-card--thumbnail-small"
+                             src="https://assets.ubuntu.com/v1/fd84bbdc-Document-open.svg"
+                             alt="">
+                      {% endif %}
+                    </a>
+                  </p>
+                  <label for="depracted" class="p-heading--5">Deprecated:</label>
+                  <input type="checkbox"
+                         name="deprecated"
+                         {% if asset.deprecated %}checked{% endif %}>
+                </div>
               {% else %}
                 <label class="p-heading--5 u-no-margin--bottom">Choose file(s) to upload</label>
                 <p class="u-text--muted u-no-padding--top">Note: Same asset cannot be re-uploaded</p>
-                <input id="input-files" type="file" multiple name="assets" aria-label="Choose files to upload" required />
+                <input id="input-files"
+                       type="file"
+                       multiple
+                       name="assets"
+                       aria-label="Choose files to upload"
+                       required />
               {% endif %}
             </div>
             <div class="p-section--shallow">
               <div class="js-multiselect">
                 <label class="p-heading--5 u-no-margin--bottom" id="asset-type">Type of Asset</label>
                 <p class="u-text--muted u-no-padding--top">Choose the most relevant type</p>
-                <select id="asset-type-select" aria-label="Required field: Select asset type" required>
-                  {% for asset_type in data.asset_types %}
+                <select id="asset-type-select"
+                        aria-label="Required field: Select asset type"
+                        required>
+                  {% for asset_type in form_field_data.asset_types %}
                     {% set asset_value = asset_type.name|lower|replace(' ', '-') %}
-                    <option value="{{ asset_value }}" {% if (asset and asset_value in asset.asset_type) or (form_session_data and asset_value in form_session_data.asset_type) %}selected{% endif %} {% if asset_type.name == "-" %}disabled{% endif %}>
-                      {{ asset_type.name }}
-                    </option>
+                    <option value="{{ asset_value }}"
+                            {% if (asset and asset_value in asset.asset_type) or (form_session_data and asset_value in form_session_data.asset_type) %}selected{% endif %}
+                            {% if asset_type.name == "-" %}disabled{% endif %}>{{ asset_type.name }}</option>
                   {% endfor %}
                 </select>
                 <input type="text" class="u-hide js-hidden-field" name="asset_type" value="">
               </div>
             </div>
-              <div class="p-section--shallow" data-name="assetName" tabindex="0">
-                <label class="p-heading--5 u-no-margin--bottom" id="asset-name">Asset name</label>
-                <p class="u-text--muted u-no-padding--top">Use the relevant naming convention</p>
-                <input type="text" id="name" name="name" placeholder="A name you could easily search for " aria-labelledby="asset-name" value="{% if asset %}{{ asset.name }}{% endif %}">
-              </div>
-              <div class="p-section--shallow" data-name="assetTags">
-                {% set existing_tags = [] %}
-                {% if asset %}
-                  {% for tag in asset.tags %}
-                    {% set _ = existing_tags.append(tag.name) %}
-                  {% endfor %}
-                {% endif %}
-                  <label class="p-heading--5 u-no-margin--bottom" id="asset-tags">Asset Tags</label>
-                  <p class="u-text--muted u-no-padding--top">Add tags that will help you search and find the asset</p>
-                  <div class="add-and-edit-chips">
-                    <div class="added-chips">
-                    {% for tag in existing_tags %}
-                      <span class="u-hide">{{tag}}</span>
-                    {% endfor %}
-                    </div>
-                    <div class="add-chips-input">
-                      <input type="text" id="assets-chips-input" placeholder="Enter tag and press enter, use cross to remove" autofocus />
-                      <input type="text" class="u-hide js-hidden-field" name="tags" value="">
-                    </div>
-                  </div>
-              </div>
-              <div class="p-section--shallow" data-name="productTags">
-                {% set existing_products = [] %}
-                {% if asset %}
-                  {% for product in asset.products %}
-                    {% set _ = existing_products.append(product.name) %}
-                  {% endfor %}
-                {% endif %}
-                <div class="p-search-and-filter js-products-search" tabindex="0">
-                  <label class="p-heading--5 u-no-margin--bottom" id="product-tags">Product or departmental tags</label>
-                  <p class="u-text--muted u-no-padding--top">Add tags for the product or department of the asset</p>
-                  <div class="p-search-and-filter__search-container" aria-expanded="false">
-                    {% for product in data.products %}
-                      <span class="p-chip js-{{ product.slug }}-chip js-selected {% if product.slug not in existing_products %}u-hide{% endif %}" data-id="{{ product.slug }}">
-                        <span class="p-chip__value">{{ product.name }}</span>
-                        <button class="p-chip__dismiss">Dismiss</button>
-                      </span>
-                    {% endfor %}
-                    <div class="p-search-and-filter__box" data-overflowing="false">
-                      <label class="u-hide" for="search">Search products</label>
-                      <input autocomplete="off" class="p-search-and-filter__input js-search-input" id="search" placeholder="Start typing a product name or Department" type="text" value="" aria-labelledby="product-tags">
-                      <input type="text" class="u-hide js-hidden-field" name="products" value="">
-                    </div>
-                  </div>
-                  <div class="p-search-and-filter__panel js-chips-panel" aria-hidden="true">
-                    <div class="p-filter-panel-section">
-                      <div class="p-filter-panel-section__header">
-                        <h4 class="p-filter-panel-section__heading p-heading--5">Tags</h4>
-                      </div>
-                      <div class="p-filter-panel-section__chips">
-                        {% for product in data.products %}
-                        <button class="p-chip js-{{ product.slug }}-chip js-unselected {% if product.slug in existing_products %}u-hide{% endif %}" id="{{ product.slug }}" data-name="{{ product.name }}">
-                          <span class="p-chip__value">{{ product.name }}</span>
-                        </button>
-                        {% endfor %}
-                        <p class="js-no-results u-no-margin--bottom u-hide"><strong>No results found...</strong></p>
-                      </div>
-                    </div>
-                  </div>
+            <div class="p-section--shallow" data-name="assetName" tabindex="0">
+              <label class="p-heading--5 u-no-margin--bottom" id="asset-name">Asset name</label>
+              <p class="u-text--muted u-no-padding--top">Use the relevant naming convention</p>
+              <input type="text"
+                     id="name"
+                     name="name"
+                     placeholder="A name you could easily search for "
+                     aria-labelledby="asset-name"
+                     value="{% if asset %}{{ asset.name }}{% endif %}">
+            </div>
+            <div class="p-section--shallow" data-name="assetTags">
+              {% set existing_tags = [] %}
+              {% if asset %}
+                {% for tag in asset.tags %}
+                  {% set _ = existing_tags.append(tag.name) %}
+                {% endfor %}
+              {% endif %}
+              <label class="p-heading--5 u-no-margin--bottom" id="asset-tags">Asset Tags</label>
+              <p class="u-text--muted u-no-padding--top">Add tags that will help you search and find the asset</p>
+              <div class="add-and-edit-chips">
+                <div class="added-chips">
+                  {% for tag in existing_tags %}<span class="u-hide">{{ tag }}</span>{% endfor %}
+                </div>
+                <div class="add-chips-input">
+                  <input type="text"
+                         id="assets-chips-input"
+                         placeholder="Enter tag and press enter, use cross to remove"
+                         autofocus />
+                  <input type="text" class="u-hide js-hidden-field" name="tags" value="">
                 </div>
               </div>
-              <div data-name="author">
-                <label class="p-heading--5 u-no-margin--bottom" id="author">Author</label>
-                <p class="u-text--muted u-no-padding--top">Name of the author of the file</p>
-                <div class="p-search-and-filter js-authors-search" tabindex="0">
-                  <div class="p-search-and-filter__search-container" aria-expanded="false">
-                    <span class="p-chip js-author-chip u-hide" data-email="" data-firstname="" data-lastname="">
-                      <span class="p-chip__value js-content"></span>
+            </div>
+            <div class="p-section--shallow" data-name="productTags">
+              {% set existing_products = [] %}
+              {% if asset and asset.products | length %}
+                {% for product in asset.products %}
+                  {% set _ = existing_products.append(product.name) %}
+                {% endfor %}
+              {% elif form_session_data and form_session_data.products | length %}
+                {% for product in form_session_data.products %}
+                  {% set _ = existing_products.append(product) %}
+                {% endfor %}
+              {% endif %}
+              <div class="p-search-and-filter js-products-search" tabindex="0">
+                <label class="p-heading--5 u-no-margin--bottom" id="product-tags">Product or departmental tags</label>
+                <p class="u-text--muted u-no-padding--top">Add tags for the product or department of the asset</p>
+                <div class="p-search-and-filter__search-container" aria-expanded="false">
+                  {% for product in form_field_data.products %}
+                    <span class="p-chip js-{{ product.slug }}-chip js-selected {% if product.slug not in existing_products %}u-hide{% endif %}"
+                          data-id="{{ product.slug }}">
+                      <span class="p-chip__value">{{ product.name }}</span>
                       <button class="p-chip__dismiss">Dismiss</button>
                     </span>
-                    {% if asset and asset.author.email %}
-                      <span class="p-chip js-chip" data-email="{{ asset.author.email }}" data-firstname="{{ asset.author.first_name }}" data-lastname="{{ asset.author.last_name }}">
-                        <span class="p-chip__value js-value">{{ asset.author.first_name + " " + asset.author.last_name }}</span>
-                        <button class="p-chip__dismiss">Dismiss</button>
-                      </span>
-                    {% endif %}
-                    <div class="p-search-and-filter__box" data-overflowing="false">
-                      <label class="u-hide" for="search">Search authors</label>
-                      <input autocomplete="off" class="p-search-and-filter__input js-authors-input" placeholder="Start typing the name of a Canonical Team-member" type="text" value="" aria-labelledby="author">
-                      <input type="text" class="u-hide js-hidden-field-email" name="author_email" value="{% if asset and asset.author.email %}{{ asset.author.email }}{% endif %}">
-                      <input type="text" class="u-hide js-hidden-field-firstname" name="author_first_name" value="{% if asset and asset.author.first_name %}{{ asset.author.first_name }}{% endif %}">
-                      <input type="text" class="u-hide js-hidden-field-lastname" name="author_last_name" value="{% if asset and asset.author.last_name %}{{ asset.author.last_name }}{% endif %}">
-                      <button alt="search" class="u-off-screen" type="submit">Search</button>
-                    </div>
+                  {% endfor %}
+                  <div class="p-search-and-filter__box" data-overflowing="false">
+                    <label class="u-hide" for="search">Search products</label>
+                    <input autocomplete="off"
+                           class="p-search-and-filter__input js-search-input"
+                           id="search"
+                           placeholder="Start typing a product name or Department"
+                           type="text"
+                           value=""
+                           aria-labelledby="product-tags">
+                    <input type="text" class="u-hide js-hidden-field" name="products" value="">
                   </div>
-                  <div class="p-search-and-filter__panel js-chips-panel" aria-hidden="true">
-                    <div class="p-filter-panel-section">
-                      <div class="p-filter-panel-section__header">
-                        <h4 class="p-filter-panel-section__heading p-heading--5">Authors</h4>
-                      </div>
-                      <div class="p-filter-panel-section__chips js-authors-chip-container" aria-expanded="false">
-                        <p><strong>No results found...</strong></p>
-                      </div>
-                      <template id="author-unselected-chip-template">
-                        <button class="p-chip js-unselected">
-                          <span class="p-chip__value js-content"></span>
+                </div>
+                <div class="p-search-and-filter__panel js-chips-panel" aria-hidden="true">
+                  <div class="p-filter-panel-section">
+                    <div class="p-filter-panel-section__header">
+                      <h4 class="p-filter-panel-section__heading p-heading--5">Tags</h4>
+                    </div>
+                    <div class="p-filter-panel-section__chips">
+                      {% for product in form_field_data.products %}
+                        <button class="p-chip js-{{ product.slug }}-chip js-unselected {% if product.slug in existing_products %}u-hide{% endif %}"
+                                id="{{ product.slug }}"
+                                data-name="{{ product.name }}">
+                          <span class="p-chip__value">{{ product.name }}</span>
                         </button>
-                      </template>
+                      {% endfor %}
+                      <p class="js-no-results u-no-margin--bottom u-hide">
+                        <strong>No results found...</strong>
+                      </p>
                     </div>
                   </div>
                 </div>
               </div>
-          </div>
-        </div>
-    </div>
-    <hr class="p-rule" />
-    <div class="p-section">
-      <div class="row--50-50">
-        <div class="col">
-          <h2>Add optional information</h2>
-        </div>
-        <div class="col">
-          <div class="p-section--shallow" data-name="googleDriveLink">
-            <label class="p-heading--5 u-no-margin--bottom">Google Drive link</label>
-            <p class="u-text--muted u-no-padding--top">Add the URL to the asset on Google Drive, for example a link to a copydoc</p>
-            <input type="text" id="google-drive-link" name="google_drive_link" placeholder="If applicable" value="{% if asset and asset.google_drive_link %}{{ asset.google_drive_link }}{% endif %}">
-          </div>
-          <div class="p-section--shallow" data-name="salesforceCampaignId">
-            <label class="p-heading--5 u-no-margin--bottom">Salesforce campaign ID number</label>
-            <p class="u-text--muted u-no-padding--top">Add the four-digit number of campaign</p>
-            <input type="text" id="salesforce-campaign-id-number" name="salesforce_campaign_id" placeholder="If Applicable" value="{% if asset and asset.salesforce_campaign_id %}{{ asset.salesforce_campaign_id }}{% endif %}">
-          </div>
-          <div class="p-section--shallow js-multiselect" data-name="language">
-            <label class="p-heading--5 u-no-margin--bottom" id="language">Language</label>
-            <p class="u-text--muted u-no-padding--top">Choose the primary language</p>
-            <select
-            id="language-select"
-            aria-labelledby="language"
-            multiple>
-              {% for language in data.languages %}
-                <option value="{{ language.name }}" {% if asset and language.name in asset.language %}selected{% endif %} {% if language.name == "-" %}disabled{% endif %}>
-                  {{ language.name }}
-                </option>
-              {% endfor %}
-            </select>
-            <input type="text" class="u-hide js-hidden-field" name="language">
+            </div>
+            {% if asset and email and first_name and asset.author.last_name %}
+              {% set email = email %}
+              {% set first_name = first_name %}
+              {% set last_name = asset.author.last_name %}
+            {% elif form_session_data and form_session_data.author_email and form_session_data.author_first_name and form_session_data.author_last_name %}
+              {% set email = form_session_data.author_email %}
+              {% set first_name = form_session_data.author_first_name %}
+              {% set last_name = form_session_data.author_last_name %}
+            {% endif %}
+            <div data-name="author">
+              <label class="p-heading--5 u-no-margin--bottom" id="author">Author</label>
+              <p class="u-text--muted u-no-padding--top">Name of the author of the file</p>
+              <div class="p-search-and-filter js-authors-search" tabindex="0">
+                <div class="p-search-and-filter__search-container" aria-expanded="false">
+                  <span class="p-chip js-author-chip u-hide"
+                        data-email=""
+                        data-firstname=""
+                        data-lastname="">
+                    <span class="p-chip__value js-content"></span>
+                    <button class="p-chip__dismiss">Dismiss</button>
+                  </span>
+                  {% if email and first_name and last_name %}
+                    <span class="p-chip js-chip"
+                          data-email="{{ email }}"
+                          data-firstname="{{ first_name }}"
+                          data-lastname="{{ last_name}}">
+                      <span class="p-chip__value js-value">{{ first_name + " " + last_name}}</span>
+                      <button class="p-chip__dismiss">Dismiss</button>
+                    </span>
+                  {% endif %}
+                  <div class="p-search-and-filter__box" data-overflowing="false">
+                    <label class="u-hide" for="search">Search authors</label>
+                    <input autocomplete="off"
+                           class="p-search-and-filter__input js-authors-input"
+                           placeholder="Start typing the name of a Canonical Team-member"
+                           type="text"
+                           value=""
+                           aria-labelledby="author">
+                    <input type="text"
+                           class="u-hide js-hidden-field-email"
+                           name="author_email"
+                           value="{% if email %}{{ email }}{% endif %}">
+                    <input type="text"
+                           class="u-hide js-hidden-field-firstname"
+                           name="author_first_name"
+                           value="{% if first_name %}{{ first_name }}{% endif %}">
+                    <input type="text"
+                           class="u-hide js-hidden-field-lastname"
+                           name="author_last_name"
+                           value="{% if last_name%}{{ last_name}}{% endif %}">
+                    <button alt="search" class="u-off-screen" type="submit">Search</button>
+                  </div>
+                </div>
+                <div class="p-search-and-filter__panel js-chips-panel" aria-hidden="true">
+                  <div class="p-filter-panel-section">
+                    <div class="p-filter-panel-section__header">
+                      <h4 class="p-filter-panel-section__heading p-heading--5">Authors</h4>
+                    </div>
+                    <div class="p-filter-panel-section__chips js-authors-chip-container"
+                         aria-expanded="false">
+                      <p>
+                        <strong>No results found...</strong>
+                      </p>
+                    </div>
+                    <template id="author-unselected-chip-template">
+                      <button class="p-chip js-unselected">
+                        <span class="p-chip__value js-content"></span>
+                      </button>
+                    </template>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    <hr class="p-rule" />
-    <div class="p-section--deep">
-      <div class="row--50-50">
-        <div class="col">
-          <h2>Check the information is correct</h2>
-        </div>
-        <div class="col">
-          <div class="p-strip is-shallow">
-          <button class="p-button--positive" type="submit">{% if is_update %}Update{% else %}Upload{% endif %} asset</button>
-        </div>  
-        </div>
+      <hr class="p-rule" />
+      <div class="p-section">
+        <div class="row--50-50">
+          <div class="col">
+            <h2>Add optional information</h2>
           </div>
-    </div>
+          <div class="col">
+            <div class="p-section--shallow" data-name="googleDriveLink">
+              <label class="p-heading--5 u-no-margin--bottom">Google Drive link</label>
+              <p class="u-text--muted u-no-padding--top">
+                Add the URL to the asset on Google Drive, for example a link to a copydoc
+              </p>
+              <input type="text"
+                     id="google-drive-link"
+                     name="google_drive_link"
+                     placeholder="If applicable"
+                     value="{% if asset and asset.google_drive_link %}{{ asset.google_drive_link }}{% endif %}">
+            </div>
+            <div class="p-section--shallow" data-name="salesforceCampaignId">
+              <label class="p-heading--5 u-no-margin--bottom">Salesforce campaign ID number</label>
+              <p class="u-text--muted u-no-padding--top">Add the four-digit number of campaign</p>
+              <input type="text"
+                     id="salesforce-campaign-id-number"
+                     name="salesforce_campaign_id"
+                     placeholder="If Applicable"
+                     value="{% if asset and asset.salesforce_campaign_id %}{{ asset.salesforce_campaign_id }}{% endif %}">
+            </div>
+            <div class="p-section--shallow js-multiselect" data-name="language">
+              <label class="p-heading--5 u-no-margin--bottom" id="language">Language</label>
+              <p class="u-text--muted u-no-padding--top">Choose the primary language</p>
+              <select id="language-select" aria-labelledby="language" multiple>
+                {% for language in form_field_data.languages %}
+                  <option value="{{ language.name }}"
+                          {% if asset and language.name in asset.language %}selected{% endif %}
+                          {% if language.name == "-" %}disabled{% endif %}>{{ language.name }}</option>
+                {% endfor %}
+              </select>
+              <input type="text" class="u-hide js-hidden-field" name="language">
+            </div>
+          </div>
+        </div>
+      </div>
+      <hr class="p-rule" />
+      <div class="p-section--deep">
+        <div class="row--50-50">
+          <div class="col">
+            <h2>Check the information is correct</h2>
+          </div>
+          <div class="col">
+            <div class="p-strip is-shallow">
+              <button class="p-button--positive" type="submit">
+                {% if is_update %}
+                  Update
+                {% else %}
+                  Upload
+                {% endif %}
+                asset
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </form>
 </div>

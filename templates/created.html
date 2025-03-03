@@ -47,7 +47,11 @@
             </div>
           </div>
         </div>
-        <div class="row">{% include "_asset-list.html" %}</div>
+        <div class="u-fixed-width">
+          <ul class="p-list">
+            {% for asset in assets %}<li class="p-list__item">{{ asset.file_path }}{% if asset.error %} :{{ asset.error }}{% endif %}</li>{% endfor %}
+          </ul>
+        </div>
       </div>
     {% endif %}
   </div>

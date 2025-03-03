@@ -1,4 +1,4 @@
-<form method="GET"
+<form method="get"
       action="/manager"
       class="p-form p-form--inline js-asset-search">
   <div class="u-fixed-width">
@@ -13,7 +13,12 @@
           <strong>Search</strong>
         </label>
       </p>
-      <input class="js-tags" type="text" name="tag" placeholder="Search asset name, file name, tag(s)" id="tag" value="{%- if params.tag -%}{{ params.tag }}{%- endif -%}">
+      <input class="js-tags"
+             type="text"
+             name="tag"
+             placeholder="Search asset name, file name, tag(s)"
+             id="tag"
+             value="{%- if params.tag -%}{{ params.tag }}{%- endif -%}">
     </div>
     <div class="col-3">
       <div class="js-select">

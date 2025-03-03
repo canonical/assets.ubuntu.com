@@ -171,6 +171,9 @@ def create():
         }
         optimize = request.form.get("optimize", True)
 
+        # Save to session
+        flask.session["form_data"] = form_data
+
         # Process uploaded files
         for asset_file in request.files.getlist("assets"):
             try:
@@ -202,16 +205,10 @@ def create():
                     {"file_path": filename, "error": str(error)}
                 )
 
-        failed_assets = True ## REMOVE: FOR TESTING PURPOSES ONLY
+        # If submission was successful, clear session
+        if not existing_assets and not failed_assets:
+            flask.session.pop("form_data", None)
 
-        # If the upload fails, redirect back to the form with the same form data
-        if failed_assets or existing_assets:
-            flask.session["form_data"] = form_data
-            return flask.redirect(
-                "create#upload-failed"
-            )
-
-        flask.session.pop("form_data", None)
         return flask.render_template(
             "created.html",
             assets=created_assets,
