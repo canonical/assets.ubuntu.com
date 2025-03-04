@@ -29,7 +29,7 @@
         </p>
         <select name="asset_type">
           <option value="">All asset types</option>
-          {% for asset_type in data.asset_types %}
+          {% for asset_type in form_field_data.asset_types %}
             {% set asset_value = asset_type.name|lower|replace(' ', '-') %}
             <option value="{{ asset_value }}"
                     {% if asset_value in params.asset_type %}selected{% endif %}
@@ -47,7 +47,7 @@
         </p>
         <select id="product-select" aria-labelledby="product" name="product_types">
           <option value="">All products or departments</option>
-          {% for product in data.products %}
+          {% for product in form_field_data.products %}
             <option value="{{ product.slug }}"
                     {% if product.slug in params.product_types %}selected{% endif %}>{{ product.name }}</option>
           {% endfor %}
@@ -63,7 +63,7 @@
         </p>
         <select id="product-select" aria-labelledby="product" name="file_types">
           <option value="">All file types</option>
-          {% for file_type in data.file_types %}
+          {% for file_type in form_field_data.file_types %}
             <option value="{{ file_type.name }}"
                     {% if file_type.name in params.file_types %}selected{% endif %}>{{ file_type.name }}</option>
           {% endfor %}
