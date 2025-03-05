@@ -40,8 +40,8 @@ from webapp.views import (
 ui_blueprint = Blueprint("ui_blueprint", __name__, url_prefix="/manager")
 api_blueprint = Blueprint("api_blueprint", __name__, url_prefix="/v1")
 
-with open("data.yaml") as file:
-    data = yaml.load(file, Loader=yaml.FullLoader)
+with open("form-field-data.yaml") as file:
+    form_field_data = yaml.load(file, Loader=yaml.FullLoader)
 
 # Manager Routes
 # ===
@@ -134,7 +134,7 @@ def home():
         order_by_fields=asset_service.order_by_fields(),
         include_deprecated=include_deprecated,
         query=search_params.tag,
-        data=data,
+        form_field_data=form_field_data,
     )
 
 
@@ -145,32 +145,37 @@ def create():
     existing_assets = []
     failed_assets = []
 
-    if flask.request.method == "POST":
-        tags = flask.request.form.get("tags", "")
-        tags = re.split(",|\\s", tags)
-        products = flask.request.form.get("products", "")
-        products = re.split(",|\\s", products)
-        google_drive_link = flask.request.form.get("google_drive_link", "")
-        salesforce_campaign_id = flask.request.form.get(
-            "salesforce_campaign_id", ""
-        )
-        language = flask.request.form.get("language", "")
-        deprecated = (
-            flask.request.form.get("deprecated", "false").lower() == "true"
-        )
-        optimize = flask.request.form.get("optimize", True)
-        asset_type = flask.request.form.get("asset_type", "") or "image"
-        author_email = flask.request.form.get("author_email", "")
-        author_first_name = flask.request.form.get("author_first_name", "")
-        author_last_name = flask.request.form.get("author_last_name", "")
-        author = {
-            "email": author_email,
-            "first_name": author_first_name,
-            "last_name": author_last_name,
+    if request.method == "POST":
+        form_data = {
+            "tags": request.form.get("tags", ""),
+            "products": request.form.get("products", ""),
+            "google_drive_link": request.form.get("google_drive_link", ""),
+            "salesforce_campaign_id": request.form.get(
+                "salesforce_campaign_id", ""
+            ),
+            "language": request.form.get("language", ""),
+            "deprecated": request.form.get("deprecated", "false").lower()
+            == "true",
+            "asset_type": request.form.get("asset_type", "") or "image",
+            "author_email": request.form.get("author_email", ""),
+            "author_first_name": request.form.get("author_first_name", ""),
+            "author_last_name": request.form.get("author_last_name", ""),
+            "name": request.form.get("name", ""),
         }
-        name = flask.request.form.get("name", "")
+        form_data["tags"] = re.split(",|\\s", form_data["tags"])
+        form_data["products"] = re.split(",|\\s", form_data["products"])
+        author = {
+            "email": form_data["author_email"],
+            "first_name": form_data["author_first_name"],
+            "last_name": form_data["author_last_name"],
+        }
+        optimize = request.form.get("optimize", True)
 
-        for asset_file in flask.request.files.getlist("assets"):
+        # Save to session
+        flask.session["form_data"] = form_data
+
+        # Process uploaded files
+        for asset_file in request.files.getlist("assets"):
             try:
                 filename = asset_file.filename
                 content = asset_file.read()
@@ -178,16 +183,16 @@ def create():
                 asset = asset_service.create_asset(
                     file_content=content,
                     friendly_name=filename,
-                    name=name,
+                    name=form_data["name"],
                     optimize=optimize,
-                    tags=tags,
-                    products=products,
-                    asset_type=asset_type,
+                    tags=form_data["tags"],
+                    products=form_data["products"],
+                    asset_type=form_data["asset_type"],
                     author=author,
-                    google_drive_link=google_drive_link,
-                    salesforce_campaign_id=salesforce_campaign_id,
-                    language=language,
-                    deprecated=deprecated,
+                    google_drive_link=form_data["google_drive_link"],
+                    salesforce_campaign_id=form_data["salesforce_campaign_id"],
+                    language=form_data["language"],
+                    deprecated=form_data["deprecated"],
                 )
 
                 created_assets.append(asset)
@@ -199,15 +204,28 @@ def create():
                 failed_assets.append(
                     {"file_path": filename, "error": str(error)}
                 )
+
+        # If submission was successful, clear session
+        if not existing_assets and not failed_assets:
+            flask.session.pop("form_data", None)
+
         return flask.render_template(
             "created.html",
             assets=created_assets,
             existing=existing_assets,
             failed=failed_assets,
-            tags=tags,
+            tags=form_data["tags"],
             optimize=optimize,
         )
-    return flask.render_template("create-update.html", data=data)
+
+    elif request.method == "GET":
+        # Repopulate the form with stored data
+        form_data = flask.session.pop("form_data", {})
+        return flask.render_template(
+            "create-update.html",
+            form_field_data=form_field_data,
+            form_session_data=form_data,
+        )
 
 
 @ui_blueprint.route("/update", methods=["GET", "POST"])
@@ -237,7 +255,6 @@ def update():
             "last_name": author_last_name,
         }
         name = request.form.get("name", "")
-
         try:
             asset = asset_service.update_asset(
                 file_path=file_path,
@@ -256,7 +273,9 @@ def update():
             flask.flash("Asset not found", "negative")
         return flask.redirect("/manager/details?file-path=" + file_path)
 
-    return flask.render_template("create-update.html", data=data, asset=asset)
+    return flask.render_template(
+        "create-update.html", form_field_data=form_field_data, asset=asset
+    )
 
 
 @ui_blueprint.route("/details", methods=["GET"])
