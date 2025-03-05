@@ -152,9 +152,9 @@
                 </div>
               </div>
             </div>
-            {% if asset and email and first_name and asset.author.last_name %}
-              {% set email = email %}
-              {% set first_name = first_name %}
+            {% if asset and asset.author.email and asset.author.first_name and asset.author.last_name %}
+              {% set email = asset.author.email %}
+              {% set first_name = asset.author.first_name %}
               {% set last_name = asset.author.last_name %}
             {% elif form_session_data and form_session_data.author_email and form_session_data.author_first_name and form_session_data.author_last_name %}
               {% set email = form_session_data.author_email %}

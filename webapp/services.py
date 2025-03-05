@@ -131,7 +131,6 @@ class AssetService:
         """
         Create a new asset
         """
-        raise Exception
         # escape unicde characters
         friendly_name = clean_unicode(friendly_name)
         url_path = clean_unicode(url_path)
