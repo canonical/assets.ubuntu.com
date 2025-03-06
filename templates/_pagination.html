@@ -19,7 +19,7 @@
           </li>
           {% if page > 3 %}<li class="p-pagination__item p-pagination__item--truncation u-hide--small">…</li>{% endif %}
           {% for p in range(page - 1, page + max_pagination_items) %}
-            {% if p > 1 and p <= total_pages %}
+            {% if p > 1 and p < total_pages %}
               <li class="p-pagination__item">
                 <a class="p-pagination__link u-no-margin--bottom {{ 'is-active' if page == p }}"
                    href="{{ add_query_param('page', p) }}">{{ p }}</a>

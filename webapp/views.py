@@ -1,5 +1,6 @@
 # Standard library
 import base64
+import math
 import re
 import uuid
 import requests
@@ -222,7 +223,7 @@ def get_assets():
             "total": total,
             "page": page,
             "per_page": per_page,
-            "total_pages": (total // per_page) + 1,
+            "total_pages": math.ceil(total / per_page),
         }
     )
 
