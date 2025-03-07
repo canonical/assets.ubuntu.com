@@ -1,4 +1,5 @@
 # System
+import math
 import re
 from distutils.util import strtobool
 from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
@@ -126,7 +127,7 @@ def home():
         assets_count=len(assets),
         total_assets=total,
         page=page,
-        total_pages=(total // per_page) + 1,
+        total_pages=math.ceil(total / per_page),
         per_page=per_page,
         type=search_params.asset_type,
         order_by=order_by,

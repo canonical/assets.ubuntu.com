@@ -15,13 +15,13 @@
   max-height: 100%;
   object-fit: scale-down;
   object-position: top;
-}
 
-.p-asset-card--thumbnail--small {
-  max-width: 30%;
-  max-height: 30%;
-  object-fit: scale-down;
-  object-position: center;
+  &--small {
+    max-width: 30%;
+    max-height: 30%;
+    object-fit: scale-down;
+    object-position: center;
+  }
 }
 
 .p-asset-card-image__container {
@@ -73,12 +73,6 @@
 .p-filter-panel-section__chips-toggle {
   padding-top: 6px;
   margin-bottom: 18px;
-}
-
-.p-asset-card {
-  padding: 0.75rem;
-  background: #f7f7f7;
-  margin-top: 2rem;
 }
 
 .p-asset-created-details__header {
