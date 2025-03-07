@@ -10,8 +10,11 @@ services:
     ports:
       - "5432:5432"
   swift:
-    image: bouncestorage/swift-aio:latest
+    image: openstackswift/saio:latest
     ports:
       - "8080:8080"
+    volumes:
+      - swift-data:/srv
 volumes:
   postgres-data:
+  swift-data:
