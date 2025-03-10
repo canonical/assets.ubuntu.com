@@ -18,16 +18,15 @@ const updateQueryParams = document.querySelector(".js-asset-search");
 (function () {
   const productsSearchComponent = document.querySelector(".js-products-search");
   if (productsSearchComponent) {
-    productsSearchComponent.addEventListener("focusin", function (e) {
-      openPanel(productsSearchComponent, true, "focusin");
-    });
-    productsSearchComponent.addEventListener("focusout", function (e) {
-      if (!e.relatedTarget) {
-        return;
-      }
-      openPanel(productsSearchComponent, false, "focusout");
-    });
-    setUpProductSearchField();
+    const productSearchInput = productsSearchComponent.querySelector(".js-search-input");
+    if (productSearchInput) {
+      // only open the options panel if there is a value in the input
+      productSearchInput.addEventListener("input", function (e) {
+        const shouldOpen = e.target.value.trim().length > 0;
+        openPanel(productsSearchComponent, shouldOpen);
+      });
+      setUpProductSearchField();
+    }
   }
 })();
 
@@ -122,6 +121,13 @@ function selectProductsChip(chipId) {
     chipId,
     document.querySelector(".js-products-search .js-hidden-field")
   );
+  // clear the entered value after selecting a chip
+  const inputField = document.querySelector(".js-products-search .js-search-input");
+  inputField.value = "";
+  inputField.focus();
+  // close the chips panel
+  const chipsPanel = document.querySelector(".js-products-search .js-chips-panel");
+  chipsPanel.setAttribute("aria-hidden", "true");
   if (updateQueryParams) {
     addValueToQueryParams("product_types", chipId);
   }

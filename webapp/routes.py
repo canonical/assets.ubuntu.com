@@ -86,6 +86,9 @@ def home():
     if order_dir not in ["asc", "desc"]:
         order_dir = "desc"
 
+    assets = []
+    total = 0
+    is_search = False
     if any(
         [
             search_params.tag,
@@ -116,9 +119,7 @@ def home():
             include_deprecated=include_deprecated,
             file_types=search_params.file_types,
         )
-    else:
-        assets = []
-        total = 0
+        is_search = True
 
     return flask.render_template(
         "index.html",
@@ -136,6 +137,7 @@ def home():
         include_deprecated=include_deprecated,
         query=search_params.tag,
         form_field_data=form_field_data,
+        is_search=is_search,
     )
 
 

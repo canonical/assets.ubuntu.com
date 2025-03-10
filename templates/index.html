@@ -17,10 +17,10 @@
   <div class="row">
     {% if assets %}
       {% include "_asset-list.html" %}
-    {% elif request.values.get("q", None) %}
-      <h3>No assets found.</h3>
+    {% elif is_search %}
+      <h3>No results. Please try another search.</h3>
     {% else %}
-      <h3>Search for a query to show assets.</h3>
+      <h3>Start a search to show assets.</h3>
     {% endif %}
   </div>
 </div>

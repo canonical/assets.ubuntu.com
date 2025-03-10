@@ -50,7 +50,7 @@
             </div>
             <div class="p-section--shallow">
               <div class="js-multiselect">
-                <label class="p-heading--5 u-no-margin--bottom" id="asset-type">Type of Asset</label>
+                <label class="p-heading--5 u-no-margin--bottom" id="asset-type">Type of asset</label>
                 <p class="u-text--muted u-no-padding--top">Choose the most relevant type</p>
                 <select id="asset-type-select"
                         aria-label="Required field: Select asset type"
@@ -65,13 +65,13 @@
                 <input type="text" class="u-hide js-hidden-field" name="asset_type" value="">
               </div>
             </div>
-            <div class="p-section--shallow" data-name="assetName" tabindex="0">
+            <div class="p-section--shallow" data-name="assetName">
               <label class="p-heading--5 u-no-margin--bottom" id="asset-name">Asset name</label>
               <p class="u-text--muted u-no-padding--top">Use the relevant naming convention</p>
               <input type="text"
                      id="name"
                      name="name"
-                     placeholder="A name you could easily search for "
+                     placeholder="For example ‘A guide to open source vulnerability management’"
                      aria-labelledby="asset-name"
                      value="{% if asset %}{{ asset.name }}{% endif %}">
             </div>
@@ -82,7 +82,7 @@
                   {% set _ = existing_tags.append(tag.name) %}
                 {% endfor %}
               {% endif %}
-              <label class="p-heading--5 u-no-margin--bottom" id="asset-tags">Asset Tags</label>
+              <label class="p-heading--5 u-no-margin--bottom" id="asset-tags">Asset tags</label>
               <p class="u-text--muted u-no-padding--top">Add tags that will help you search and find the asset</p>
               <div class="add-and-edit-chips">
                 <div class="added-chips">
@@ -91,8 +91,7 @@
                 <div class="add-chips-input">
                   <input type="text"
                          id="assets-chips-input"
-                         placeholder="Enter tag and press enter, use cross to remove"
-                         autofocus />
+                         placeholder="Enter tag and press enter" />
                   <input type="text" class="u-hide js-hidden-field" name="tags" value="">
                 </div>
               </div>
@@ -108,7 +107,7 @@
                   {% set _ = existing_products.append(product) %}
                 {% endfor %}
               {% endif %}
-              <div class="p-search-and-filter js-products-search" tabindex="0">
+              <div class="p-search-and-filter js-products-search">
                 <label class="p-heading--5 u-no-margin--bottom" id="product-tags">Product or departmental tags</label>
                 <p class="u-text--muted u-no-padding--top">Add tags for the product or department of the asset</p>
                 <div class="p-search-and-filter__search-container" aria-expanded="false">
@@ -124,11 +123,11 @@
                     <input autocomplete="off"
                            class="p-search-and-filter__input js-search-input"
                            id="search"
-                           placeholder="Start typing a product name or Department"
+                           placeholder="Start typing a product name or department"
                            type="text"
                            value=""
                            aria-labelledby="product-tags">
-                    <input type="text" class="u-hide js-hidden-field" name="products" value="">
+                    <input type="text" class="u-hide js-hidden-field" name="products" value="" tabindex="-1">
                   </div>
                 </div>
                 <div class="p-search-and-filter__panel js-chips-panel" aria-hidden="true">
@@ -140,7 +139,8 @@
                       {% for product in form_field_data.products %}
                         <button class="p-chip js-{{ product.slug }}-chip js-unselected {% if product.slug in existing_products %}u-hide{% endif %}"
                                 id="{{ product.slug }}"
-                                data-name="{{ product.name }}">
+                                data-name="{{ product.name }}"
+                                tabindex="-1">
                           <span class="p-chip__value">{{ product.name }}</span>
                         </button>
                       {% endfor %}
@@ -164,7 +164,7 @@
             <div data-name="author">
               <label class="p-heading--5 u-no-margin--bottom" id="author">Author</label>
               <p class="u-text--muted u-no-padding--top">Name of the author of the file</p>
-              <div class="p-search-and-filter js-authors-search" tabindex="0">
+              <div class="p-search-and-filter js-authors-search">
                 <div class="p-search-and-filter__search-container" aria-expanded="false">
                   <span class="p-chip js-author-chip u-hide"
                         data-email=""
@@ -186,23 +186,26 @@
                     <label class="u-hide" for="search">Search authors</label>
                     <input autocomplete="off"
                            class="p-search-and-filter__input js-authors-input"
-                           placeholder="Start typing the name of a Canonical Team-member"
+                           placeholder="Start typing the name of the Canonical teammember"
                            type="text"
                            value=""
-                           aria-labelledby="author">
+                           aria-labelledby="author" />
                     <input type="text"
                            class="u-hide js-hidden-field-email"
                            name="author_email"
-                           value="{% if email %}{{ email }}{% endif %}">
+                           value="{% if email %}{{ email }}{% endif %}"
+                           tabindex="-1" />
                     <input type="text"
                            class="u-hide js-hidden-field-firstname"
                            name="author_first_name"
-                           value="{% if first_name %}{{ first_name }}{% endif %}">
+                           value="{% if first_name %}{{ first_name }}{% endif %}"
+                           tabindex="-1" />
                     <input type="text"
                            class="u-hide js-hidden-field-lastname"
                            name="author_last_name"
-                           value="{% if last_name%}{{ last_name}}{% endif %}">
-                    <button alt="search" class="u-off-screen" type="submit">Search</button>
+                           value="{% if last_name%}{{ last_name}}{% endif %}"
+                           tabindex="-1" />
+                    <button alt="search" class="u-off-screen" type="submit" tabindex="-1">Search</button>
                   </div>
                 </div>
                 <div class="p-search-and-filter__panel js-chips-panel" aria-hidden="true">
@@ -217,7 +220,7 @@
                       </p>
                     </div>
                     <template id="author-unselected-chip-template">
-                      <button class="p-chip js-unselected">
+                      <button class="p-chip js-unselected" tabindex="-1">
                         <span class="p-chip__value js-content"></span>
                       </button>
                     </template>
@@ -238,7 +241,7 @@
             <div class="p-section--shallow" data-name="googleDriveLink">
               <label class="p-heading--5 u-no-margin--bottom">Google Drive link</label>
               <p class="u-text--muted u-no-padding--top">
-                Add the URL to the asset on Google Drive, for example a link to a copydoc
+                Add the URL to the asset on Google Drive, for example, the link to a copydoc
               </p>
               <input type="text"
                      id="google-drive-link"
