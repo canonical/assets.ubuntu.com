@@ -1,54 +1,47 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>{% block title %}{% endblock %} | Assets manager</title>
+    <title>
+      {% block title %}{% endblock %}
+    | Assets manager</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="{{ versioned_static('css/main.css') }}" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="/static/js/dist/main.js" defer></script>
-    <link
-      rel="icon"
-      type="image/png"
-      href="https://assets.ubuntu.com/v1/cb22ba5d-favicon-16x16.png"
-      sizes="16x16"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      href="https://assets.ubuntu.com/v1/49a1a858-favicon-32x32.png"
-      sizes="32x32"
-    />
+    <link rel="stylesheet" href="{{ versioned_static("css/main.css") }}" />
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="{{ versioned_static('js/dist/main.js') }}" defer></script>
+    <script src="{{ versioned_static('js/dist/navigation.js') }}" defer></script>
+    <link rel="icon"
+          type="image/png"
+          href="https://assets.ubuntu.com/v1/cb22ba5d-favicon-16x16.png"
+          sizes="16x16" />
+    <link rel="icon"
+          type="image/png"
+          href="https://assets.ubuntu.com/v1/49a1a858-favicon-32x32.png"
+          sizes="32x32" />
   </head>
-
   <body>
-    <header id="navigation" class="p-navigation--sliding is-dark">
+    <header id="navigation" class="p-navigation is-dark">
       <div class="p-navigation__row--25-75">
         <div class="p-navigation__banner">
           <div class="p-navigation__tagged-logo">
             <a class="p-navigation__link" href="/manager">
               <div class="p-navigation__logo-tag">
-                <img
-                  class="p-navigation__logo-icon"
-                  src="https://assets.ubuntu.com/v1/82818827-CoF_white.svg"
-                  alt=""
-                />
+                <img class="p-navigation__logo-icon"
+                     src="https://assets.ubuntu.com/v1/82818827-CoF_white.svg"
+                     alt="" />
               </div>
               <span class="p-navigation__logo-title">Canonical Assets Manager</span>
             </a>
           </div>
-          <a href="#navigation" class="p-navigation__toggle--open" title="menu"
-            >Menu</a
-          >
-          <a
-            href="#navigation-closed"
-            class="p-navigation__toggle--close"
-            title="close menu"
-            >Close menu</a
-          >
+          <a href="#navigation"
+             class="p-navigation__toggle--open js-menu-button"
+             title="menu">Menu</a>
+          <a href="#navigation-closed"
+             class="p-navigation__toggle--close"
+             title="close menu">Close menu</a>
         </div>
-
-        <nav class="p-navigation__nav" aria-label="Main navigation">
+        <nav class="p-navigation__nav js-show-nav" aria-label="Main navigation">
           <ul class="p-navigation__items">
             <li class="p-navigation__item">
               <a class="p-navigation__link" href="/manager">Search assets</a>
@@ -60,9 +53,9 @@
         </nav>
       </div>
     </header>
-
-    <main id="main-content">{% block content %} {% endblock %}</main>
-    
+    <main id="main-content">
+      {% block content %}{% endblock %}
+    </main>
     <script>
       function generateImageTag(str) {
         const img = new Image()
@@ -127,20 +120,15 @@
           false
         )
       }
-    </script>
-
-    <!-- Notification -->
-    <div class="p-notification--positive u-hide" id="notification">
-      <div class="p-notification__content">
-        <p class="p-notification__message"></p>
-        <button
-          class="p-notification__close"
-          aria-controls="notification"
-          onclick="hideNotification()"
-        ></button>
-      </div>
-    </div>
-    <style>
+</script>
+<!-- Notification -->
+<div class="p-notification--positive u-hide" id="notification">
+<div class="p-notification__content">
+<p class="p-notification__message"></p>
+<button class="p-notification__close" aria-controls="notification" onclick="hideNotification()"></button>
+</div>
+</div>
+<style>
       #notification {
         z-index: 9999;
         max-width: 20rem;
@@ -151,8 +139,8 @@
         top: 0;
         background: white;
       }
-    </style>
-    <script>
+</style>
+<script>
       const notificationEl = document.getElementById("notification")
       const notificationTimeout = 2000
       let notificationIsVisible = false
@@ -182,6 +170,6 @@
           link.parentElement.classList.add("is-selected")
         }
       })
-    </script>
-  </body>
+</script>
+</body>
 </html>
