@@ -108,7 +108,7 @@
                 {% endfor %}
               {% endif %}
               <div class="p-search-and-filter js-products-search">
-                <label class="p-heading--5 u-no-margin--bottom" id="product-tags">Product or departmental tags</label>
+                <label class="p-heading--5 u-no-margin--bottom" id="product-tags">Product or department tags</label>
                 <p class="u-text--muted u-no-padding--top">Add tags for the product or department of the asset</p>
                 <div class="p-search-and-filter__search-container" aria-expanded="false">
                   {% for product in form_field_data.products %}
@@ -163,7 +163,7 @@
             {% endif %}
             <div data-name="author">
               <label class="p-heading--5 u-no-margin--bottom" id="author">Author</label>
-              <p class="u-text--muted u-no-padding--top">Name of the author of the file</p>
+              <p class="u-text--muted u-no-padding--top">Name the author of the file</p>
               <div class="p-search-and-filter js-authors-search">
                 <div class="p-search-and-filter__search-container" aria-expanded="false">
                   <span class="p-chip js-author-chip u-hide"
@@ -250,12 +250,12 @@
                      value="{% if asset and asset.google_drive_link %}{{ asset.google_drive_link }}{% endif %}">
             </div>
             <div class="p-section--shallow" data-name="salesforceCampaignId">
-              <label class="p-heading--5 u-no-margin--bottom">Salesforce campaign ID number</label>
-              <p class="u-text--muted u-no-padding--top">Add the four-digit number of campaign</p>
+              <label class="p-heading--5 u-no-margin--bottom">Salesforce campaign ID</label>
+              <p class="u-text--muted u-no-padding--top">Add the four-digit number of a campaign</p>
               <input type="text"
                      id="salesforce-campaign-id-number"
                      name="salesforce_campaign_id"
-                     placeholder="If Applicable"
+                     placeholder="If applicable"
                      value="{% if asset and asset.salesforce_campaign_id %}{{ asset.salesforce_campaign_id }}{% endif %}">
             </div>
             <div class="p-section--shallow js-multiselect" data-name="language">

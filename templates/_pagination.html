@@ -1,7 +1,10 @@
 {% set max_pagination_items = 3 %}
 <div class="row--50-50">
   <div class="col">
-    {% if total_assets %}<h5 id="assets_count" class="u-no-margin--bottom">{{ total_assets }} asset{{ "s" if total_assets > 1 }} match{{ "es" if total_assets < 2 }} your search</h5>{% endif %}
+    {% if total_assets %}
+      <p id="assets_count" class="u-no-margin--bottom">{{ total_assets }} asset{{ "s" if total_assets > 1 }} match{{ "es" if total_assets < 2 }} your search</p>
+      <div class="u-hide--large u-sv3"></div>
+    {% endif %}
   </div>
   {% if total_pages > 1 %}
     <div class="col">

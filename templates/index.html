@@ -6,9 +6,14 @@
 
 <div class="p-strip is-shallow">
   <div class="u-fixed-width">
-    <div class="p-section">
-      {% include "_search-form.html" %}
-    </div>
+    {% include "_search-form.html" %}
+  </div>  
+  <div class="u-fixed-width">
+    {% if assets %}
+      <h3 class="p-heading--5 p-text--small-caps">Search results</h3>
+    {% elif is_search %}
+      <h3 class="p-heading--5 p-text--small-caps">No results. Please try another search.</h3>
+    {% endif %}
   </div>
   <hr class="p-rule is-fixed-width" />
 </div>
@@ -17,9 +22,7 @@
   <div class="row">
     {% if assets %}
       {% include "_asset-list.html" %}
-    {% elif is_search %}
-      <h3>No results. Please try another search.</h3>
-    {% else %}
+    {% elif not is_search %}
       <h3>Start a search to show assets.</h3>
     {% endif %}
   </div>

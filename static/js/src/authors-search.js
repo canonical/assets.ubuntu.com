@@ -111,7 +111,6 @@ function selectAuthorChip(chip, selectedAuthorChip) {
   // clear the entered value after selecting a chip
   const inputField = document.querySelector(".js-authors-search .js-authors-input");
   inputField.value = "";
-  inputField.focus();
   // close the chips panel
   const chipsPanel = document.querySelector(".js-authors-search .js-chips-panel");
   chipsPanel.setAttribute("aria-hidden", "true");
