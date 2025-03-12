@@ -16,16 +16,14 @@ const updateQueryParams = document.querySelector('.js-asset-search');
 (function () {
   const authorsSearchComponent = document.querySelector('.js-authors-search');
   if (authorsSearchComponent) {
-    authorsSearchComponent.addEventListener('focusin', function () {
-      openPanel(authorsSearchComponent, true, 'focusin');
-    });
-    authorsSearchComponent.addEventListener('focusout', function (e) {
-      if (!e.relatedTarget) {
-        return;
-      }
-      openPanel(authorsSearchComponent, false, 'focusout');
-    });
-    setUpAuthorSearchField();
+    const authorsSearchInput = authorsSearchComponent.querySelector(".js-authors-input");
+    if (authorsSearchInput) {
+      authorsSearchInput.addEventListener('input', function (e) {
+        const shouldOpen = e.target.value.trim().length > 0;
+        openPanel(authorsSearchComponent, shouldOpen);
+      });
+      setUpAuthorSearchField();
+    }
   }
 })();
 
@@ -110,6 +108,12 @@ function selectAuthorChip(chip, selectedAuthorChip) {
   addValueToHiddenInput(chip.dataset.email, document.querySelector('.js-hidden-field-email'), replace = true);
   addValueToHiddenInput(chip.dataset.firstname, document.querySelector('.js-hidden-field-firstname'), replace = true);
   addValueToHiddenInput(chip.dataset.lastname, document.querySelector('.js-hidden-field-lastname'), replace = true);
+  // clear the entered value after selecting a chip
+  const inputField = document.querySelector(".js-authors-search .js-authors-input");
+  inputField.value = "";
+  // close the chips panel
+  const chipsPanel = document.querySelector(".js-authors-search .js-chips-panel");
+  chipsPanel.setAttribute("aria-hidden", "true");
   if (updateQueryParams) {
     addValueToQueryParams('author_email', chip.dataset.email, replace = true);
     addValueToQueryParams('author_firstname', chip.dataset.firstname, replace = true);

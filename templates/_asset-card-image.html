@@ -43,7 +43,7 @@
             {% if asset.data.width and asset.data.height %}{{ asset.data.width }} x {{ asset.data.height }}px{% endif %}
           </strong>
         </p>
-        <p class="u-no-margin--bottom">Date added: {{ asset.created.strftime("%d %B %Y") }}</p>
+        <p class="u-no-margin--bottom">Date added: <strong>{{ asset.created.strftime("%d %B %Y") }}</strong></p>
       </div>
       <hr class="p-rule" />
       <div class="p-section--shallow">
@@ -77,7 +77,7 @@
           <strong>Asset details</strong>
         </p>
         {% include "shared/_asset-author.html" %}
-        <p class="u-no-margin--bottom">Created: {{ asset.created.strftime("%d %B %Y") }}</p>
+        <p class="u-no-margin--bottom">Created: <strong>{{ asset.created.strftime("%d %B %Y") }}</strong></p>
         <p class="u-no-margin--bottom">
           Language: <strong>{{ asset.language }}</strong>
         </p>

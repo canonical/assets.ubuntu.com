@@ -34,7 +34,7 @@
                   alt=""
                 />
               </div>
-              <span class="p-navigation__logo-title">Canonical Assets Manager</span>
+              <span class="p-navigation__logo-title">Canonical asset manager</span>
             </a>
           </div>
           <a href="#navigation" class="p-navigation__toggle--open" title="menu"
@@ -111,6 +111,7 @@
           let url = e.target.dataset.url
           if (url.startsWith("/")) url = `${location.origin}${url}`
           generateImageTag(url)
+          showNotification("Dev tag copied to clipboard")
         })
       })
 

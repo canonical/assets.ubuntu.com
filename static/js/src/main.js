@@ -35,19 +35,21 @@ document.addEventListener("click", function (e) {
  * @param {Boolean} opening - Whether the panel should being opening or not. Default is false.
  **/
 export function openPanel(searchComponent, opening = "false") {
-  const searchContainer = searchComponent.querySelector(
-    ".p-search-and-filter__search-container"
-  );
-  const panel = searchComponent.querySelector(".p-search-and-filter__panel");
-  if (panel && searchContainer) {
-    if (opening) {
-      panel.setAttribute("aria-hidden", "false");
-      searchContainer.setAttribute("aria-expanded", "true");
-      searchComponent.classList.add("js-active-search");
-    } else {
-      panel.setAttribute("aria-hidden", "true");
-      searchContainer.setAttribute("aria-expanded", "false");
-      searchComponent.classList.remove("js-active-search");
+  if (searchComponent) {
+    const searchContainer = searchComponent.querySelector(
+      ".p-search-and-filter__search-container"
+    );
+    const panel = searchComponent.querySelector(".p-search-and-filter__panel");
+    if (panel && searchContainer) {
+      if (opening) {
+        panel.setAttribute("aria-hidden", "false");
+        searchContainer.setAttribute("aria-expanded", "true");
+        searchComponent.classList.add("js-active-search");
+      } else {
+        panel.setAttribute("aria-hidden", "true");
+        searchContainer.setAttribute("aria-expanded", "false");
+        searchComponent.classList.remove("js-active-search");
+      }
     }
   }
 }
