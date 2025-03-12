@@ -166,7 +166,7 @@
       }
 
       document.querySelectorAll(".p-navigation__link").forEach((link) => {
-        if (link.href === location.href) {
+        if (link.href === `${location.origin}${location.pathname}`) {
           link.parentElement.classList.add("is-selected")
         }
       })
