@@ -2,20 +2,20 @@
 import imghdr
 from base64 import b64decode, b64encode
 from datetime import datetime, timezone
-from typing import Tuple
 from io import BytesIO
+from typing import List, Tuple
+
+from PIL import Image as PillowImage
 
 # Packages
 from sqlalchemy import func, or_
-from typing import List
-from PIL import Image as PillowImage
 
 # Local
 from webapp.database import db_session
+from webapp.lib.file_helpers import is_svg
 from webapp.lib.processors import ImageProcessor
 from webapp.lib.url_helpers import clean_unicode
-from webapp.lib.file_helpers import is_svg
-from webapp.models import Asset, Tag, Product, Author
+from webapp.models import Asset, Author, Product, Tag
 from webapp.swift import file_manager
 from webapp.utils import lru_cache
 
@@ -56,7 +56,7 @@ class AssetService:
                     Asset.products.any(Product.name == tag),
                     Asset.name.ilike(f"%{tag}%"),
                     Asset.file_path.ilike(f"%{tag}%"),
-                )
+                ),
             )
         if asset_type:
             conditions.append(Asset.asset_type == asset_type)
@@ -66,7 +66,9 @@ class AssetService:
             conditions.append(Asset.language.ilike(f"{language}"))
         if salesforce_campaign_id:
             conditions.append(
-                Asset.salesforce_campaign_id.ilike(f"{salesforce_campaign_id}")
+                Asset.salesforce_campaign_id.ilike(
+                    f"{salesforce_campaign_id}",
+                ),
             )
 
         if not include_deprecated:
@@ -82,7 +84,7 @@ class AssetService:
             conditions.append(Asset.created.between(start_date, end_date))
         if product_types:
             conditions.append(
-                Asset.products.any(Product.name.in_(product_types))
+                Asset.products.any(Product.name.in_(product_types)),
             )
 
         if file_types:
@@ -141,7 +143,7 @@ class AssetService:
         decoded_file_content = b64decode(encoded_file_content)
 
         if imghdr.what(None, h=file_content) is not None or is_svg(
-            file_content
+            file_content,
         ):
             data["image"] = True
         else:
@@ -172,50 +174,57 @@ class AssetService:
 
         if not url_path:
             url_path = file_manager.generate_asset_path(
-                file_content, friendly_name
+                file_content,
+                friendly_name,
             )
 
-        asset = (
-            db_session.query(Asset)
-            .filter(Asset.file_path == url_path)
-            .one_or_none()
-        )
-        if asset:
-            if "width" not in asset.data and "width" in data:
-                asset.data["width"] = data["width"]
+        try:
+            asset = (
+                db_session.query(Asset)
+                .filter(Asset.file_path == url_path)
+                .one_or_none()
+            )
+            if asset:
+                if "width" not in asset.data and "width" in data:
+                    asset.data["width"] = data["width"]
 
-            if "height" not in asset.data and "height" in data:
-                asset.data["height"] = data["height"]
+                if "height" not in asset.data and "height" in data:
+                    asset.data["height"] = data["height"]
 
+                db_session.commit()
+
+                raise AssetAlreadyExistException(url_path)
+
+            # Save the file in Swift
+            file_manager.create(file_content, url_path)
+            tags = self.create_tags_if_not_exist(tags)
+            products = self.create_products_if_not_exists(products)
+            author = self.create_author_if_not_exist(author)
+
+            # Save file info in Postgres
+            asset = Asset(
+                file_path=url_path,
+                name=name,
+                data=data,
+                tags=tags,
+                created=datetime.now(tz=timezone.utc),
+                products=products,
+                asset_type=asset_type,
+                author=author,
+                google_drive_link=google_drive_link,
+                salesforce_campaign_id=salesforce_campaign_id,
+                language=language,
+                deprecated=deprecated,
+                file_type=url_path.split(".")[-1].lower(),
+            )
+            db_session.add(asset)
             db_session.commit()
+            return asset
 
-            raise AssetAlreadyExistException(url_path)
-
-        # Save the file in Swift
-        file_manager.create(file_content, url_path)
-        tags = self.create_tags_if_not_exist(tags)
-        products = self.create_products_if_not_exists(products)
-        author = self.create_author_if_not_exist(author)
-
-        # Save file info in Postgres
-        asset = Asset(
-            file_path=url_path,
-            name=name,
-            data=data,
-            tags=tags,
-            created=datetime.now(tz=timezone.utc),
-            products=products,
-            asset_type=asset_type,
-            author=author,
-            google_drive_link=google_drive_link,
-            salesforce_campaign_id=salesforce_campaign_id,
-            language=language,
-            deprecated=deprecated,
-            file_type=url_path.split(".")[-1].lower(),
-        )
-        db_session.add(asset)
-        db_session.commit()
-        return asset
+        # Rollback transaction if any error occurs
+        except Exception:
+            db_session.rollback()
+            raise
 
     def create_tags_if_not_exist(self, tag_names):
         """
@@ -223,7 +232,7 @@ class AssetService:
         object from the database
         """
         tag_names = list(
-            set([self.normalize_tag_name(name) for name in tag_names if name])
+            set([self.normalize_tag_name(name) for name in tag_names if name]),
         )
         existing_tags = (
             db_session.query(Tag).filter(Tag.name.in_(tag_names)).all()
@@ -370,15 +379,11 @@ class AssetAlreadyExistException(Exception):
     Raised when the requested asset to create already exists
     """
 
-    pass
-
 
 class AssetNotFound(Exception):
     """
     Raised when the requested asset wasn't found
     """
-
-    pass
 
 
 asset_service = AssetService()
