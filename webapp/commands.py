@@ -152,3 +152,22 @@ def insert_dummy_data():
             optimize=asset.get("optimize", False),
             tags=["dummy_asset"],
         )
+
+
+@db_group.command("deprecate-stale-assets")
+def deprecate_assets():
+    """
+    Deprecate assets whose data is inaccessible.
+    """
+    assets = db_session.query(Asset).all()
+    for asset in assets:
+        asset_data = file_manager.fetch(asset.file_path)
+        if not asset_data:
+            print(404, f" No asset found for '{asset.file_path}'")
+            # Deprecate the asset
+            asset.deprecated = True
+            # Replace asset data with a placeholder
+            asset.file_path = "9f61b97f-logo-ubuntu.svg"
+            db_session.add(asset)
+
+    db_session.commit()

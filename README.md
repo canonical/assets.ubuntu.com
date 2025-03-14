@@ -222,6 +222,14 @@ $ curl --request PUT --data target_url=https://assets.ubuntu.com/v1/fe8d7514-ubu
 
 Deleting redirects is similarly simple, with `curl --request DELETE https://assets.ubuntu.com/v1/redirects/{redirect-path}?token={your-api-token}`, e.g. `curl --request DELETE https://assets.ubuntu.com/v1/redirects/ubuntu-server-guide?token=xxxxxxxxx`.
 
+### Deprecating stale assets
+
+Sometimes, for various reasons, assets data on swift might disappear, leading to broken links. To deprecate these assets and set placeholder data, run the following command:
+```bash
+flask --app webapp.app database deprecate-stale-assets
+```
+
+
 ## Security
 
 As the server only uses a basic token for authentication, it is paramount that in a production setting, the API functions are only accessed over HTTPS, to keep the API token secret. For this reason, when `DEBUG==false` the server will force a redirect to HTTPS for all API calls.
