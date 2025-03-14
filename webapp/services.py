@@ -37,7 +37,7 @@ class AssetService:
         start_date: str = "2024-01-01",
         end_date: str = "2024-10-14",
         salesforce_campaign_id: str = "1234",
-        language: str = "en",
+        language: str = "English",
         page=1,
         per_page=6,
         order_by=Asset.created,
@@ -124,7 +124,7 @@ class AssetService:
         author: str = None,
         google_drive_link: str = None,
         salesforce_campaign_id: str = None,
-        language: str = None,
+        language: str = "English",
         deprecated: bool = False,
         data={},
     ):
@@ -304,7 +304,7 @@ class AssetService:
         author: str = None,
         google_drive_link: str = None,
         salesforce_campaign_id: str = None,
-        language: str = None,
+        language: str = "English",
     ):
         asset = (
             db_session.query(Asset)

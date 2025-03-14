@@ -39,7 +39,7 @@
                 </div>
               {% else %}
                 <label class="p-heading--5 u-no-margin--bottom">Choose file(s) to upload</label>
-                <p class="u-text--muted u-no-padding--top">Note: Same asset cannot be re-uploaded</p>
+                <p class="u-text--muted u-no-padding--top">Please note, if an asset is already in the asset manager, it cannot be added again</p>
                 <input id="input-files"
                        type="file"
                        multiple
@@ -241,7 +241,7 @@
             <div class="p-section--shallow" data-name="googleDriveLink">
               <label class="p-heading--5 u-no-margin--bottom">Google Drive link</label>
               <p class="u-text--muted u-no-padding--top">
-                Add the URL to the asset on Google Drive, for example, the link to a copydoc
+                Add the URL to the asset on Google Drive. For example, the link to a copydoc
               </p>
               <input type="text"
                      id="google-drive-link"
@@ -261,7 +261,8 @@
             <div class="p-section--shallow js-multiselect" data-name="language">
               <label class="p-heading--5 u-no-margin--bottom" id="language">Language</label>
               <p class="u-text--muted u-no-padding--top">Choose the primary language</p>
-              <select id="language-select" aria-labelledby="language" multiple>
+              <select id="language-select"
+                      aria-label="language">
                 {% for language in form_field_data.languages %}
                   <option value="{{ language.name }}"
                           {% if asset and language.name in asset.language %}selected{% endif %}

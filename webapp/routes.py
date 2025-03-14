@@ -156,7 +156,7 @@ def create():
             "salesforce_campaign_id": request.form.get(
                 "salesforce_campaign_id", ""
             ),
-            "language": request.form.get("language", ""),
+            "language": request.form.get("language", "") or "English",
             "deprecated": request.form.get("deprecated", "false").lower()
             == "true",
             "asset_type": request.form.get("asset_type", "") or "image",

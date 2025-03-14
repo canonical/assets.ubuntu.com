@@ -13,6 +13,8 @@
       <h3 class="p-heading--5 p-text--small-caps">Search results</h3>
     {% elif is_search %}
       <h3 class="p-heading--5 p-text--small-caps">No results. Please try another search.</h3>
+    {% else %}
+      <h3 class="p-heading--5 p-text--small-caps">Start a search to show assets.</h3>
     {% endif %}
   </div>
   <hr class="p-rule is-fixed-width" />
@@ -22,8 +24,6 @@
   <div class="row">
     {% if assets %}
       {% include "_asset-list.html" %}
-    {% elif not is_search %}
-      <h3>Start a search to show assets.</h3>
     {% endif %}
   </div>
 </div>
