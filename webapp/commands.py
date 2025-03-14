@@ -1,5 +1,4 @@
 # Standard library
-import base64
 import re
 import uuid
 from datetime import datetime
@@ -160,52 +159,30 @@ def insert_dummy_data():
         )
 
 
-def get_placeholder_data():
+def create_placeholder_file(file_path: str) -> None:
+    """
+    Create a placeholder image for an asset.
+    Note that this will *not* replace existing asset data.
+    """
+    # Don't modify existing data
+    if file_manager.exists(file_path):
+        print(
+            f"Asset '{file_path}' cannot be created because it "
+            "already exists.",
+        )
+        return
+
     placeholder_image_name = "9f61b97f-logo-ubuntu.svg"
     res = requests.get(
         f"https://assets.ubuntu.com/v1/{placeholder_image_name}",
         timeout=10,
     )
     res.raise_for_status()
-    return res.content
-
-
-def get_placeholder_asset():
-    """
-    Return the file path of the placeholder image. If it doesn't
-    exist, we download it from the production server.
-    """
-    placeholder = (
-        db_session.query(Asset)
-        .filter(
-            Asset.name == "placeholder",
-        )
-        .first()
-    )
-    asset_data = None
-    if placeholder:
-        asset_data = file_manager.fetch(placeholder.file_path)
-        if not asset_data:
-            # If the placeholder data is missing, we reupload
-            data = get_placeholder_data()
-            file_manager.create(data, placeholder.file_path)
-        return placeholder.file_path
-
-    data = get_placeholder_data()
-    placeholder = asset_service.create_asset(
-        file_content=base64.b64decode(data),
-        friendly_name="placeholder_image_name",
-        optimize=True,
-        tags=["placeholder"],
-    )
-    placeholder.name = "placeholder"
-    db_session.commit()
-    db_session.flush()
-    return placeholder.file_path
+    file_manager.create(res.content, file_path)
 
 
 @db_group.command("deprecate-stale-assets")
-def deprecate_assets():
+def deprecate_assets() -> None:
     """
     Deprecate assets whose data is inaccessible.
     This command can be run several times.
@@ -218,7 +195,6 @@ def deprecate_assets():
             # Deprecate the asset
             asset.deprecated = True
             # Replace asset data with a placeholder.
-            asset.file_path = get_placeholder_asset()
-            db_session.add(asset)
+            create_placeholder_file(asset.file_path)
 
     db_session.commit()
