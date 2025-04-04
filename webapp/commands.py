@@ -1,17 +1,21 @@
 # Standard library
-from datetime import datetime
 import re
 import uuid
+from datetime import datetime
 
 # Packages
 import click
 import flask
 import requests
 
-# Local
 from webapp.database import db_session
 from webapp.models import Asset, Redirect, Token
-from webapp.services import asset_service
+
+# Local
+from webapp.services import (
+    asset_service,
+)
+from webapp.swift import file_manager
 
 token_group = flask.cli.AppGroup("token")
 db_group = flask.cli.AppGroup("database")
@@ -65,7 +69,8 @@ def import_assets_from_prod(token):
         entry = data[index]
         file_path = entry.get("file_path")
         created = datetime.strptime(
-            entry.get("created"), "%a %b %d %H:%M:%S %Y"
+            entry.get("created"),
+            "%a %b %d %H:%M:%S %Y",
         )
         tags = entry.get("tags", "")
         tags = re.split(",|\\s", tags)
@@ -92,7 +97,7 @@ def import_assets_from_prod(token):
                 f".+\\.({'|'.join(image_extensions)})$",
                 file_path,
                 flags=re.IGNORECASE,
-            )
+            ),
         )
 
         asset = asset_service.find_asset(file_path)
@@ -111,7 +116,7 @@ def import_assets_from_prod(token):
 @click.argument("token")
 def import_redirects_from_prod(token):
     data = requests.get(
-        f"https://assets.ubuntu.com/v1/redirects?token={token}"
+        f"https://assets.ubuntu.com/v1/redirects?token={token}",
     ).json()
 
     print("Importing redirects...")
@@ -121,7 +126,7 @@ def import_redirects_from_prod(token):
                 permanent=entry.get("permanent"),
                 redirect_path=entry.get("redirect_path"),
                 target_url=entry.get("target_url"),
-            )
+            ),
         )
 
     db_session.commit()
@@ -152,3 +157,44 @@ def insert_dummy_data():
             optimize=asset.get("optimize", False),
             tags=["dummy_asset"],
         )
+
+
+def create_placeholder_file(file_path: str) -> None:
+    """
+    Create a placeholder image for an asset.
+    Note that this will *not* replace existing asset data.
+    """
+    # Don't modify existing data
+    if file_manager.exists(file_path):
+        print(
+            f"Asset '{file_path}' cannot be created because it "
+            "already exists.",
+        )
+        return
+
+    placeholder_image_name = "9f61b97f-logo-ubuntu.svg"
+    res = requests.get(
+        f"https://assets.ubuntu.com/v1/{placeholder_image_name}",
+        timeout=10,
+    )
+    res.raise_for_status()
+    file_manager.create(res.content, file_path)
+
+
+@db_group.command("deprecate-stale-assets")
+def deprecate_assets() -> None:
+    """
+    Deprecate assets whose data is inaccessible.
+    This command can be run several times.
+    """
+    assets = db_session.query(Asset).all()
+    for asset in assets:
+        asset_data = file_manager.fetch(asset.file_path)
+        if not asset_data:
+            print(404, f" No asset found for '{asset.file_path}'")
+            # Deprecate the asset
+            asset.deprecated = True
+            # Replace asset data with a placeholder.
+            create_placeholder_file(asset.file_path)
+
+    db_session.commit()
