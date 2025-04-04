@@ -25,7 +25,9 @@ def upgrade():
         sa.PrimaryKeyConstraint("first_name", "last_name", "email"),
         sa.UniqueConstraint("email"),
     )
-    op.add_column("asset", sa.Column("author_email", sa.String(), nullable=True))
+    op.add_column(
+        "asset", sa.Column("author_email", sa.String(), nullable=True)
+    )
     op.add_column("asset", sa.Column("file_type", sa.String(), nullable=True))
     op.create_foreign_key(
         "fk_asset_author", "asset", "author", ["author_email"], ["email"]

@@ -102,7 +102,6 @@ def home():
             search_params.file_types,
         ]
     ):
-
         assets, total = asset_service.find_assets(
             tag=search_params.tag,
             asset_type=search_params.asset_type,
