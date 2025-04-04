@@ -1,0 +1,79 @@
+<form method="get"
+      action="/manager"
+      class="p-form p-form--inline js-asset-search">
+  <div class="u-fixed-width">
+    <h1 class="p-muted-heading">Search and filter</h1>
+    <hr class="p-rule" />
+  </div>
+  {% set params = request.values.to_dict() %}
+  <div class="row">
+    <div class="col-3">
+      <p>
+        <label for="tag">
+          <strong>Search</strong>
+        </label>
+      </p>
+      <input class="js-tags"
+             type="text"
+             name="tag"
+             placeholder="Search asset name, file name, tag(s)"
+             id="tag"
+             value="{%- if params.tag -%}{{ params.tag }}{%- endif -%}">
+    </div>
+    <div class="col-3">
+      <div class="js-select">
+        <p>
+          <label for="asset-type">
+            <strong>Asset type</strong>
+          </label>
+        </p>
+        <select name="asset_type">
+          <option value="">All asset types</option>
+          {% for asset_type in form_field_data.asset_types %}
+            {% set asset_value = asset_type.name|lower|replace(' ', '-') %}
+            <option value="{{ asset_value }}"
+                    {% if asset_value in params.asset_type %}selected{% endif %}
+                    {% if asset_type.name == "-" %}disabled{% endif %}>{{ asset_type.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="col-3">
+      <div class="js-select">
+        <p>
+          <label for="asset-type">
+            <strong>Category</strong>
+          </label>
+        </p>
+        <select id="product-select" aria-labelledby="product" name="product_types">
+          <option value="">All products or departments</option>
+          {% for product in form_field_data.products %}
+            <option value="{{ product.slug }}"
+                    {% if product.slug in params.product_types %}selected{% endif %}>{{ product.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="col-3">
+      <div class="js-select">
+        <p>
+          <label for="asset-type">
+            <strong>File type</strong>
+          </label>
+        </p>
+        <select id="product-select" aria-labelledby="product" name="file_types">
+          <option value="">All file types</option>
+          {% for file_type in form_field_data.file_types %}
+            <option value="{{ file_type.name }}"
+                    {% if file_type.name in params.file_types %}selected{% endif %}>{{ file_type.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="u-fixed-width" style="margin-top: 36px;">
+    <div class="u-align--right">
+      <button type="submit" class="p-button--positive">Search</button>
+    </div>
+  </div>
+</form>

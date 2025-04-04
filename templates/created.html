@@ -1,30 +1,58 @@
 {% extends "_layout.html" %}
-
 {% block title %}Created assets{% endblock %}
-
 {% block content %}
-<div class="p-strip is-shallow">
-  {% if failed %}
-  <div class="row">
-    <h2>Failed to upload {{failed|length}} assets</h2>
-    {% for failure in failed %}
-    <p>{{failure.file_path}} - <code>{{failure.error}}</code></p>
-    {% endfor %}
+  {% set created = True %}
+  <div class="p-strip is-shallow">
+    <div class="u-fixed-width">
+      <div class="p-section--shallow">
+        <h1 class="p-muted-heading">Upload complete</h1>
+        <hr class="p-rule" />
+      </div>
+    </div>
+    {% if assets %}
+      <div class="p-section--shallow">
+        <div class="u-fixed-width">
+          <div class="p-section--shallow">
+            <div class="p-asset-created-details__header">
+              <h2>{{ assets|length }} asset(s) added to asset manager</h2>
+              <a href="/manager/create" class="p-button--positive">Add another asset</a>
+            </div>
+          </div>
+        </div>
+        <div class="row">{% include "_asset-list.html" %}</div>
+      </div>
+    {% endif %}
+    {% if existing %}
+      {% set assets = existing %}
+      <div class="p-section--shallow">
+        <div class="u-fixed-width">
+          <div class="p-section--shallow">
+            <div class="p-asset-created-details__header">
+              <h2>{{ assets|length }} existing asset(s)</h2>
+              <a href="/manager/create" class="p-button--positive">Add another asset</a>
+            </div>
+          </div>
+        </div>
+        <div class="row">{% include "_asset-list.html" %}</div>
+      </div>
+    {% endif %}
+    {% if failed %}
+      {% set assets = failed %}
+      <div class="p-section--shallow">
+        <div class="u-fixed-width">
+          <div class="p-section--shallow">
+            <div class="p-asset-created-details__header">
+              <h2>{{ assets|length }} asset(s) failed to upload</h2>
+              <a href="/manager/create" class="p-button--positive">Add another asset</a>
+            </div>
+          </div>
+        </div>
+        <div class="u-fixed-width">
+          <ul class="p-list">
+            {% for asset in assets %}<li class="p-list__item">{{ asset.file_path }}{% if asset.error %} :{{ asset.error }}{% endif %}</li>{% endfor %}
+          </ul>
+        </div>
+      </div>
+    {% endif %}
   </div>
-  {% endif %}
-  {% if assets %}
-  <div class="row">
-    <h2>{{assets|length}} assets created</h2>
-    {% include "_asset-list.html" %}
-  </div>
-  {% endif %}
-
-  {% if existing %}
-  <div class="row">
-    {% set assets = existing %}
-    <h2>{{existing|length}} existing assets</h2>
-    {% include "_asset-list.html" %}
-  </div>
-  {% endif %}
-</div>
 {% endblock %}

@@ -1,0 +1,17 @@
+{% extends "_layout.html" %}
+{% block title %}Asset details{% endblock %}
+{% block content %}
+  <div class="p-strip is-shallow">
+    <div class="u-fixed-width">
+      <div class="p-section--shallow">
+        <h1 class="p-muted-heading">Asset details</h1>
+        <hr class="p-rule" />
+      </div>
+    </div>
+    <div class="row">
+      {% with details=True %}
+        {% include "_asset-card-image.html" %}
+      {% endwith %}
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,10 @@
+<div class="p-section--shallow">
+        <button class="p-button--positive copy-link"
+                data-url="/v1/{{ asset.file_path }}">Asset link</button>
+        {% if asset.data.image %}
+                <button class="p-button js-copy-image-tag"
+                        data-url="/v1/{{ asset.file_path }}">Dev tag</button>
+        {% endif %}
+        <a class="p-button"
+           href="/manager/update?file-path={{ asset.file_path }}">Edit</a>
+</div>
