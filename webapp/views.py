@@ -232,37 +232,60 @@ def create_asset():
     """
     Create a new asset
     """
-    asset = request.values.get("asset")
-    friendly_name = request.values.get("friendly-name")
-    optimize = strtobool(request.values.get("optimize", "false"))
-    tags = request.values.get("tags", "").split(",")
-    products = request.values.get("products", "").split(",")
-    url_path = request.values.get("url-path", "").strip("/")
-    asset_type = request.values.get("asset-type", "")
-    author = request.values.get("author", "")
-    google_drive_link = request.values.get("google_drive_link", "")
-    salesforce_campaign_id = request.values.get("salesforce_campaign_id", "")
-    language = request.values.get("language", "")
-    deprecated = request.values.get("deprecated", "false").lower() == "true"
+    created_assets = []
+    existing_assets = []
+    failed_assets = []
 
-    try:
-        asset = asset_service.create_asset(
-            file_content=base64.b64decode(asset),
-            friendly_name=friendly_name,
-            optimize=optimize,
-            tags=tags,
-            products=products,
-            url_path=url_path,
-            asset_type=asset_type,
-            author=author,
-            google_drive_link=google_drive_link,
-            salesforce_campaign_id=salesforce_campaign_id,
-            language=language,
-            deprecated=deprecated,
+    if request.method == "POST":
+        friendly_name = request.values.get("friendly-name")
+        optimize = strtobool(request.values.get("optimize", "false"))
+        tags = request.values.get("tags", "").split(",")
+        products = request.values.get("products", "").split(",")
+        url_path = request.values.get("url-path", "").strip("/")
+        asset_type = request.values.get("asset-type", "")
+        author = request.values.get("author", "")
+        google_drive_link = request.values.get("google_drive_link", "")
+        salesforce_campaign_id = request.values.get(
+            "salesforce_campaign_id",
+            "",
         )
-    except AssetAlreadyExistException as error:
-        abort(409, error)
-    return jsonify(asset.as_json()), 201
+        language = request.values.get("language", "")
+        deprecated = (
+            request.values.get("deprecated", "false").lower() == "true"
+        )
+
+        # Process uploaded files
+        try:
+            for asset_file in request.files.getlist("assets"):
+                asset = asset_service.create_asset(
+                    file_content=asset_file.read(),
+                    friendly_name=friendly_name,
+                    optimize=optimize,
+                    tags=tags,
+                    products=products,
+                    url_path=url_path,
+                    asset_type=asset_type,
+                    author=author,
+                    google_drive_link=google_drive_link,
+                    salesforce_campaign_id=salesforce_campaign_id,
+                    language=language,
+                    deprecated=deprecated,
+                )
+                created_assets.append(asset)
+
+        except AssetAlreadyExistException as error:
+            existing_assets.append(
+                {"file_path": friendly_name, "error": str(error)},
+            )
+            return jsonify(failed_assets), 409
+        except Exception as error:
+            failed_assets.append(
+                {"file_path": friendly_name, "error": str(error)},
+            )
+            return jsonify(failed_assets), 400
+
+    created_assets = [i.as_json() for i in created_assets]
+    return jsonify(created_assets), 201
 
 
 # Tokens
