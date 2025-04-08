@@ -4,12 +4,14 @@ import re
 from distutils.util import strtobool
 from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
+import flask
+import yaml
 
 # Packages
 from flask import Blueprint
 from flask.globals import request
-import flask
-import yaml
+
+from webapp.param_parser import parse_asset_search_params
 
 # Local
 from webapp.services import (

@@ -30,6 +30,7 @@ class AssetService:
 
     def find_assets(
         self,
+        asset_name: str = "new",
         tag: str = "abc",
         asset_type: str = "image",
         product_types: list = ["a", "b"],
@@ -58,6 +59,8 @@ class AssetService:
                     Asset.file_path.ilike(f"%{tag}%"),
                 ),
             )
+        if asset_name:
+            conditions.append(Asset.name.ilike(f"%{asset_name}%"))
         if asset_type:
             conditions.append(Asset.asset_type == asset_type)
         if author_email:
@@ -123,7 +126,7 @@ class AssetService:
         tags: List[str] = [],
         products: List[str] = [],
         asset_type: str = "image",
-        author: str = None,
+        author: dict = None,
         google_drive_link: str = None,
         salesforce_campaign_id: str = None,
         language: str = "English",
@@ -149,7 +152,6 @@ class AssetService:
         else:
             # As it's not an image, there is no need for optimization
             data["optimized"] = False
-
         if data.get("image"):
             try:
                 # Use Pillow to open the image and get dimensions
@@ -199,7 +201,7 @@ class AssetService:
             file_manager.create(file_content, url_path)
             tags = self.create_tags_if_not_exist(tags)
             products = self.create_products_if_not_exists(products)
-            author = self.create_author_if_not_exist(author)
+            _author = self.create_author_if_not_exist(author)
 
             # Save file info in Postgres
             asset = Asset(
@@ -210,7 +212,7 @@ class AssetService:
                 created=datetime.now(tz=timezone.utc),
                 products=products,
                 asset_type=asset_type,
-                author=author,
+                author=_author,
                 google_drive_link=google_drive_link,
                 salesforce_campaign_id=salesforce_campaign_id,
                 language=language,
@@ -219,12 +221,13 @@ class AssetService:
             )
             db_session.add(asset)
             db_session.commit()
-            return asset
 
         # Rollback transaction if any error occurs
         except Exception:
             db_session.rollback()
             raise
+        else:
+            return asset
 
     def create_tags_if_not_exist(self, tag_names):
         """
@@ -274,30 +277,38 @@ class AssetService:
         db_session.commit()
         return product_objects
 
-    def create_author_if_not_exist(self, author):
+    def create_author_if_not_exist(
+        self,
+        author,
+    ):
         """
         Create the author object and return the object from the database
         """
-        if not author:
+        if not (email := author.get("email")):
             return None
 
+        # If not supplied, we use the email to get the first name
+        if not author.get("first_name"):
+            first_name, last_name = email.split("@")[0].split(".")
+        # If we still don't have a last name, use a reversed first name
+        if not author.get("last_name"):
+            last_name = first_name[::-1]
+
         existing_author = (
-            db_session.query(Author).filter_by(email=author["email"]).first()
+            db_session.query(Author).filter_by(email=email).first()
         )
 
         if existing_author:
             return existing_author
 
         author_data = Author(
-            first_name=author["first_name"],
-            last_name=author["last_name"],
-            email=author["email"],
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
         )
         db_session.add(author_data)
         db_session.commit()
-        return (
-            db_session.query(Author).filter_by(email=author["email"]).first()
-        )
+        return db_session.query(Author).filter_by(email=email).first()
 
     def normalize_tag_name(self, tag_name):
         return tag_name.strip().lower()
