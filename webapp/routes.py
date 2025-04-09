@@ -4,22 +4,19 @@ import re
 from distutils.util import strtobool
 from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
+# Packages
 import flask
 import yaml
-
-# Packages
 from flask import Blueprint
 from flask.globals import request
 
-from webapp.param_parser import parse_asset_search_params
-
 # Local
+from webapp.param_parser import parse_asset_search_params
 from webapp.services import (
     AssetAlreadyExistException,
     AssetNotFound,
     asset_service,
 )
-from webapp.param_parser import parse_asset_search_params
 from webapp.sso import login_required
 from webapp.views import (
     create_asset,
@@ -35,9 +32,9 @@ from webapp.views import (
     get_redirects,
     get_token,
     get_tokens,
+    get_users,
     update_asset,
     update_redirect,
-    get_users,
 )
 
 ui_blueprint = Blueprint("ui_blueprint", __name__, url_prefix="/manager")
