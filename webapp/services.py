@@ -30,7 +30,6 @@ class AssetService:
 
     def find_assets(
         self,
-        asset_name: str = "new",
         tag: str = "abc",
         asset_type: str = "image",
         product_types: list = ["a", "b"],
@@ -59,8 +58,6 @@ class AssetService:
                     Asset.file_path.ilike(f"%{tag}%"),
                 ),
             )
-        if asset_name:
-            conditions.append(Asset.name.ilike(f"%{asset_name}%"))
         if asset_type:
             conditions.append(Asset.asset_type == asset_type)
         if author_email:

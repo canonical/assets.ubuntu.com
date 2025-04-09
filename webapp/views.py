@@ -203,7 +203,6 @@ def get_assets():
             asset_type=search_params.asset_type,
             product_types=search_params.product_types,
             author_email=search_params.author_email,
-            asset_name=search_params.name,
             start_date=search_params.start_date,
             end_date=search_params.end_date,
             salesforce_campaign_id=search_params.salesforce_campaign_id,
