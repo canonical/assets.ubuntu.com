@@ -243,7 +243,10 @@ def create_asset():
         products = request.values.get("products", "").split(",")
         url_path = request.values.get("url-path", "").strip("/")
         asset_type = request.values.get("asset-type", "")
-        author = request.values.get("author", "")
+        author_email = request.values.get("author", "")
+        _author = {
+            "email": author_email,
+        }
         google_drive_link = request.values.get("google_drive_link", "")
         salesforce_campaign_id = request.values.get(
             "salesforce_campaign_id",
@@ -265,7 +268,7 @@ def create_asset():
                     products=products,
                     url_path=url_path,
                     asset_type=asset_type,
-                    author=author,
+                    author=_author,
                     google_drive_link=google_drive_link,
                     salesforce_campaign_id=salesforce_campaign_id,
                     language=language,

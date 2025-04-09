@@ -219,7 +219,7 @@ def create():
             optimize=optimize,
         )
 
-    elif request.method == "GET":
+    if request.method == "GET":
         # Repopulate the form with stored data
         form_data = flask.session.pop("form_data", {})
         return flask.render_template(
