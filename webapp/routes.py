@@ -4,20 +4,19 @@ import re
 from distutils.util import strtobool
 from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
-
 # Packages
-from flask import Blueprint
-from flask.globals import request
 import flask
 import yaml
+from flask import Blueprint
+from flask.globals import request
 
 # Local
+from webapp.param_parser import parse_asset_search_params
 from webapp.services import (
     AssetAlreadyExistException,
     AssetNotFound,
     asset_service,
 )
-from webapp.param_parser import parse_asset_search_params
 from webapp.sso import login_required
 from webapp.views import (
     create_asset,
@@ -33,9 +32,9 @@ from webapp.views import (
     get_redirects,
     get_token,
     get_tokens,
+    get_users,
     update_asset,
     update_redirect,
-    get_users,
 )
 
 ui_blueprint = Blueprint("ui_blueprint", __name__, url_prefix="/manager")
@@ -220,7 +219,7 @@ def create():
             optimize=optimize,
         )
 
-    elif request.method == "GET":
+    if request.method == "GET":
         # Repopulate the form with stored data
         form_data = flask.session.pop("form_data", {})
         return flask.render_template(
