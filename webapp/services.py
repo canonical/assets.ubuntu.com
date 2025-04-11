@@ -284,12 +284,22 @@ class AssetService:
         if not (email := author.get("email")):
             return None
 
+        possible_names = email.split("@")[0].split(".")
         # If not supplied, we use the email to get the first name
-        if not author.get("first_name"):
-            first_name, last_name = email.split("@")[0].split(".")
-        # If we still don't have a last name, use a reversed first name
-        if not author.get("last_name"):
-            last_name = first_name[::-1]
+        # The reason we want to derive this from the email is that most emails
+        # follow a predictable fname.lname@host format, and not all authors
+        # might be on launchpad (especially for cli tools).
+        if not (first_name := author.get("first_name")):
+            first_name = possible_names[0]
+
+        # If we don't have a last name
+        if not (last_name := author.get("last_name")):
+            try:
+                # use name from email
+                last_name = possible_names[1]
+            except IndexError:
+                # or a reversed first_name
+                last_name = first_name[::-1]
 
         existing_author = (
             db_session.query(Author).filter_by(email=email).first()
