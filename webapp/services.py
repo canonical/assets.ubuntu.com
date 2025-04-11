@@ -284,11 +284,15 @@ class AssetService:
         if not (email := author.get("email")):
             return None
 
+        possible_names = email.split("@")[0].split(".")
         # If not supplied, we use the email to get the first name
-        if not author.get("first_name"):
-            first_name, last_name = email.split("@")[0].split(".")
-        # If we still don't have a last name, use a reversed first name
-        if not author.get("last_name"):
+        if not (first_name := author.get("first_name")):
+            first_name = possible_names[0]
+
+        if not (last_name := author.get("last_name")) and len(
+            possible_names < 2
+        ):
+            # If we still don't have a last name, use a reversed first name
             last_name = first_name[::-1]
 
         existing_author = (
