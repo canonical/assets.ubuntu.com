@@ -286,6 +286,9 @@ class AssetService:
 
         possible_names = email.split("@")[0].split(".")
         # If not supplied, we use the email to get the first name
+        # The reason we want to derive this from the email is that most emails
+        # follow a predictable fname.lname@host format, and not all authors
+        # might be on launchpad (especially for cli tools).
         if not (first_name := author.get("first_name")):
             first_name = possible_names[0]
 
