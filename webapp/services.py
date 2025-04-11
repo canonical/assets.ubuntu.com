@@ -289,11 +289,14 @@ class AssetService:
         if not (first_name := author.get("first_name")):
             first_name = possible_names[0]
 
-        if not (last_name := author.get("last_name")) and len(
-            possible_names < 2
-        ):
-            # If we still don't have a last name, use a reversed first name
-            last_name = first_name[::-1]
+        # If we don't have a last name
+        if not (last_name := author.get("last_name")):
+            try:
+                # use name from email
+                last_name = possible_names[1]
+            except IndexError:
+                # or a reversed first_name
+                last_name = first_name[::-1]
 
         existing_author = (
             db_session.query(Author).filter_by(email=email).first()
