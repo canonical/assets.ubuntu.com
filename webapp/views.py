@@ -478,7 +478,7 @@ def get_users(username: str):
 
     headers = {"Authorization": "token " + environ.get("DIRECTORY_API_TOKEN")}
     response = requests.post(
-        "https://directory.wpe.internal/graphql/",
+        "https://api.directory.canonical.com/graphql/",
         json={
             "query": query,
             "variables": {"name": username.strip()},
