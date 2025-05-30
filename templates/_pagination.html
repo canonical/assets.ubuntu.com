@@ -54,11 +54,11 @@
                   name="per_page"
                   onchange="this.form.submit()">
             <option value="10"
-                    {% if request.args.get('per_page') == '10' %}selected{% endif %}>10</option>
+                    {% if request.args.get('per_page') == '15' %}selected{% endif %}>15</option>
             <option value="20"
-                    {% if request.args.get('per_page') == '20' %}selected{% endif %}>20</option>
+                    {% if request.args.get('per_page') == '30' %}selected{% endif %}>30</option>
             <option value="50"
-                    {% if request.args.get('per_page') == '50' %}selected{% endif %}>50</option>
+                    {% if request.args.get('per_page') == '60' %}selected{% endif %}>60</option>
             <option value="100"
                     {% if request.args.get('per_page') == '100' %}selected{% endif %}>100</option>
           </select>
