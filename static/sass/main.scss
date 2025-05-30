@@ -89,3 +89,15 @@
 .added-chips {
   background-color: #f7f7f7;
 }
+
+.p-form--per-page-select {
+  .p-form__label {
+    margin-right: 0;
+  }
+  .p-form__control {
+    max-width: fit-content;min-width: 0;padding-right: 2rem;
+  }
+  .p-button {
+    margin-left:0.5rem;
+  }
+}

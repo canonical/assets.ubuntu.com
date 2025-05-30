@@ -1,31 +1,42 @@
 {% extends "_layout.html" %}
 
-{% block title %}Search assets{% endblock title %}
+{% block title %}
+  Search assets
+{% endblock title %}
 
 {% block content %}
 
-<div class="p-strip is-shallow">
-  <div class="u-fixed-width">
-    {% include "_search-form.html" %}
-  </div>  
-  <div class="u-fixed-width">
-    {% if assets %}
-      <h3 class="p-heading--5 p-text--small-caps">Search results</h3>
-    {% elif is_search %}
-      <h3 class="p-heading--5 p-text--small-caps">No results. Please try another search.</h3>
-    {% else %}
-      <h3 class="p-heading--5 p-text--small-caps">Start a search to show assets.</h3>
-    {% endif %}
+  <div class="p-strip is-shallow">
+    <div class="u-fixed-width">{% include "_search-form.html" %}</div>
+    <div class="u-fixed-width">
+      {% if assets %}
+        <h3 class="p-heading--5 p-text--small-caps">Search results</h3>
+      {% elif is_search %}
+        <h3 class="p-heading--5 p-text--small-caps">No results. Please try another search.</h3>
+      {% else %}
+        <h3 class="p-heading--5 p-text--small-caps">Start a search to show assets.</h3>
+      {% endif %}
+    </div>
+    <hr class="p-rule is-fixed-width" />
   </div>
-  <hr class="p-rule is-fixed-width" />
-</div>
-{% include "_pagination.html" %}
-<div class="p-strip is-shallow">
-  <div class="row">
-    {% if assets %}
-      {% include "_asset-list.html" %}
-    {% endif %}
+
+  {% if total_assets %}
+    <div class="u-fixed-width">
+      <p id="assets_count" class="u-no-margin--bottom">
+        {{ total_assets }} asset{{ "s" if total_assets > 1 }} match{{ "es" if total_assets < 2 }} your search
+      </p>
+      <div class="u-hide--large u-sv3"></div>
+    </div>
+  {% endif %}
+
+  <div class="p-strip is-shallow u-no-padding--bottom">
+    <div class="row">
+      {% if assets %}
+        {% include "_asset-list.html" %}
+      {% endif %}
+    </div>
   </div>
-</div>
+
+  {% include "_pagination.html" %}
 
 {% endblock content %}
