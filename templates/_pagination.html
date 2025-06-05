@@ -53,11 +53,11 @@
                   id="assets-per-page"
                   name="per_page"
                   onchange="this.form.submit()">
-            <option value="10"
+            <option value="15"
                     {% if request.args.get('per_page') == '15' %}selected{% endif %}>15</option>
-            <option value="20"
+            <option value="30"
                     {% if request.args.get('per_page') == '30' %}selected{% endif %}>30</option>
-            <option value="50"
+            <option value="60"
                     {% if request.args.get('per_page') == '60' %}selected{% endif %}>60</option>
             <option value="100"
                     {% if request.args.get('per_page') == '100' %}selected{% endif %}>100</option>
