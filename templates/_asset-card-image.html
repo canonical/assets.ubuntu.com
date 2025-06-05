@@ -49,14 +49,14 @@
       <div class="p-section--shallow">
         <span>Tags:&nbsp;</span>
         {% for product in asset.products %}
-          <button class="p-chip is-inline is-dense">
+          <a href="/manager?tag={{product.name}}" class="p-chip is-inline is-dense">
             <span class="p-chip__value">{{ product.name }}</span>
-          </button>
+          </a>
         {% endfor %}
         {% for tag in asset.tags %}
-          <button class="p-chip is-inline is-dense">
+          <a href="/manager?tag={{tag.name}}" class="p-chip is-inline is-dense">
             <span class="p-chip__value">{{ tag.name }}</span>
-          </button>
+          </a>
         {% endfor %}
       </div>
       {% if details %}

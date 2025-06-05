@@ -90,12 +90,18 @@
   background-color: #f7f7f7;
 }
 
+a.p-chip {
+  background-color: var(--vf-color-background-neutral-default);
+}
+
 .p-form--per-page-select {
   .p-form__label {
     margin-right: 0;
   }
   .p-form__control {
-    max-width: fit-content;min-width: 0;padding-right: 2rem;
+    max-width: fit-content;
+    min-width: 0;
+    padding-right: 2rem;
   }
   .p-button {
     margin-left:0.5rem;
