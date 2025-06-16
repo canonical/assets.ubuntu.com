@@ -152,7 +152,7 @@
                 </div>
               </div>
             </div>
-            {% if asset and asset.author.email and asset.author.first_name and asset.author.last_name %}
+            {% if asset and asset.author and asset.author.email and asset.author.first_name and asset.author.last_name %}
               {% set email = asset.author.email %}
               {% set first_name = asset.author.first_name %}
               {% set last_name = asset.author.last_name %}
@@ -265,7 +265,7 @@
                       aria-label="language">
                 {% for language in form_field_data.languages %}
                   <option value="{{ language.name }}"
-                          {% if asset and language.name in asset.language %}selected{% endif %}
+                          {% if asset and asset.language and language.name in asset.language %}selected{% endif %}
                           {% if language.name == "-" %}disabled{% endif %}>{{ language.name }}</option>
                 {% endfor %}
               </select>
