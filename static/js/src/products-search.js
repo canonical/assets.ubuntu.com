@@ -201,7 +201,9 @@ function showAndHideProductChips(chips, query) {
  * @param {HTMLInputElement} input - The input element to attach the event listener to.
  */
 function chips_in_input(input) {
+  if (!input) return;
   const parent_chips_container = input.closest(".add-and-edit-chips");
+  if (!parent_chips_container) return;
   input.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
       event.preventDefault();
@@ -255,8 +257,9 @@ function createChip(value, parent_chips_container) {
  * @param {HTMLInputElement} input - The input element where chips are being managed.
  */
 function handleExistingChips_in_input(input) {
+  if (!input) return;
   const parent_chips_container = input.closest(".add-and-edit-chips");
-  console.log(parent_chips_container);
+  if (!parent_chips_container) return;
   const existing_chips = Array.from(
     parent_chips_container.querySelectorAll(".added-chips .u-hide")
   );

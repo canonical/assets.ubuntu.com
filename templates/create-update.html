@@ -1,5 +1,7 @@
 {% extends "_layout.html" %}
+
 {% block title %}Create assets{% endblock %}
+
 {% block content %}
   {% set is_update = request.path == "/manager/update" %}
   <div class="p-strip">
@@ -23,23 +25,25 @@
                         <img src="/v1/{{ asset.file_path }}" />
                       {% elif asset.asset_type == "whitepaper" %}
                         <img class="p-asset-card--thumbnail--small"
-                            src="https://assets.ubuntu.com/v1/b061c401-White+paper.svg"
-                            alt="">
+                             src="https://assets.ubuntu.com/v1/b061c401-White+paper.svg"
+                             alt="" />
                       {% else %}
                         <img class="p-asset-card--thumbnail--small"
-                            src="https://assets.ubuntu.com/v1/fd84bbdc-Document-open.svg"
-                            alt="">
+                             src="https://assets.ubuntu.com/v1/fd84bbdc-Document-open.svg"
+                             alt="" />
                       {% endif %}
                     </a>
                   </p>
                   <label for="depracted" class="p-heading--5">Deprecated:</label>
                   <input type="checkbox"
                          name="deprecated"
-                         {% if asset.deprecated %}checked{% endif %}>
+                         {% if asset.deprecated %}checked{% endif %} />
                 </div>
               {% else %}
                 <label class="p-heading--5 u-no-margin--bottom">Choose file(s) to upload</label>
-                <p class="u-text--muted u-no-padding--top">Please note, if an asset is already in the asset manager, it cannot be added again</p>
+                <p class="u-text--muted u-no-padding--top">
+                  Please note, if an asset is already in the asset manager, it cannot be added again
+                </p>
                 <input id="input-files"
                        type="file"
                        multiple
@@ -62,7 +66,7 @@
                             {% if asset_type.name == "-" %}disabled{% endif %}>{{ asset_type.name }}</option>
                   {% endfor %}
                 </select>
-                <input type="text" class="u-hide js-hidden-field" name="asset_type" value="">
+                <input type="text" class="u-hide js-hidden-field" name="asset_type" value="" />
               </div>
             </div>
             <div class="p-section--shallow" data-name="assetName">
@@ -73,28 +77,7 @@
                      name="name"
                      placeholder="For example ‘A guide to open source vulnerability management’"
                      aria-labelledby="asset-name"
-                     value="{% if asset %}{{ asset.name }}{% endif %}">
-            </div>
-            <div class="p-section--shallow" data-name="assetTags">
-              {% set existing_tags = [] %}
-              {% if asset %}
-                {% for tag in asset.tags %}
-                  {% set _ = existing_tags.append(tag.name) %}
-                {% endfor %}
-              {% endif %}
-              <label class="p-heading--5 u-no-margin--bottom" id="asset-tags">Asset tags</label>
-              <p class="u-text--muted u-no-padding--top">Add tags that will help you search and find the asset</p>
-              <div class="add-and-edit-chips">
-                <div class="added-chips">
-                  {% for tag in existing_tags %}<span class="u-hide">{{ tag }}</span>{% endfor %}
-                </div>
-                <div class="add-chips-input">
-                  <input type="text"
-                         id="assets-chips-input"
-                         placeholder="Enter tag and press enter" />
-                  <input type="text" class="u-hide js-hidden-field" name="tags" value="">
-                </div>
-              </div>
+                     value="{% if asset %}{{ asset.name }}{% endif %}" />
             </div>
             <div class="p-section--shallow" data-name="productTags">
               {% set existing_products = [] %}
@@ -126,8 +109,12 @@
                            placeholder="Start typing a product name or department"
                            type="text"
                            value=""
-                           aria-labelledby="product-tags">
-                    <input type="text" class="u-hide js-hidden-field" name="products" value="" tabindex="-1">
+                           aria-labelledby="product-tags" />
+                    <input type="text"
+                           class="u-hide js-hidden-field"
+                           name="products"
+                           value=""
+                           tabindex="-1" />
                   </div>
                 </div>
                 <div class="p-search-and-filter__panel js-chips-panel" aria-hidden="true">
@@ -149,6 +136,27 @@
                       </p>
                     </div>
                   </div>
+                </div>
+              </div>
+            </div>
+            <div class="p-section--shallow" data-name="assetTags">
+              {% set existing_tags = [] %}
+              {% if asset %}
+                {% for tag in asset.tags %}
+                  {% set _ = existing_tags.append(tag.name) %}
+                {% endfor %}
+              {% endif %}
+              <label class="p-heading--5 u-no-margin--bottom" id="asset-tags">Asset tags</label>
+              <p class="u-text--muted u-no-padding--top">Add tags that will help you search and find the asset</p>
+              <div class="add-and-edit-chips">
+                <div class="added-chips">
+                  {% for tag in existing_tags %}<span class="u-hide">{{ tag }}</span>{% endfor %}
+                </div>
+                <div class="add-chips-input">
+                  <input type="text"
+                         id="assets-chips-input"
+                         placeholder="Enter tag and press enter" />
+                  <input type="text" class="u-hide js-hidden-field" name="tags" value="" />
                 </div>
               </div>
             </div>
@@ -177,8 +185,8 @@
                     <span class="p-chip js-chip"
                           data-email="{{ email }}"
                           data-firstname="{{ first_name }}"
-                          data-lastname="{{ last_name}}">
-                      <span class="p-chip__value js-value">{{ first_name + " " + last_name}}</span>
+                          data-lastname="{{ last_name }}">
+                      <span class="p-chip__value js-value">{{ first_name + " " + last_name }}</span>
                       <button class="p-chip__dismiss">Dismiss</button>
                     </span>
                   {% endif %}
@@ -203,7 +211,7 @@
                     <input type="text"
                            class="u-hide js-hidden-field-lastname"
                            name="author_last_name"
-                           value="{% if last_name%}{{ last_name}}{% endif %}"
+                           value="{% if last_name %}{{ last_name }}{% endif %}"
                            tabindex="-1" />
                     <button alt="search" class="u-off-screen" type="submit" tabindex="-1">Search</button>
                   </div>
@@ -240,6 +248,10 @@
           <div class="col">
             <div class="p-section--shallow" data-name="googleDriveLink">
               <label class="p-heading--5 u-no-margin--bottom">Google Drive link</label>
+              <span class="p-tooltip--right" aria-describedby="google-drive-link-info">
+                <i class="p-icon--information"></i> <span class="p-tooltip__message" role="tooltip" id="google-drive-link-info">This link is Canonical internal and should point to the asset's Google Doc</span>
+              </span>
+
               <p class="u-text--muted u-no-padding--top">
                 Add the URL to the asset on Google Drive. For example, the link to a copydoc
               </p>
@@ -247,29 +259,28 @@
                      id="google-drive-link"
                      name="google_drive_link"
                      placeholder="If applicable"
-                     value="{% if asset and asset.google_drive_link %}{{ asset.google_drive_link }}{% endif %}">
+                     value="{% if asset and asset.google_drive_link %}{{ asset.google_drive_link }}{% endif %}" />
             </div>
             <div class="p-section--shallow" data-name="salesforceCampaignId">
               <label class="p-heading--5 u-no-margin--bottom">Salesforce campaign ID</label>
-              <p class="u-text--muted u-no-padding--top">Add the four-digit number of a campaign</p>
+              <p class="u-text--muted u-no-padding--top">Add the id number of campaign</p>
               <input type="text"
                      id="salesforce-campaign-id-number"
                      name="salesforce_campaign_id"
                      placeholder="If applicable"
-                     value="{% if asset and asset.salesforce_campaign_id %}{{ asset.salesforce_campaign_id }}{% endif %}">
+                     value="{% if asset and asset.salesforce_campaign_id %}{{ asset.salesforce_campaign_id }}{% endif %}" />
             </div>
             <div class="p-section--shallow js-multiselect" data-name="language">
               <label class="p-heading--5 u-no-margin--bottom" id="language">Language</label>
               <p class="u-text--muted u-no-padding--top">Choose the primary language</p>
-              <select id="language-select"
-                      aria-label="language">
+              <select id="language-select" aria-label="language">
                 {% for language in form_field_data.languages %}
                   <option value="{{ language.name }}"
                           {% if asset and asset.language and language.name in asset.language %}selected{% endif %}
                           {% if language.name == "-" %}disabled{% endif %}>{{ language.name }}</option>
                 {% endfor %}
               </select>
-              <input type="text" class="u-hide js-hidden-field" name="language">
+              <input type="text" class="u-hide js-hidden-field" name="language" />
             </div>
           </div>
         </div>
