@@ -156,13 +156,10 @@ function attachLoadingSpinner(submitButton) {
 }
 
 document.querySelectorAll("form").forEach((form) => {
-  console.log("Form found", form);
   form.addEventListener("submit", (event) => {
     const submitButtons = form.querySelectorAll("button[type='submit']");
-    if (submitButtons) {
-      submitButtons.forEach((submitButton) => {
-        attachLoadingSpinner(submitButton);
-      });
-    }
+    submitButtons?.forEach((submitButton) => {
+      attachLoadingSpinner(submitButton);
+    });
   });
 });

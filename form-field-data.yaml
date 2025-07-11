@@ -174,9 +174,6 @@ products:
     slug: "sales"
 
 asset_types:
-  - name: "Image"
-  - name: "Illustration"
-  - name: "-"
   - name: "Case Study"
   - name: "Datasheet"
   - name: "Demo"
@@ -184,12 +181,13 @@ asset_types:
   - name: "Ebook"
   - name: "Guide"
   - name: "Icon"
+  - name: "Illustration"
+  - name: "Image"
   - name: "Infographic"
-  - name: "Whitepaper"
-  - name: "Photography"
   - name: "Logo"
+  - name: "Photography"
   - name: "Script"
-
+  - name: "Whitepaper"
 
 languages:
   - name: "English"
