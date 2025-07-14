@@ -10,7 +10,6 @@ class AssetSearchParams:
     name: str = ""
     start_date: str = None
     end_date: str = None
-    salesforce_campaign_id: str = ""
     language: str = ""
     file_types: list = None
 

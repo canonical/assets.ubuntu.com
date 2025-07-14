@@ -1,6 +1,7 @@
 # System
 import math
 import re
+import json
 from distutils.util import strtobool
 from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
@@ -16,6 +17,7 @@ from webapp.services import (
     AssetAlreadyExistException,
     AssetNotFound,
     asset_service,
+    query_salesforce_campaigns,
 )
 from webapp.sso import login_required
 from webapp.views import (
@@ -96,7 +98,6 @@ def home():
             search_params.author_email,
             search_params.start_date,
             search_params.end_date,
-            search_params.salesforce_campaign_id,
             search_params.language,
             search_params.file_types,
         ]
@@ -108,7 +109,6 @@ def home():
             author_email=search_params.author_email,
             start_date=search_params.start_date,
             end_date=search_params.end_date,
-            salesforce_campaign_id=search_params.salesforce_campaign_id,
             language=search_params.language,
             page=page,
             per_page=per_page,
@@ -145,15 +145,17 @@ def create():
     created_assets = []
     existing_assets = []
     failed_assets = []
+    salesforce_campaigns_string = request.form.get(
+        "salesforce_campaigns", "[]"
+    )
+    salesforce_campaigns = json.loads(salesforce_campaigns_string)
 
     if request.method == "POST":
         form_data = {
             "tags": request.form.get("tags", ""),
             "products": request.form.get("products", ""),
             "google_drive_link": request.form.get("google_drive_link", ""),
-            "salesforce_campaign_id": request.form.get(
-                "salesforce_campaign_id", ""
-            ),
+            "salesforce_campaigns": salesforce_campaigns,
             "language": request.form.get("language", "") or "English",
             "deprecated": request.form.get("deprecated", "false").lower()
             == "true",
@@ -191,7 +193,7 @@ def create():
                     asset_type=form_data["asset_type"],
                     author=author,
                     google_drive_link=form_data["google_drive_link"],
-                    salesforce_campaign_id=form_data["salesforce_campaign_id"],
+                    salesforce_campaigns=form_data["salesforce_campaigns"],
                     language=form_data["language"],
                     deprecated=form_data["deprecated"],
                 )
@@ -245,7 +247,10 @@ def update():
         deprecated = strtobool(request.form.get("deprecated", "false"))
         asset_type = request.form.get("asset_type", "")
         google_drive_link = request.form.get("google_drive_link", "")
-        salesforce_campaign_id = request.form.get("salesforce_campaign_id", "")
+        salesforce_campaigns_string = request.form.get(
+            "salesforce_campaigns", "[]"
+        )
+        salesforce_campaigns = json.loads(salesforce_campaigns_string)
         language = request.form.get("language", "")
         author_email = request.form.get("author_email", "")
         author_first_name = request.form.get("author_first_name", "")
@@ -266,7 +271,7 @@ def update():
                 asset_type=asset_type,
                 author=author,
                 google_drive_link=google_drive_link,
-                salesforce_campaign_id=salesforce_campaign_id,
+                salesforce_campaigns=salesforce_campaigns,
                 language=language,
             )
             flask.flash("Asset updated", "positive")
@@ -289,6 +294,12 @@ def details():
         flask.flash("Asset not found", "negative")
 
     return flask.render_template("details.html", asset=asset)
+
+
+@ui_blueprint.route("/salesforce_campaigns/<query>", methods=["GET"])
+@login_required
+def campaign_operations(query):
+    return query_salesforce_campaigns(query)
 
 
 # API Routes
