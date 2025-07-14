@@ -13,10 +13,11 @@ from sqlalchemy import func, or_
 # Local
 from webapp.config import config
 from webapp.database import db_session
+from webapp.integrations.trino_service import trino_cur
 from webapp.lib.file_helpers import is_svg
 from webapp.lib.processors import ImageProcessor
 from webapp.lib.url_helpers import sanitize_filename
-from webapp.models import Asset, Author, Product, Tag
+from webapp.models import Asset, Author, Product, Tag, Salesforce_Campaign
 from webapp.swift import file_manager
 from webapp.utils import lru_cache
 
@@ -31,14 +32,13 @@ class AssetService:
 
     def find_assets(
         self,
-        tag: str = "abc",
-        asset_type: str = "image",
-        product_types: list = ["a", "b"],
-        author_email: str = "abc@g.com",
-        start_date: str = "2024-01-01",
-        end_date: str = "2024-10-14",
-        salesforce_campaign_id: str = "1234",
-        language: str = "English",
+        tag: str = "",
+        asset_type: str = "",
+        product_types: list = [],
+        author_email: str = "",
+        start_date: str = "",
+        end_date: str = "",
+        language: str = "",
         page=1,
         per_page=16,
         order_by=Asset.created,
@@ -65,13 +65,6 @@ class AssetService:
             conditions.append(Asset.author_email == author_email)
         if language:
             conditions.append(Asset.language.ilike(f"{language}"))
-        if salesforce_campaign_id:
-            conditions.append(
-                Asset.salesforce_campaign_id.ilike(
-                    f"{salesforce_campaign_id}",
-                ),
-            )
-
         if not include_deprecated:
             conditions.append(Asset.deprecated.is_(False))
 
@@ -126,7 +119,7 @@ class AssetService:
         asset_type: str = "image",
         author: dict = None,
         google_drive_link: str = None,
-        salesforce_campaign_id: str = None,
+        salesforce_campaigns: List[dict | None] = [],
         language: str = "English",
         deprecated: bool = False,
         data={},
@@ -202,6 +195,9 @@ class AssetService:
             file_manager.create(file_content, url_path)
             tags = self.create_tags_if_not_exist(tags)
             products = self.create_products_if_not_exists(products)
+            salesforce_campaigns = self.create_campaigns_if_not_exist(
+                salesforce_campaigns
+            )
             _author = self.create_author_if_not_exist(author)
 
             # Save file info in Postgres
@@ -215,7 +211,7 @@ class AssetService:
                 asset_type=asset_type,
                 author=_author,
                 google_drive_link=google_drive_link,
-                salesforce_campaign_id=salesforce_campaign_id,
+                salesforce_campaigns=salesforce_campaigns,
                 language=language,
                 deprecated=deprecated,
                 file_type=url_path.split(".")[-1].lower(),
@@ -229,6 +225,41 @@ class AssetService:
             raise
         else:
             return asset
+
+    def create_campaigns_if_not_exist(
+        self,
+        salesforce_campaigns: List[dict | None],
+    ):
+        """
+        Create the salesforce campaigns if they don't exist
+        and return the objects from the database
+        """
+
+        if not salesforce_campaigns:
+            return []
+        salesforce_campaign_objects = []
+        for campaign in salesforce_campaigns:
+            campaign_id = campaign.get("id")
+            campaign_name = campaign.get("name", "")
+            if not campaign_id or not campaign_name:
+                continue
+            existing_campaign = (
+                db_session.query(Salesforce_Campaign)
+                .filter_by(id=campaign_id)
+                .first()
+            )
+
+            if existing_campaign:
+                salesforce_campaign_objects.append(existing_campaign)
+            else:
+                campaign = Salesforce_Campaign(
+                    id=campaign_id, name=campaign_name
+                )
+                salesforce_campaign_objects.append(campaign)
+                db_session.add(campaign)
+
+        db_session.commit()
+        return salesforce_campaign_objects
 
     def create_tags_if_not_exist(self, tag_names):
         """
@@ -337,7 +368,7 @@ class AssetService:
         asset_type: str = "image",
         author: str = None,
         google_drive_link: str = None,
-        salesforce_campaign_id: str = None,
+        salesforce_campaigns: List[dict | None] = [],
         language: str = "English",
     ):
         asset = (
@@ -362,8 +393,10 @@ class AssetService:
             asset.author = self.create_author_if_not_exist(author)
         if google_drive_link:
             asset.google_drive_link = google_drive_link
-        if salesforce_campaign_id:
-            asset.salesforce_campaign_id = salesforce_campaign_id
+        if salesforce_campaigns:
+            asset.salesforce_campaigns = self.create_campaigns_if_not_exist(
+                salesforce_campaigns
+            )
         if language:
             asset.language = language
         if deprecated is not None:
@@ -418,3 +451,18 @@ class ReadOnlyMode(Exception):
 
 
 asset_service = AssetService()
+
+
+def query_salesforce_campaigns(query: str) -> list[dict]:
+    formed_query = (
+        f"SELECT Id, Name FROM Campaign WHERE Name LIKE '%{query}%' LIMIT 20"
+    )
+    all_results = []
+    try:
+        trino_cur.execute(formed_query)
+        fetch_results = trino_cur.fetchall()
+        for result in fetch_results:
+            all_results.append({"id": result[0], "name": result[1]})
+    except Exception as e:
+        print(e)
+    return all_results

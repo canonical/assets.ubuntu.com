@@ -261,15 +261,78 @@
                      placeholder="If applicable"
                      value="{% if asset and asset.google_drive_link %}{{ asset.google_drive_link }}{% endif %}" />
             </div>
-            <div class="p-section--shallow" data-name="salesforceCampaignId">
+
+            <div class="p-section--shallow" data-name="salesforceCampaigns">
+              {% set existing_campaigns = [] %}
+              {% if asset and asset.salesforce_campaigns | length %}
+                {% for campaign in asset.salesforce_campaigns %}
+                  {% set _ = existing_campaigns.append({
+                    "id": campaign.id,
+                    "name": campaign.name
+                  }) %}
+                {% endfor %}
+              {% elif form_session_data and form_session_data.salesforce_campaigns | length %}
+                {% for campaign in form_session_data.salesforce_campaigns %}
+                  {% set _ = existing_campaigns.append({
+                    "id": campaign.id,
+                    "name": campaign.name
+                  }) %}
+                {% endfor %}
+              {% endif %}
+              <div class="p-search-and-filter js-campaign-search">
+                <label class="p-heading--5 u-no-margin--bottom" id="salesforceCampaigns">Salesforce Campaigns</label>
+                <p class="u-text--muted u-no-padding--top">Search and select the campaign names</p>
+                <div class="p-chips--selected_campaigns">
+                  {% for campaign in existing_campaigns %}
+                    <span class="p-chip js-selected"
+                          tabindex="-1"
+                          data-name="{{ campaign.name }}"
+                          data-id="{{ campaign.id }}">
+                      <span class="p-chip__value js-content">{{ campaign.name }}</span>
+                      <button class="p-chip__dismiss">Dismiss</button>
+                    </span>
+                  {% endfor %}
+                </div>
+                <div class="p-search-and-filter__search-container" aria-expanded="false">
+                  <div class="p-search-and-filter__box" data-overflowing="false">
+                    <label class="u-hide" for="search">Search Campaign names</label>
+                    <input autocomplete="off"
+                           class="p-search-and-filter__input js-campaign-input"
+                           id="search"
+                           placeholder="Start typing a campaign name"
+                           type="text"
+                           value=""
+                           aria-labelledby="salesforceCampaigns" />
+                    <input type="text"
+                           class="u-hide js-hidden-field"
+                           name="salesforce_campaigns"
+                           value='{{ existing_campaigns | tojson }}'
+                           tabindex="-1" />
+                  </div>
+                </div>
+                <div class="p-search-and-filter__panel js-chips-panel" aria-hidden="true">
+                  <div class="p-filter-panel-section">
+                    <div class="p-filter-panel-section__header">
+                      <h4 class="p-filter-panel-section__heading p-heading--5">Campaigns</h4>
+                    </div>
+                    <div class="p-filter-panel-section__chips js-campaign-chip-container"
+                         style="overflow-y:auto">Loading...</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <template id="campaign-unselected-chip-template">
+              <button class="p-chip js-unselected" tabindex="-1" data-name="" data-id="">
+                <span class="p-chip__value js-content"></span>
+              </button>
+            </template>
+            <!-- <div class="p-section--shallow" data-name="salesforceCampaignId">
               <label class="p-heading--5 u-no-margin--bottom">Salesforce campaign ID</label>
               <p class="u-text--muted u-no-padding--top">Add the id number of campaign</p>
-              <input type="text"
-                     id="salesforce-campaign-id-number"
-                     name="salesforce_campaign_id"
-                     placeholder="If applicable"
-                     value="{% if asset and asset.salesforce_campaign_id %}{{ asset.salesforce_campaign_id }}{% endif %}" />
-            </div>
+              <input type="text" id="salesforce-campaign-id-number" name="salesforce_campaign_id" placeholder="If applicable" value="{% if asset and asset.salesforce_campaign_id %}{{ asset.salesforce_campaign_id }}{% endif %}" />
+</div> -->
+
             <div class="p-section--shallow js-multiselect" data-name="language">
               <label class="p-heading--5 u-no-margin--bottom" id="language">Language</label>
               <p class="u-text--muted u-no-padding--top">Choose the primary language</p>

@@ -3,6 +3,8 @@ import handleProductsChip from "./products-search";
 
 import "./authors-search";
 import handleAuthorsChip from "./authors-search";
+import "./sf_campaign-search";
+import handleCampaignChip from './sf_campaign-search';
 
 import "./date-picker";
 import "./generic-fields";
@@ -21,6 +23,10 @@ document.addEventListener("click", function (e) {
     }
     if (targetChip.closest(".js-authors-search")) {
       handleAuthorsChip(targetChip);
+      return;
+    }
+    if (targetChip.closest(".js-campaign-search")) {
+      handleCampaignChip(targetChip);
       return;
     }
     // Handle clicks outside the search and filter
