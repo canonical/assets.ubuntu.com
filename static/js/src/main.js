@@ -137,3 +137,29 @@ export function sanitizeInput(input) {
     .replace(/[^a-z0-9-]/g, "")
     .replace(/^-+|-+$/g, "");
 }
+
+function attachLoadingSpinner(submitButton) {
+  let spinnerClassName = "p-icon--spinner u-animation--spin";
+  if (submitButton.classList.contains("p-button--positive")) {
+    spinnerClassName += " is-light";
+  }
+
+  const spinnerIcon = document.createElement("i");
+  spinnerIcon.className = spinnerClassName;
+  const buttonRect = submitButton.getBoundingClientRect();
+  submitButton.style.width = buttonRect.width + "px";
+  submitButton.style.height = buttonRect.height + "px";
+  submitButton.classList.add("is-processing");
+  submitButton.disabled = true;
+  submitButton.innerText = "";
+  submitButton.appendChild(spinnerIcon);
+}
+
+document.querySelectorAll("form").forEach((form) => {
+  form.addEventListener("submit", (event) => {
+    const submitButtons = form.querySelectorAll("button[type='submit']");
+    submitButtons?.forEach((submitButton) => {
+      attachLoadingSpinner(submitButton);
+    });
+  });
+});
