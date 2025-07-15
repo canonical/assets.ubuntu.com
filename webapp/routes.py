@@ -99,6 +99,8 @@ def home():
             search_params.salesforce_campaign_id,
             search_params.language,
             search_params.file_types,
+            search_params.vertical,
+            search_params.portfolio,
         ]
     ):
         assets, total = asset_service.find_assets(
@@ -116,6 +118,8 @@ def home():
             desc_order=order_dir == "desc",
             include_deprecated=include_deprecated,
             file_types=search_params.file_types,
+            vertical=search_params.vertical,
+            portfolio=search_params.portfolio,
         )
         is_search = True
 
@@ -162,6 +166,8 @@ def create():
             "author_first_name": request.form.get("author_first_name", ""),
             "author_last_name": request.form.get("author_last_name", ""),
             "name": request.form.get("name", ""),
+            "vertical": request.form.get("vertical", ""),
+            "portfolio": request.form.get("portfolio", ""),
         }
         form_data["tags"] = re.split(",|\\s", form_data["tags"])
         form_data["products"] = re.split(",|\\s", form_data["products"])
@@ -194,6 +200,8 @@ def create():
                     salesforce_campaign_id=form_data["salesforce_campaign_id"],
                     language=form_data["language"],
                     deprecated=form_data["deprecated"],
+                    vertical=form_data["vertical"],
+                    portfolio=form_data["portfolio"],
                 )
 
                 created_assets.append(asset)
@@ -256,6 +264,8 @@ def update():
             "last_name": author_last_name,
         }
         name = request.form.get("name", "")
+        portfolio = request.form.get("portfolio", "")
+        vertical = request.form.get("vertical", "")
         try:
             asset = asset_service.update_asset(
                 file_path=file_path,
@@ -268,6 +278,8 @@ def update():
                 google_drive_link=google_drive_link,
                 salesforce_campaign_id=salesforce_campaign_id,
                 language=language,
+                portfolio=portfolio,
+                vertical=vertical,
             )
             flask.flash("Asset updated", "positive")
         except AssetNotFound:

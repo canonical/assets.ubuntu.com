@@ -13,6 +13,8 @@ class AssetSearchParams:
     salesforce_campaign_id: str = ""
     language: str = ""
     file_types: list = None
+    vertical: str = None
+    portfolio: str = None
 
     def __post_init__(self):
         if self.product_types is None:

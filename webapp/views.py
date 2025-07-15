@@ -114,6 +114,8 @@ def update_asset(file_path):
     google_drive_link = request.values.get("google_drive_link", "")
     salesforce_campaign_id = request.values.get("salesforce_campaign_id", "")
     language = request.values.get("language", "")
+    vertical = request.values.get("vertical", "")
+    portfolio = request.values.get("portfolio", "")
     try:
         asset = asset_service.update_asset(
             file_path=file_path,
@@ -125,6 +127,8 @@ def update_asset(file_path):
             google_drive_link=google_drive_link,
             salesforce_campaign_id=salesforce_campaign_id,
             language=language,
+            vertical=vertical,
+            portfolio=portfolio,
         )
         return jsonify(asset.as_json())
     except AssetNotFound:
@@ -185,6 +189,7 @@ def get_assets():
     per_page = (
         20 if not per_page or per_page < 1 or per_page > 100 else per_page
     )
+    total = 0
 
     if any(
         [
@@ -196,6 +201,8 @@ def get_assets():
             search_params.end_date,
             search_params.salesforce_campaign_id,
             search_params.language,
+            search_params.vertical,
+            search_params.portfolio,
         ]
     ):
         assets, total = asset_service.find_assets(
@@ -207,10 +214,12 @@ def get_assets():
             end_date=search_params.end_date,
             salesforce_campaign_id=search_params.salesforce_campaign_id,
             language=search_params.language,
-            file_types=[file_type],
+            file_types=[file_type] if file_type else [],
             page=page,
             per_page=per_page,
             include_deprecated=include_deprecated,
+            portfolio=search_params.portfolio,
+            vertical=search_params.vertical,
         )
     else:
         assets = asset_service.find_all_assets()
@@ -234,7 +243,6 @@ def create_asset():
     created_assets = []
     existing_assets = []
     failed_assets = []
-
     if request.method == "POST":
         friendly_name = request.values.get("friendly-name")
         optimize = strtobool(request.values.get("optimize", "false"))
@@ -255,6 +263,8 @@ def create_asset():
         deprecated = (
             request.values.get("deprecated", "false").lower() == "true"
         )
+        vertical = request.values.get("vertical", "")
+        portfolio = request.values.get("portfolio", "")
 
         # Process uploaded files
         try:
@@ -272,6 +282,8 @@ def create_asset():
                     salesforce_campaign_id=salesforce_campaign_id,
                     language=language,
                     deprecated=deprecated,
+                    vertical=vertical,
+                    portfolio=portfolio,
                 )
                 created_assets.append(asset)
 
