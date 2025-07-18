@@ -28,7 +28,7 @@ config:
   options:
     os:
       type: secret
-      description: Swift bucket credentials, must contain (auth_url, username, password, auth_version, tenant_name?)
-    directory_api:
+      description: Swift bucket credentials, must contain (auth-url, username, password, auth-version, tenant-name?)
+    directory-api:
       type: secret
       description: Canonical Directory API credentials, must contain (url, token)
