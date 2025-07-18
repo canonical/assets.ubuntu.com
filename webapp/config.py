@@ -6,7 +6,7 @@ ENV_FILES = (".env", ".env.local")
 
 class SwiftConfig(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=ENV_FILES, extra="ignore", env_prefix="os_"
+        env_file=ENV_FILES, extra="ignore", env_prefix="flask_os_"
     )
     auth_url: str
     username: str
@@ -17,14 +17,16 @@ class SwiftConfig(BaseSettings):
 
 class DirectoryApiConfig(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=ENV_FILES, extra="ignore", env_prefix="directory_api_"
+        env_file=ENV_FILES, extra="ignore", env_prefix="flask_directory_api_"
     )
     url: str
     token: SecretStr
 
 
 class Config(BaseSettings):
-    model_config = SettingsConfigDict(env_file=ENV_FILES, extra="ignore")
+    model_config = SettingsConfigDict(
+        env_file=ENV_FILES, extra="ignore", env_prefix="flask_"
+    )
 
     secret_key: SecretStr
     database_url: SecretStr = Field(
