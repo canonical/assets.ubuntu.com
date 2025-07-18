@@ -276,11 +276,14 @@ class AssetService:
 
     def create_author_if_not_exist(
         self,
-        author,
+        author = None,
     ):
         """
         Create the author object and return the object from the database
         """
+        if not author:
+            return None
+
         if not (email := author.get("email")):
             return None
 

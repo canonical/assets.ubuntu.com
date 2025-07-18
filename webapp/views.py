@@ -1,18 +1,15 @@
-# Standard library
 import math
 import re
 import uuid
 from datetime import datetime
 from distutils.util import strtobool
-from os import environ
 from urllib.parse import unquote, urlparse
 
+from webapp.config import config
 import requests
 
-# Packages
 from flask import Response, abort, jsonify, redirect, request
 
-# Local
 from webapp.database import db_session
 from webapp.decorators import token_required
 from webapp.param_parser import parse_asset_search_params
@@ -476,9 +473,9 @@ def get_users(username: str):
     }
     """
 
-    headers = {"Authorization": "token " + environ.get("DIRECTORY_API_TOKEN")}
+    headers = {"Authorization": "token " + config.directory_api.token.get_secret_value()}
     response = requests.post(
-        "https://api.directory.canonical.com/graphql/",
+        config.directory_api.url,
         json={
             "query": query,
             "variables": {"name": username.strip()},
