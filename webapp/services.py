@@ -276,7 +276,7 @@ class AssetService:
 
     def create_author_if_not_exist(
         self,
-        author = None,
+        author=None,
     ):
         """
         Create the author object and return the object from the database

@@ -473,7 +473,10 @@ def get_users(username: str):
     }
     """
 
-    headers = {"Authorization": "token " + config.directory_api.token.get_secret_value()}
+    headers = {
+        "Authorization": "token "
+        + config.directory_api.token.get_secret_value()
+    }
     response = requests.post(
         config.directory_api.url,
         json={

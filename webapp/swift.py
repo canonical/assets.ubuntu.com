@@ -1,5 +1,4 @@
 # Standard library
-import os
 from hashlib import sha1
 from typing import Optional
 
