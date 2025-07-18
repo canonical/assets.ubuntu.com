@@ -20,6 +20,8 @@ parts:
       - flask/app/templates
       - flask/app/static
       - flask/app/form-field-data.yaml
+      - flask/app/alembic.ini
+      - flask/app/migrate.sh
 
   build-ui:
     plugin: nil
