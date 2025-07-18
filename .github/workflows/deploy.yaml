@@ -1,0 +1,226 @@
+name: Juju deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment (Staging or Production)"
+        required: false
+        type: environment
+        default: "Production"
+      commit:
+        description: "Commit SHA"
+        required: false
+        type: string
+        default: HEAD
+  push:
+    branches:
+      - main
+
+## See ~/.vaultrc in your Juju model
+## Environment variables:
+# WEBSITE_URL (url)
+# JUJU_MODEL (string)
+# JUJU_CONTROLLER (string)
+# JUJU_VERSION (string)
+# VAULT_ADDR (url)
+# VAULT_SECRET_PATH_ROLE (relative path)
+# VAULT_SECRET_PATH_COMMON (relative path)
+#
+## Secrets:
+#  VAULT_APPROLE_ROLE_ID (uuid)
+#  VAULT_APPROLE_SECRET_ID (uuid)
+
+env:
+  DEPLOYMENT_ENV: ${{ github.event.inputs.environment || 'Staging' }}
+  CHARM_BUILD_NAME: ${{ github.event.repository.name }}-${{ github.sha }}.charm
+  ROCK_BUILD_NAME: ${{ github.event.repository.name }}-${{ github.sha }}.rock
+
+jobs:
+  commit-check:
+    runs-on: ubuntu-latest
+    outputs:
+      REF: ${{ steps.check-branch.outputs.ref }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check branch
+        id: check-branch
+        run: |
+          # make sure that the commit sha is from the main branch
+          # otherwise, fail the workflow
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            if [ "${{ github.event.inputs.commit }}" == "HEAD" ]; then
+              echo "ref=main" >> $GITHUB_OUTPUT
+            else
+              echo "ref=${{ github.event.inputs.commit }}" >> $GITHUB_OUTPUT
+              is_main=$(git branch -r --contains ${{ github.event.inputs.commit }} | grep -c main)
+                if [ $is_main -eq 0 ]; then
+                  echo "Commit is not from the main branch"
+                  echo -e "> [!WARNING]\n> Commit is not from the main branch" >> $GITHUB_STEP_SUMMARY
+                  exit 1
+                fi
+            fi
+          else
+            echo "ref=${GITHUB_SHA}" >> $GITHUB_OUTPUT
+          fi
+
+  rockcraft-pack:
+    runs-on: ubuntu-24.04
+    needs: commit-check
+    outputs:
+      image_url: ${{ steps.image_url.outputs.image_url }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ needs.commit-check.outputs.REF }}
+
+      # Cache the rock file for production rollout
+      - name: Cache rock
+        id: rock-cache
+        uses: actions/cache@v4
+        with:
+          path: ./*.rock
+          key: ${{ runner.os}}-rock-${{ hashFiles('**') }}
+
+      - name: Setup LXD
+        if: steps.rock-cache.outputs.cache-hit != 'true'
+        uses: canonical/setup-lxd@main
+
+      - name: Install rockcraft
+        run: |
+          sudo snap install --classic rockcraft
+
+      - name: Pack project
+        if: steps.rock-cache.outputs.cache-hit != 'true'
+        id: rockcraft-pack
+        run: |
+          sudo rockcraft pack  -v
+
+      - name: Upload rock file
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ROCK_BUILD_NAME }}
+          path: ./*.rock
+
+      - name: Set image URL
+        id: image_url
+        run: |
+          IMAGE_URL=ghcr.io/${{ github.repository }}:$(date +%s)-${GITHUB_SHA:0:7}
+          echo -e "> [!NOTE]\n> Rockcraft OCI image: $IMAGE_URL" >> $GITHUB_STEP_SUMMARY
+          echo $DOCKERHUB_MIRROR
+          echo "ghcr_image_url=$IMAGE_URL" >> $GITHUB_OUTPUT
+          echo "image_url=$IMAGE_URL" >> $GITHUB_OUTPUT
+      - name: Push to GHCR
+        run: |
+          echo "Pushing to GHCR.."
+          rockcraft.skopeo --insecure-policy copy oci-archive:$(ls *.rock) docker://${{ steps.image_url.outputs.ghcr_image_url }} --dest-creds ${{ github.repository_owner }}:${{ secrets.GITHUB_TOKEN }}
+
+  charmcraft-pack:
+    runs-on: ubuntu-24.04
+    needs: commit-check
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ needs.commit-check.outputs.REF }}
+
+      # This pack task takes a while with less likely to change files
+      - name: Cache charm
+        id: charm-cache
+        uses: actions/cache@v4
+        with:
+          path: ./*.charm
+          key: ${{ runner.os}}-charmcraft-${{ hashFiles('./charm/**') }}
+
+      - name: Install charmcraft
+        if: steps.charm-cache.outputs.cache-hit != 'true'
+        run: |
+          sudo snap install --classic charmcraft
+
+      - name: Pack charm
+        if: steps.charm-cache.outputs.cache-hit != 'true'
+        id: charmcraft-pack
+        run: |
+          # --project-dir option doesn't work with destructive-mode
+          cd ./charm
+          sudo charmcraft pack -v --destructive-mode
+          mv *.charm ../
+
+      - name: Upload charm file
+        uses: actions/upload-artifact@v4
+        id: charm-upload
+        with:
+          name: ${{ env.CHARM_BUILD_NAME }}
+          path: ./*.charm
+
+      - name: Set charm URL
+        id: charm_url
+        run: |
+          if [ -f ${{ steps.charm-cache.outputs.cache-hit }} ]; then
+            echo -e "> [!NOTE]\n> Charm pack file (cached): ${{ steps.charm-upload.outputs.artifact-url }}" >> $GITHUB_STEP_SUMMARY
+          else
+            echo -e "> [!NOTE]\n> Charm pack file: ${{ steps.charm-upload.outputs.artifact-url }}" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  deploy:
+    needs: [commit-check, rockcraft-pack, charmcraft-pack]
+    runs-on:
+      [self-hosted, self-hosted-linux-amd64-jammy-private-endpoint-medium]
+    environment:
+      name: ${{ inputs.environment || 'Staging' }}
+      url: ${{ vars.WEBSITE_URL }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ needs.commit-check.outputs.REF }}
+
+      - name: Install juju
+        run: |
+          sudo snap install --channel=${{ vars.JUJU_VERSION }} juju
+          sudo snap install --classic vault
+
+      - name: Running env
+        run: |
+          echo "${{ env.DEPLOYMENT_ENV }}"
+
+      - name: Download Charm Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.CHARM_BUILD_NAME }}
+
+      - name: Configure Vault and Juju
+        env:
+          VAULT_ADDR: ${{ vars.VAULT_ADDR }}
+          VAULT_SECRET_PATH_ROLE: ${{ vars.VAULT_SECRET_PATH_ROLE }}
+          VAULT_SECRET_PATH_COMMON: ${{ vars.VAULT_SECRET_PATH_COMMON }}
+          JUJU_CONTROLLER: ${{ vars.JUJU_CONTROLLER }}
+        run: |
+          export TF_VAR_login_approle_role_id=${{ secrets.VAULT_APPROLE_ROLE_ID }}
+          export TF_VAR_login_approle_secret_id=${{ secrets.VAULT_APPROLE_SECRET_ID }}
+          export VAULT_TOKEN=$(vault write -f -field=token auth/approle/login role_id=${TF_VAR_login_approle_role_id} secret_id=${TF_VAR_login_approle_secret_id})
+          mkdir -p ~/.local/share/juju
+          vault read -field=controller_config "${VAULT_SECRET_PATH_COMMON}/controllers/$JUJU_CONTROLLER" | base64 -d > ~/.local/share/juju/controllers.yaml
+          USERNAME=$(vault read -field=username "${VAULT_SECRET_PATH_ROLE}/juju")
+          PASSWORD=$(vault read -field=password "${VAULT_SECRET_PATH_ROLE}/juju")
+          printf "controllers:\n  $JUJU_CONTROLLER:\n    user: %s\n    password: %s\n" "$USERNAME" "$PASSWORD" > ~/.local/share/juju/accounts.yaml
+
+      - name: Deploy charm
+        env:
+          JUJU_MODEL: ${{ vars.JUJU_MODEL }}
+        run: |
+          export JUJU_MODEL=admin/$JUJU_MODEL
+          echo "Deploying to $JUJU_MODEL"
+          echo "{\"ImageName\": \"${{ needs.rockcraft-pack.outputs.image_url }}\", \"username\":\"${{ secrets.GHCR_READ_USERNAME }}\", \"password\":\"${{ secrets.GHCR_READ_TOKEN }}\"}" > ./image_metadata.json
+          cat ./image_metadata.json
+          ls -la
+          # run the deploy command
+          # in a fresh environment first
+          juju deploy ./assets-manager_ubuntu-22.04-amd64.charm --resource app-image=./image_metadata.json assets-manager
+          # juju refresh assets-manager --path=./assets-manager_ubuntu-22.04-amd64.charm --resource app-image=./image_metadata.json
