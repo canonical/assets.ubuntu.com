@@ -43,7 +43,7 @@ class AssetService:
         order_by=Asset.created,
         desc_order=True,
         include_deprecated=False,
-        file_types: list = [],
+        file_types: list = (),
         vertical: str = None,
         portfolio: str = None,
     ) -> Tuple[list, int]:
