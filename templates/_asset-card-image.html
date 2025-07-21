@@ -10,17 +10,17 @@
              target="{% if details or created %}_blank{% else %}_self{% endif %}">
             <div class="p-asset-card-image__container {% if asset.deprecated %}is-deprecated{% endif %}">
               {% if asset.data.image %}
-              <img class="p-asset-card--thumbnail"
-                   alt=""
-                   src="/v1/{{ asset.file_path }}" />
+                <img class="p-asset-card--thumbnail"
+                     alt=""
+                     src="/v1/{{ asset.file_path }}" />
               {% elif asset.asset_type == 'whitepaper' %}
-              <img class="p-asset-card--thumbnail"
-                   alt=""
-                   src="https://assets.ubuntu.com/v1/b061c401-White+paper.svg" />     
+                <img class="p-asset-card--thumbnail"
+                     alt=""
+                     src="https://assets.ubuntu.com/v1/b061c401-White+paper.svg" />
               {% else %}
-              <img class="p-asset-card--thumbnail"
-                   alt=""
-                   src="https://assets.ubuntu.com/v1/fd84bbdc-Document-open.svg" />
+                <img class="p-asset-card--thumbnail"
+                     alt=""
+                     src="https://assets.ubuntu.com/v1/fd84bbdc-Document-open.svg" />
               {% endif %}
             </div>
           </a>
@@ -35,7 +35,7 @@
           </p>
         {% endif %}
         <p class="u-no-margin--bottom">
-          File type: <strong>.{{ asset.file_type or asset.file_path.split(".")[-1].lower() }}</strong>
+          File type: <strong>.{{ asset.file_type or asset.file_path.split(".")[-1] .lower() }}</strong>
         </p>
         <p class="u-no-margin--bottom">
           Resolution:
@@ -43,18 +43,21 @@
             {% if asset.data.width and asset.data.height %}{{ asset.data.width }} x {{ asset.data.height }}px{% endif %}
           </strong>
         </p>
-        <p class="u-no-margin--bottom">Date added: <strong>{{ asset.created.strftime("%d %B %Y") }}</strong></p>
+        <p class="u-no-margin--bottom">
+          Date added: <strong>{{ asset.created.strftime("%d %B %Y") }}</strong>
+        </p>
       </div>
       <hr class="p-rule" />
       <div class="p-section--shallow">
         <span>Tags:&nbsp;</span>
         {% for product in asset.products %}
-          <a href="/manager?tag={{product.name}}" class="p-chip is-inline is-dense">
+          <a href="/manager?tag={{ product.name }}"
+             class="p-chip is-inline is-dense">
             <span class="p-chip__value">{{ product.name }}</span>
           </a>
         {% endfor %}
         {% for tag in asset.tags %}
-          <a href="/manager?tag={{tag.name}}" class="p-chip is-inline is-dense">
+          <a href="/manager?tag={{ tag.name }}" class="p-chip is-inline is-dense">
             <span class="p-chip__value">{{ tag.name }}</span>
           </a>
         {% endfor %}
@@ -71,13 +74,21 @@
         <p class="u-no-margin--bottom">
           Google Drive link:  <a href="{{ asset.google_drive_link }}">{{ asset.google_drive_link }}</a>
         </p>
+        <p class="u-no-margin--bottom">
+          Vertical: <strong>{{ asset.vertical }}</strong>
+        </p>
+        <p class="u-no-margin--bottom">
+          Portfolio:  <strong>{{ asset.portfolio }}</strong>
+        </p>
       {% elif created %}
         {% include "shared/_asset-card-actions.html" %}
         <p>
           <strong>Asset details</strong>
         </p>
         {% include "shared/_asset-author.html" %}
-        <p class="u-no-margin--bottom">Created: <strong>{{ asset.created.strftime("%d %B %Y") }}</strong></p>
+        <p class="u-no-margin--bottom">
+          Created: <strong>{{ asset.created.strftime("%d %B %Y") }}</strong>
+        </p>
         <p class="u-no-margin--bottom">
           Language: <strong>{{ asset.language }}</strong>
         </p>
@@ -86,6 +97,12 @@
         </p>
         <p class="u-no-margin--bottom">
           Google Drive link:  <a href="{{ asset.google_drive_link }}">{{ asset.google_drive_link }}</a>
+        </p>
+        <p class="u-no-margin--bottom">
+          Vertical: <strong>{{ asset.vertical }}</strong>
+        </p>
+        <p class="u-no-margin--bottom">
+          Portfolio:  <strong>{{ asset.portfolio }}</strong>
         </p>
       {% else %}
         {% include "shared/_asset-card-actions.html" %}

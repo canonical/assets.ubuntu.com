@@ -19,4 +19,6 @@ def parse_asset_search_params() -> AssetSearchParams:
         ).strip(),
         language=request.args.get("language", "").strip(),
         file_types=request.args.getlist("file_types") or [],
+        vertical=request.args.get("vertical", None),
+        portfolio=request.args.get("portfolio", None),
     )

@@ -80,6 +80,8 @@ class Asset(DateTimeMixin):
     )
     file_type = Column(String, nullable=True)
     deprecated = Column(Boolean, nullable=False, default=False)
+    vertical = Column(String, nullable=True)
+    portfolio = Column(String, nullable=True)
 
     def as_json(self):
         return {
@@ -108,6 +110,8 @@ class Asset(DateTimeMixin):
             "salesforce_campaign_id": self.salesforce_campaign_id,
             "language": self.language,
             "file_type": self.file_type,
+            "vertical": self.vertical,
+            "portfolio": self.portfolio,
         }
 
 

@@ -30,20 +30,22 @@ class AssetService:
 
     def find_assets(
         self,
-        tag: str = "abc",
-        asset_type: str = "image",
-        product_types: list = ["a", "b"],
-        author_email: str = "abc@g.com",
-        start_date: str = "2024-01-01",
-        end_date: str = "2024-10-14",
-        salesforce_campaign_id: str = "1234",
-        language: str = "English",
+        tag: str = "",
+        asset_type: str = "",
+        product_types: list = [],
+        author_email: str = "",
+        start_date: str = "",
+        end_date: str = "",
+        salesforce_campaign_id: str = "",
+        language: str = "",
         page=1,
         per_page=6,
         order_by=Asset.created,
         desc_order=True,
         include_deprecated=False,
-        file_types: list = ["a", "b"],
+        file_types: list = (),
+        vertical: str = None,
+        portfolio: str = None,
     ) -> Tuple[list, int]:
         """
         Find assets that matches the given criterions
@@ -89,7 +91,10 @@ class AssetService:
 
         if file_types:
             conditions.append(Asset.file_type.in_(file_types))
-
+        if vertical:
+            conditions.append(Asset.vertical == vertical)
+        if portfolio:
+            conditions.append(Asset.portfolio == portfolio)
         assets_query = (
             db_session.query(Asset)
             .filter(*conditions)
@@ -129,6 +134,8 @@ class AssetService:
         language: str = "English",
         deprecated: bool = False,
         data={},
+        vertical: str = None,
+        portfolio: str = None,
     ):
         """
         Create a new asset
@@ -136,7 +143,6 @@ class AssetService:
         # escape unicde characters
         friendly_name = clean_unicode(friendly_name)
         url_path = clean_unicode(url_path)
-
         # First we ensure it is b64 encoded
         encoded_file_content = b64encode(file_content)
         # Then we can decode it
@@ -215,6 +221,8 @@ class AssetService:
                 language=language,
                 deprecated=deprecated,
                 file_type=url_path.split(".")[-1].lower(),
+                vertical=vertical,
+                portfolio=portfolio,
             )
             db_session.add(asset)
             db_session.commit()
@@ -332,6 +340,8 @@ class AssetService:
         google_drive_link: str = None,
         salesforce_campaign_id: str = None,
         language: str = "English",
+        vertical: str = None,
+        portfolio: str = None,
     ):
         asset = (
             db_session.query(Asset)
@@ -361,6 +371,10 @@ class AssetService:
             asset.language = language
         if deprecated is not None:
             asset.deprecated = deprecated
+        if vertical:
+            asset.vertical = vertical
+        if portfolio:
+            asset.portfolio = portfolio
         db_session.commit()
         return asset
 

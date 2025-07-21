@@ -282,6 +282,32 @@
               </select>
               <input type="text" class="u-hide js-hidden-field" name="language" />
             </div>
+            <div class="p-section--shallow js-multiselect" data-name="vertical">
+              <label class="p-heading--5 u-no-margin--bottom" id="vertical">Vertical</label>
+              <p class="u-text--muted u-no-padding--top">Choose the vertical</p>
+              <select id="vertical-select" aria-label="vertical">
+                {% if not asset or not asset.vertical %}<option value="" selected disabled hidden></option>{% endif %}
+                {% for vertical in form_field_data.verticals %}
+                  <option value="{{ vertical.slug }}"
+                          {% if asset and asset.vertical and vertical.slug in asset.vertical %}selected{% endif %}
+                          {% if vertical.name == "-" %}disabled{% endif %}>{{ vertical.name }}</option>
+                {% endfor %}
+              </select>
+              <input type="text" class="u-hide js-hidden-field" name="vertical" />
+            </div>
+            <div class="p-section--shallow js-multiselect" data-name="portfolio">
+              <label class="p-heading--5 u-no-margin--bottom" id="portfolio">Portfolio</label>
+              <p class="u-text--muted u-no-padding--top">Choose the portfolio</p>
+              <select id="portfolio-select" aria-label="portfolio">
+                {% if not asset or not asset.portfolio %}<option value="" selected disabled hidden></option>{% endif %}
+                {% for portfolio in form_field_data.portfolios %}
+                  <option value="{{ portfolio.slug }}"
+                          {% if asset and asset.portfolio and portfolio.slug in asset.portfolio %}selected{% endif %}
+                          {% if portfolio.name == "-" %}disabled{% endif %}>{{ portfolio.name }}</option>
+                {% endfor %}
+              </select>
+              <input type="text" class="u-hide js-hidden-field" name="portfolio" />
+            </div>
           </div>
         </div>
       </div>
