@@ -1,7 +1,7 @@
 """added salesforce_campaign and asset association
 
 Revision ID: 7059dcc76605
-Revises: bebbc242e9b1
+Revises: 14e1e1dfca79
 Create Date: 2025-07-24 11:09:29.779605
 
 """
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = "7059dcc76605"
-down_revision = "bebbc242e9b1"
+down_revision = "14e1e1dfca79"
 branch_labels = None
 depends_on = None
 
