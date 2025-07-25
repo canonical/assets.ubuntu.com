@@ -6,8 +6,8 @@
     <hr class="p-rule" />
   </div>
   {% set params = request.values.to_dict() %}
-  <div class="row">
-    <div class="col-3">
+  <div class="grid-row">
+    <div class="grid-col-2">
       <p>
         <label for="tag">
           <strong>Search</strong>
@@ -18,9 +18,9 @@
              name="tag"
              placeholder="Search asset name, file name, tag(s)"
              id="tag"
-             value="{%- if params.tag -%}{{ params.tag }}{%- endif -%}">
+             value="{%- if params.tag -%}{{ params.tag }}{%- endif -%}" />
     </div>
-    <div class="col-3">
+    <div class="grid-col-2">
       <div class="js-select">
         <p>
           <label for="asset-type">
@@ -38,7 +38,7 @@
         </select>
       </div>
     </div>
-    <div class="col-3">
+    <div class="grid-col-2">
       <div class="js-select">
         <p>
           <label for="asset-type">
@@ -54,7 +54,7 @@
         </select>
       </div>
     </div>
-    <div class="col-3">
+    <div class="grid-col-2">
       <div class="js-select">
         <p>
           <label for="asset-type">

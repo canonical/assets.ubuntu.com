@@ -1,7 +1,7 @@
 {% set max_pagination_items = 3 %}
 <div class="p-section--deep">
-  <div class="row--50-50">
-    <div class="col">
+  <div class="grid-row">
+    <div class="grid-col-4 grid-col-medium-2">
       {% if total_pages > 1 %}
         <nav class="p-pagination" aria-label="Pagination">
           <ol class="p-pagination__items u-align--left">
@@ -43,7 +43,7 @@
         </nav>
       {% endif %}
     </div>
-    <div class="col u-align--right">
+    <div class="grid-col-4 grid-col-medium-2  u-align--right">
       <form method="get"
             action=""
             class="p-form p-form--inline p-form--per-page-select">
@@ -53,13 +53,13 @@
                   id="assets-per-page"
                   name="per_page"
                   onchange="this.form.submit()">
-            <option value="15"
-                    {% if request.args.get('per_page') == '15' %}selected{% endif %}>15</option>
-            <option value="30"
-                    {% if request.args.get('per_page') == '30' %}selected{% endif %}>30</option>
-            <option value="60"
-                    {% if request.args.get('per_page') == '60' %}selected{% endif %}>60</option>
-            <option value="100"
+            <option value="16"
+                    {% if request.args.get('per_page') == '16' %}selected{% endif %}>16</option>
+            <option value="32"
+                    {% if request.args.get('per_page') == '32' %}selected{% endif %}>32</option>
+            <option value="64"
+                    {% if request.args.get('per_page') == '64' %}selected{% endif %}>64</option>
+            <option value="128"
                     {% if request.args.get('per_page') == '100' %}selected{% endif %}>100</option>
           </select>
           <input type="hidden" name="page" value="1" />
