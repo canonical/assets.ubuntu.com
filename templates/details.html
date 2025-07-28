@@ -1,5 +1,7 @@
 {% extends "_layout.html" %}
+
 {% block title %}Asset details{% endblock %}
+
 {% block content %}
   <div class="p-strip is-shallow">
     <div class="u-fixed-width">
@@ -8,7 +10,7 @@
         <hr class="p-rule" />
       </div>
     </div>
-    <div class="row">
+    <div class="grid-row">
       {% with details=True %}
         {% include "_asset-card-image.html" %}
       {% endwith %}

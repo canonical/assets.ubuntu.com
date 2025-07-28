@@ -1,5 +1,7 @@
 {% extends "_layout.html" %}
+
 {% block title %}Created assets{% endblock %}
+
 {% block content %}
   {% set created = True %}
   <div class="p-strip is-shallow">
@@ -19,7 +21,7 @@
             </div>
           </div>
         </div>
-        <div class="row">{% include "_asset-list.html" %}</div>
+        <div class="grid-row">{% include "_asset-list.html" %}</div>
       </div>
     {% endif %}
     {% if existing %}
@@ -33,7 +35,7 @@
             </div>
           </div>
         </div>
-        <div class="row">{% include "_asset-list.html" %}</div>
+        <div class="grid-row">{% include "_asset-list.html" %}</div>
       </div>
     {% endif %}
     {% if failed %}
@@ -49,7 +51,12 @@
         </div>
         <div class="u-fixed-width">
           <ul class="p-list">
-            {% for asset in assets %}<li class="p-list__item">{{ asset.file_path }}{% if asset.error %} :{{ asset.error }}{% endif %}</li>{% endfor %}
+            {% for asset in assets %}
+              <li class="p-list__item">
+                {{ asset.file_path }}
+                {% if asset.error %}:{{ asset.error }}{% endif %}
+              </li>
+            {% endfor %}
           </ul>
         </div>
       </div>
