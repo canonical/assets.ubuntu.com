@@ -4,7 +4,7 @@ import handleProductsChip from "./products-search";
 import "./authors-search";
 import handleAuthorsChip from "./authors-search";
 import "./sf_campaign-search";
-import handleCampaignChip from './sf_campaign-search';
+import handleCampaignChip from "./sf_campaign-search";
 
 import "./date-picker";
 import "./generic-fields";
@@ -169,3 +169,17 @@ document.querySelectorAll("form").forEach((form) => {
     });
   });
 });
+
+/**
+ * Function to debounce a function call.
+ * @param {Function} func - The function to debounce.
+ * @param {Number} delay - The delay in ms.
+ **/
+export function debounce(func, delay) {
+  let timer;
+  return function (...args) {
+    const context = this;
+    clearTimeout(timer);
+    timer = setTimeout(() => func.apply(context, args), delay);
+  };
+}

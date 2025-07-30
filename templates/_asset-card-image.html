@@ -64,8 +64,11 @@
     </div>
     {% if details %}
       <hr class="p-rule" />
-        <p>
-          Salesforce Campaigns: <ul class="p-list--divided">{% for campaign in asset.salesforce_campaigns %}<li  class="p-list__item">{{ campaign.name }}</li>{% if not loop.last %} {% endif %}{% endfor %}</ul>
+      <p>
+          Salesforce Campaigns:
+          <ul class="p-list--divided">
+            {% for campaign in asset.salesforce_campaigns %}<li class="p-list__item">{{ campaign.name }}</li>{% endfor %}
+          </ul>
         </p>
         <hr class="p-rule" />
       {% include "shared/_asset-author.html" %}
@@ -84,9 +87,10 @@
         <strong>Asset details</strong>
       </p>
                <hr class="p-rule" />
-        <p>
-          Salesforce Campaigns: <ul class="p-list--divided">{% for campaign in asset.salesforce_campaigns %}<li  class="p-list__item">{{ campaign.name }}</li>{% if not loop.last %} {% endif %}{% endfor %}</ul>
-        </p>
+      Salesforce Campaigns:
+          <ul class="p-list--divided">
+            {% for campaign in asset.salesforce_campaigns %}<li class="p-list__item">{{ campaign.name }}</li>{% endfor %}
+          </ul>
         <hr class="p-rule" />
       {% include "shared/_asset-author.html" %}
       <p class="u-no-margin--bottom">

@@ -17,6 +17,7 @@ from webapp.integrations.trino_service import trino_cur
 from webapp.lib.file_helpers import is_svg
 from webapp.lib.processors import ImageProcessor
 from webapp.lib.url_helpers import sanitize_filename
+from webapp.lib.python_helpers import sanitize_like_input
 from webapp.models import Asset, Author, Product, Tag, Salesforce_Campaign
 from webapp.swift import file_manager
 from webapp.utils import lru_cache
@@ -454,8 +455,15 @@ asset_service = AssetService()
 
 
 def query_salesforce_campaigns(query: str) -> list[dict]:
+    safe_query = sanitize_like_input(query.strip())
+
+    # Add '%' wildcards safely
+    like_pattern = f"%{safe_query}%"
+
     formed_query = (
-        f"SELECT Id, Name FROM Campaign WHERE Name LIKE '%{query}%' LIMIT 20"
+        f"SELECT Id, Name FROM Campaign "
+        f"WHERE Name LIKE '{like_pattern}' ESCAPE '\\' "
+        f"LIMIT 20"
     )
     all_results = []
     try:
@@ -464,5 +472,5 @@ def query_salesforce_campaigns(query: str) -> list[dict]:
         for result in fetch_results:
             all_results.append({"id": result[0], "name": result[1]})
     except Exception as e:
-        print(e)
+        print("Failed to fetch campaigns from Salesforce via Trino: ", e)
     return all_results
