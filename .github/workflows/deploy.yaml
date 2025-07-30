@@ -84,7 +84,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./*.rock
-          key: rock-${{ hashFiles('**', '!*.rock') }}
+          key: rock-${{ hashFiles('webapp', 'templates', 'static', '*.json', '*.yaml', '*.lock') }}
 
       - name: Setup LXD
         if: steps.rock-cache.outputs.cache-hit != 'true'
@@ -120,7 +120,7 @@ jobs:
           rockcraft.skopeo --insecure-policy copy oci-archive:$(ls *.rock) docker://${{ steps.image_url.outputs.ghcr_image_url }} --dest-creds ${{ github.repository_owner }}:${{ secrets.GITHUB_TOKEN }}
 
   charmcraft-pack:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     needs: commit-check
     steps:
       - name: Checkout code
@@ -222,5 +222,5 @@ jobs:
           ls -la
           # run the deploy command
           # in a fresh environment first
-          juju deploy ./assets-manager_ubuntu-22.04-amd64.charm --resource app-image=./image_metadata.json assets-manager
-          # juju refresh assets-manager --path=./assets-manager_ubuntu-22.04-amd64.charm --resource app-image=./image_metadata.json
+          juju deploy ./assets-manager_ubuntu-22.04-amd64.charm --resource flask-app-image=./image_metadata.json assets-manager
+          # juju refresh assets-manager --path=./assets-manager_ubuntu-22.04-amd64.charm --resource flask-app-image=./image_metadata.json
