@@ -1,5 +1,4 @@
 # Standard library
-import os
 from hashlib import sha1
 from typing import Optional
 
@@ -9,6 +8,7 @@ import swiftclient.exceptions
 from swiftclient.exceptions import ClientException as SwiftException
 
 # Local
+from webapp.config import config
 from webapp.lib.url_helpers import normalize
 
 
@@ -101,15 +101,12 @@ class FileManager:
         return path
 
 
-# Include staging-swift in NO_PROXY
-os.environ["NO_PROXY"] = f"{os.environ.get('NO_PROXY', '')},staging-swift"
-
 swift_connection = swiftclient.client.Connection(
-    os.environ.get("OS_AUTH_URL"),
-    os.environ.get("OS_USERNAME"),
-    os.environ.get("OS_PASSWORD"),
-    auth_version=os.environ.get("OS_AUTH_VERSION", "2.0"),
-    os_options={"tenant_name": os.environ.get("OS_TENANT_NAME")},
+    config.swift.auth_url,
+    config.swift.username,
+    config.swift.password.get_secret_value(),
+    auth_version=config.swift.auth_version,
+    os_options={"tenant_name": config.swift.tenant_name},
 )
 
 file_manager = FileManager(swift_connection)
