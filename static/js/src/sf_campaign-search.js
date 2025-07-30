@@ -1,8 +1,10 @@
-import { openPanel } from "./main.js";
+import { openPanel, debounce } from "./main.js";
 
 const template = document.querySelector("#campaign-unselected-chip-template");
 const chipContainer = document.querySelector(".p-chips--selected_campaigns");
-
+const hidden_input_store = document.querySelector(
+  ".js-campaign-search .js-hidden-field"
+);
 // Sets up the event listeners for opening the panel.
 // Also calls the specific setup function.
 (function () {
@@ -26,10 +28,12 @@ const chipContainer = document.querySelector(".p-chips--selected_campaigns");
 // Calls the function that shows the search results
 function setUpCampaignSearchField() {
   const campaignsInput = document.querySelector(".js-campaign-input");
+  const chipContainer = document.querySelector(".js-campaign-chip-container");
   campaignsInput.addEventListener(
     "input",
     debounce(async function () {
       const query = this.value;
+      chipContainer.innerHTML = "Loading...";
       if (query.trim() !== "") {
         try {
           const response = await fetch(
@@ -43,22 +47,35 @@ function setUpCampaignSearchField() {
             updateSearchResults(data);
           }
         } catch (error) {
-          console.error("Error fetching user data:", error);
+          console.error("Error fetching campaign data:", error);
         }
       } else {
         updateSearchResults([]);
       }
-    }, 300)
+    }, 700)
   );
 }
 
 function updateSearchResults(data) {
   const chipContainer = document.querySelector(".js-campaign-chip-container");
+  let selectedChips = [];
+
+  try {
+    selectedChips = JSON.parse(hidden_input_store.value || "[]");
+  } catch (e) {
+    console.error("Failed to parse selected chips JSON:", e);
+  }
+
+  const selectedIds = new Set(selectedChips.map((chip) => chip.id));
+
+  // Remove already selected campaigns from the results
+  const filteredData = data.filter((campaign) => !selectedIds.has(campaign.id));
+
   chipContainer.innerHTML = "";
-  if (data.length === 0) {
+  if (filteredData.length === 0) {
     chipContainer.innerHTML = "<p><strong>No results found...</strong></p>";
   }
-  data.forEach((campaign) => {
+  filteredData.forEach((campaign) => {
     const chipClone = template.content.cloneNode(true);
     const chip = chipClone.querySelector(".p-chip.js-unselected");
     chip.querySelector(".js-content").textContent = campaign.name;
@@ -66,16 +83,6 @@ function updateSearchResults(data) {
     chip.setAttribute("data-name", campaign.name);
     chipContainer.appendChild(chip);
   });
-}
-
-// debounce function to limit the rate of API calls
-function debounce(func, delay) {
-  let timer;
-  return function (...args) {
-    const context = this;
-    clearTimeout(timer);
-    timer = setTimeout(() => func.apply(context, args), delay);
-  };
 }
 
 function removeValueFromHiddenInput(chip, hiddenField) {
@@ -87,10 +94,7 @@ function removeValueFromHiddenInput(chip, hiddenField) {
 }
 
 function deselectCampaignChip(chip) {
-  removeValueFromHiddenInput(
-    chip,
-    document.querySelector(".js-campaign-search .js-hidden-field")
-  );
+  removeValueFromHiddenInput(chip, hidden_input_store);
   chip.remove();
 }
 
@@ -117,10 +121,7 @@ function addValueToHiddenInput(chip, hiddenField) {
 }
 
 function selectCampaignChip(chip) {
-  const unique = addValueToHiddenInput(
-    chip,
-    document.querySelector(".js-campaign-search .js-hidden-field")
-  );
+  const unique = addValueToHiddenInput(chip, hidden_input_store);
   if (!unique) {
     return; // If the value already exists, do not proceed
   }

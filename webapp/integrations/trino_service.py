@@ -33,16 +33,15 @@ class TrinoConfig(BaseSettings):
 def get_service_account_token():
     try:
         trino_service_account = TrinoConfig()
+        service_account_dict = trino_service_account.model_dump()
+        credentials = service_account.Credentials.from_service_account_info(
+            service_account_dict, scopes=["openid", "email"]
+        )
+        credentials.refresh(requests.Request())
+        return credentials.token
     except Exception as e:
         logger.error(f"Failed to load Trino configuration: {e}")
         return None
-
-    service_account_dict = trino_service_account.model_dump()
-    credentials = service_account.Credentials.from_service_account_info(
-        service_account_dict, scopes=["openid", "email"]
-    )
-    credentials.refresh(requests.Request())
-    return credentials.token
 
 
 # Prepare the trino connection using the service account token
