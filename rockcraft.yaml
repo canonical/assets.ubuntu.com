@@ -14,6 +14,7 @@ parts:
   flask-framework/install-app:
     after:
       - build-ui
+      - runtime-debs
     prime:
       - flask/app/app.py
       - flask/app/webapp
@@ -39,6 +40,8 @@ parts:
       yarn install
       # build the UI
       yarn run build
+      mkdir -p "$CRAFT_PART_INSTALL/flask/app"
+      cp -r static "$CRAFT_PART_INSTALL/flask/app/"
 
   runtime-debs:
     plugin: nil
