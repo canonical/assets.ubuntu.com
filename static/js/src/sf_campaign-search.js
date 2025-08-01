@@ -1,10 +1,13 @@
 import { openPanel, debounce } from "./main.js";
 
 const template = document.querySelector("#campaign-unselected-chip-template");
-const chipContainer = document.querySelector(".p-chips--selected_campaigns");
+const selectedChipContainer = document.querySelector(".js-selected-campaigns");
+const campaignsSearchInput = document.querySelector(".js-campaign-input");
 const hidden_input_store = document.querySelector(
   ".js-campaign-search .js-hidden-field"
 );
+const chipContainer = document.querySelector(".js-campaign-chip-container");
+
 // Sets up the event listeners for opening the panel.
 // Also calls the specific setup function.
 (function () {
@@ -12,8 +15,6 @@ const hidden_input_store = document.querySelector(
     ".js-campaign-search"
   );
   if (campaignsSearchComponent) {
-    const campaignsSearchInput =
-      campaignsSearchComponent.querySelector(".js-campaign-input");
     if (campaignsSearchInput) {
       campaignsSearchInput.addEventListener("input", function (e) {
         const shouldOpen = e.target.value.trim().length > 0;
@@ -27,9 +28,7 @@ const hidden_input_store = document.querySelector(
 // Sets up a query to the Salesforce Campaign DB via backend to search for campaigns.
 // Calls the function that shows the search results
 function setUpCampaignSearchField() {
-  const campaignsInput = document.querySelector(".js-campaign-input");
-  const chipContainer = document.querySelector(".js-campaign-chip-container");
-  campaignsInput.addEventListener(
+  campaignsSearchInput.addEventListener(
     "input",
     debounce(async function () {
       const query = this.value;
@@ -57,7 +56,6 @@ function setUpCampaignSearchField() {
 }
 
 function updateSearchResults(data) {
-  const chipContainer = document.querySelector(".js-campaign-chip-container");
   let selectedChips = [];
 
   try {
@@ -139,22 +137,19 @@ function selectCampaignChip(chip) {
   newchip.setAttribute("data-id", chip.dataset.id);
   newchip.setAttribute("data-name", chip.dataset.name);
   newchip.querySelector(".js-content").textContent = chip.dataset.name;
-  chipContainer.appendChild(newchip);
+  selectedChipContainer.appendChild(newchip);
 
   // clear the entered value after selecting a chip
-  const inputField = document.querySelector(
-    ".js-campaign-search .js-campaign-input"
-  );
-  inputField.value = "";
-  inputField.focus();
+
+  campaignsSearchInput.value = "";
+  campaignsSearchInput.focus();
 
   // Hide panel and reset the chips panel
   const chipsPanel = document.querySelector(
     ".js-campaign-search .js-chips-panel"
   );
   chipsPanel.setAttribute("aria-hidden", "true");
-  chipsPanel.querySelector(".js-campaign-chip-container").innerHTML =
-    "Loading...";
+  chipContainer.innerHTML = "Loading...";
 }
 
 export default function handleCampaignChip(targetChip) {
