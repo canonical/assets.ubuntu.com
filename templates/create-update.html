@@ -262,7 +262,7 @@
                      value="{% if asset and asset.google_drive_link %}{{ asset.google_drive_link }}{% endif %}" />
             </div>
 
-            <div class="p-section--shallow" data-name="salesforceCampaigns">
+            <div class="p-section--shallow" data-name="salesforce_campaigns">
               {% set existing_campaigns = [] %}
               {% if asset and asset.salesforce_campaigns | length %}
                 {% for campaign in asset.salesforce_campaigns %}
@@ -282,7 +282,7 @@
               <div class="p-search-and-filter js-campaign-search">
                 <label class="p-heading--5 u-no-margin--bottom" id="salesforceCampaigns">Salesforce Campaigns</label>
                 <p class="u-text--muted u-no-padding--top">Search and select the campaign names</p>
-                <div class="p-chips--selected_campaigns">
+                <div class="p-chips--selected_campaigns js-selected-campaigns">
                   {% for campaign in existing_campaigns %}
                     <span class="p-chip js-selected"
                           tabindex="-1"
