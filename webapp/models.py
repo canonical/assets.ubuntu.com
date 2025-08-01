@@ -38,6 +38,15 @@ asset_tag_association_table = Table(
     Column("tag_name", ForeignKey("tag.name"), primary_key=True),
 )
 
+asset_campaign_association_table = Table(
+    "asset_campaign_association",
+    Base.metadata,
+    Column("asset_id", ForeignKey("asset.id"), primary_key=True),
+    Column(
+        "campaign_id", ForeignKey("salesforce_campaign.id"), primary_key=True
+    ),
+)
+
 asset_product_association_table = Table(
     "asset_product_association",
     Base.metadata,
@@ -64,7 +73,6 @@ class Asset(DateTimeMixin):
     asset_type = Column(String, nullable=True)
     name = Column(String, nullable=True)
     google_drive_link = Column(String, nullable=True)
-    salesforce_campaign_id = Column(String, nullable=True)
     language = Column(String, nullable=True)
     data = Column(JSON, nullable=False)
     file_path = Column(String, nullable=False)
@@ -76,6 +84,11 @@ class Asset(DateTimeMixin):
     products = relationship(
         "Product",
         secondary=asset_product_association_table,
+        back_populates="assets",
+    )
+    salesforce_campaigns = relationship(
+        "Salesforce_Campaign",
+        secondary=asset_campaign_association_table,
         back_populates="assets",
     )
     file_type = Column(String, nullable=True)
@@ -105,7 +118,9 @@ class Asset(DateTimeMixin):
                 else None
             ),
             "google_drive_link": self.google_drive_link,
-            "salesforce_campaign_id": self.salesforce_campaign_id,
+            "salesforce_campaigns": [
+                campaign.as_json() for campaign in self.salesforce_campaigns
+            ],
             "language": self.language,
             "file_type": self.file_type,
         }
@@ -122,6 +137,23 @@ class Tag(DateTimeMixin):
         return {
             "name": self.name,
             "assets": ", ".join(self.assets),
+        }
+
+
+class Salesforce_Campaign(DateTimeMixin):
+    __tablename__ = "salesforce_campaign"
+    name = Column(String, nullable=True)
+    id = Column(String, primary_key=True)
+    assets = relationship(
+        "Asset",
+        secondary=asset_campaign_association_table,
+        back_populates="salesforce_campaigns",
+    )
+
+    def as_json(self):
+        return {
+            "name": self.name,
+            "id": self.id,
         }
 
 

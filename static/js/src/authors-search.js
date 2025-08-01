@@ -1,24 +1,26 @@
-import { 
+import {
   openPanel,
-  addValueToHiddenInput, 
+  addValueToHiddenInput,
   removeValueFromHiddenInput,
-  addValueToQueryParams, 
+  addValueToQueryParams,
   removeValueFromQueryParams,
-} from './main.js';
+  debounce,
+} from "./main.js";
 
 // Define whether we are in search and thus need to update query params
-const updateQueryParams = document.querySelector('.js-asset-search');
+const updateQueryParams = document.querySelector(".js-asset-search");
 
-/* 
+/*
  * Sets up the event listeners for opening the panel.
  * Also calls the specific setup function.
  **/
 (function () {
-  const authorsSearchComponent = document.querySelector('.js-authors-search');
+  const authorsSearchComponent = document.querySelector(".js-authors-search");
   if (authorsSearchComponent) {
-    const authorsSearchInput = authorsSearchComponent.querySelector(".js-authors-input");
+    const authorsSearchInput =
+      authorsSearchComponent.querySelector(".js-authors-input");
     if (authorsSearchInput) {
-      authorsSearchInput.addEventListener('input', function (e) {
+      authorsSearchInput.addEventListener("input", function (e) {
         const shouldOpen = e.target.value.trim().length > 0;
         openPanel(authorsSearchComponent, shouldOpen);
       });
@@ -32,25 +34,28 @@ const updateQueryParams = document.querySelector('.js-asset-search');
  * Calls the function that shows the search results
  **/
 function setUpAuthorSearchField() {
-  const authorsInput = document.querySelector('.js-authors-input');
-  authorsInput.addEventListener('input', debounce(async function () {
-    const username = this.value;
-    if (username.trim() !== "") {
-      try {
-        const response = await fetch(`/v1/get-users/${(username)}`, {
-          method: 'GET',
-        });
-        if (response.ok) {
-          const data = await response.json();
-          updateSearchResults(data);
+  const authorsInput = document.querySelector(".js-authors-input");
+  authorsInput.addEventListener(
+    "input",
+    debounce(async function () {
+      const username = this.value;
+      if (username.trim() !== "") {
+        try {
+          const response = await fetch(`/v1/get-users/${username}`, {
+            method: "GET",
+          });
+          if (response.ok) {
+            const data = await response.json();
+            updateSearchResults(data);
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
         }
-      } catch (error) {
-        console.error('Error fetching user data:', error);
+      } else {
+        updateSearchResults([]);
       }
-    } else {
-      updateSearchResults([]);
-    }
-  }, 300));
+    }, 300)
+  );
 }
 
 /*
@@ -59,8 +64,8 @@ function setUpAuthorSearchField() {
  * @param {HTMLElement} targetChip - The chip that was clicked.
  **/
 export default function handleAuthorsChip(targetChip) {
-  const selectedAuthorChip = document.querySelector('.js-author-chip');
-  if (targetChip.classList.contains('js-unselected')) {
+  const selectedAuthorChip = document.querySelector(".js-author-chip");
+  if (targetChip.classList.contains("js-unselected")) {
     selectAuthorChip(targetChip, selectedAuthorChip);
   } else {
     deselectAuthorChip(targetChip);
@@ -74,20 +79,21 @@ export default function handleAuthorsChip(targetChip) {
  * @param {Array} data - The data from the API call.
  **/
 function updateSearchResults(data) {
-  const chipContainer = document.querySelector('.js-authors-chip-container');
-  chipContainer.innerHTML = '';
+  const chipContainer = document.querySelector(".js-authors-chip-container");
+  chipContainer.innerHTML = "";
   if (data.length === 0) {
-    chipContainer.innerHTML = '<p><strong>No results found...</strong></p>';
+    chipContainer.innerHTML = "<p><strong>No results found...</strong></p>";
   }
-  const template = document.querySelector('#author-unselected-chip-template');
+  const template = document.querySelector("#author-unselected-chip-template");
   const limitedData = data.slice(0, 10);
-  limitedData.forEach(author => {
+  limitedData.forEach((author) => {
     const chipClone = template.content.cloneNode(true);
-    const chip = chipClone.querySelector('.p-chip.js-unselected');
-    chip.querySelector('.js-content').textContent = author.firstName + ' ' + author.surname;
-    chip.setAttribute('data-email', author.email);
-    chip.setAttribute('data-firstName', author.firstName);
-    chip.setAttribute('data-lastName', author.surname);
+    const chip = chipClone.querySelector(".p-chip.js-unselected");
+    chip.querySelector(".js-content").textContent =
+      author.firstName + " " + author.surname;
+    chip.setAttribute("data-email", author.email);
+    chip.setAttribute("data-firstName", author.firstName);
+    chip.setAttribute("data-lastName", author.surname);
     chipContainer.appendChild(chip);
   });
 }
@@ -100,53 +106,72 @@ function updateSearchResults(data) {
  * @param {HTMLElement} activeChipContainer - The container to add the active chip.
  **/
 function selectAuthorChip(chip, selectedAuthorChip) {
-  selectedAuthorChip.classList.remove('u-hide');
-  selectedAuthorChip.querySelector('.js-content').textContent = chip.dataset.firstname + ' ' + chip.dataset.lastname;
-  selectedAuthorChip.setAttribute('data-email', chip.dataset.email);
-  selectedAuthorChip.setAttribute('data-firstname', chip.dataset.firstname);
-  selectedAuthorChip.setAttribute('data-lastname', chip.dataset.lastname);
-  addValueToHiddenInput(chip.dataset.email, document.querySelector('.js-hidden-field-email'), replace = true);
-  addValueToHiddenInput(chip.dataset.firstname, document.querySelector('.js-hidden-field-firstname'), replace = true);
-  addValueToHiddenInput(chip.dataset.lastname, document.querySelector('.js-hidden-field-lastname'), replace = true);
+  selectedAuthorChip.classList.remove("u-hide");
+  selectedAuthorChip.querySelector(".js-content").textContent =
+    chip.dataset.firstname + " " + chip.dataset.lastname;
+  selectedAuthorChip.setAttribute("data-email", chip.dataset.email);
+  selectedAuthorChip.setAttribute("data-firstname", chip.dataset.firstname);
+  selectedAuthorChip.setAttribute("data-lastname", chip.dataset.lastname);
+  addValueToHiddenInput(
+    chip.dataset.email,
+    document.querySelector(".js-hidden-field-email"),
+    (replace = true)
+  );
+  addValueToHiddenInput(
+    chip.dataset.firstname,
+    document.querySelector(".js-hidden-field-firstname"),
+    (replace = true)
+  );
+  addValueToHiddenInput(
+    chip.dataset.lastname,
+    document.querySelector(".js-hidden-field-lastname"),
+    (replace = true)
+  );
   // clear the entered value after selecting a chip
-  const inputField = document.querySelector(".js-authors-search .js-authors-input");
+  const inputField = document.querySelector(
+    ".js-authors-search .js-authors-input"
+  );
   inputField.value = "";
   // close the chips panel
-  const chipsPanel = document.querySelector(".js-authors-search .js-chips-panel");
+  const chipsPanel = document.querySelector(
+    ".js-authors-search .js-chips-panel"
+  );
   chipsPanel.setAttribute("aria-hidden", "true");
   if (updateQueryParams) {
-    addValueToQueryParams('author_email', chip.dataset.email, replace = true);
-    addValueToQueryParams('author_firstname', chip.dataset.firstname, replace = true);
-    addValueToQueryParams('author_lastname', chip.dataset.lastname, replace = true);
+    addValueToQueryParams("author_email", chip.dataset.email, (replace = true));
+    addValueToQueryParams(
+      "author_firstname",
+      chip.dataset.firstname,
+      (replace = true)
+    );
+    addValueToQueryParams(
+      "author_lastname",
+      chip.dataset.lastname,
+      (replace = true)
+    );
   }
-
 }
 
 function deselectAuthorChip(chip) {
-  chip.classList.add('u-hide');
-  removeValueFromHiddenInput(chip.dataset.email, document.querySelector('.js-hidden-field-email'));
-  removeValueFromHiddenInput(chip.dataset.firstname, document.querySelector('.js-hidden-field-firstname'));
-  removeValueFromHiddenInput(chip.dataset.lastname, document.querySelector('.js-hidden-field-lastname'));
+  chip.classList.add("u-hide");
+  removeValueFromHiddenInput(
+    chip.dataset.email,
+    document.querySelector(".js-hidden-field-email")
+  );
+  removeValueFromHiddenInput(
+    chip.dataset.firstname,
+    document.querySelector(".js-hidden-field-firstname")
+  );
+  removeValueFromHiddenInput(
+    chip.dataset.lastname,
+    document.querySelector(".js-hidden-field-lastname")
+  );
   if (updateQueryParams) {
-    removeValueFromQueryParams('author_email', chip.dataset.email);
-    removeValueFromQueryParams('author_firstname', chip.dataset.firstname);
-    removeValueFromQueryParams('author_lastname', chip.dataset.lastname);
+    removeValueFromQueryParams("author_email", chip.dataset.email);
+    removeValueFromQueryParams("author_firstname", chip.dataset.firstname);
+    removeValueFromQueryParams("author_lastname", chip.dataset.lastname);
   }
-  chip.removeAttribute('data-email', chip.dataset.email);
-  chip.removeAttribute('data-firstname', chip.dataset.firstname);
-  chip.removeAttribute('data-lastname', chip.dataset.lastname);
-}
-
-/* 
- * Function to debounce a function call.
- * @param {Function} func - The function to debounce.
- * @param {Number} delay - The delay in ms.
- **/
-function debounce(func, delay) {
-  let timer;
-  return function (...args) {
-    const context = this;
-    clearTimeout(timer);
-    timer = setTimeout(() => func.apply(context, args), delay);
-  };
+  chip.removeAttribute("data-email", chip.dataset.email);
+  chip.removeAttribute("data-firstname", chip.dataset.firstname);
+  chip.removeAttribute("data-lastname", chip.dataset.lastname);
 }
