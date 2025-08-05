@@ -120,7 +120,7 @@ jobs:
           rockcraft.skopeo --insecure-policy copy oci-archive:$(ls *.rock) docker://${{ steps.image_url.outputs.ghcr_image_url }} --dest-creds ${{ github.repository_owner }}:${{ secrets.GITHUB_TOKEN }}
 
   charmcraft-pack:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: commit-check
     steps:
       - name: Checkout code
@@ -191,7 +191,7 @@ jobs:
           echo "${{ env.DEPLOYMENT_ENV }}"
 
       - name: Download Charm Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: ${{ env.CHARM_BUILD_NAME }}
 
