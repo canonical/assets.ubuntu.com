@@ -11,6 +11,7 @@ from flask import Blueprint, url_for
 from flask.globals import request
 
 # Local
+from webapp.config import config
 from webapp.param_parser import parse_asset_search_params
 from webapp.services import (
     AssetAlreadyExistException,
@@ -118,7 +119,6 @@ def home():
             file_types=search_params.file_types,
         )
         is_search = True
-
     return flask.render_template(
         "index.html",
         assets=assets,
@@ -145,6 +145,9 @@ def create():
     created_assets = []
     existing_assets = []
     failed_assets = []
+
+    if config.read_only_mode:
+        return flask.render_template("create-readonly.html")
 
     if request.method == "POST":
         form_data = {

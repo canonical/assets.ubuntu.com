@@ -32,3 +32,7 @@ config:
     directory-api:
       type: secret
       description: Canonical Directory API credentials, must contain (url, token)
+    read-only-mode:
+      type: boolean
+      description: Enabling this will prevent users from creating new assets (useful during migration to a new server)
+      default: false
