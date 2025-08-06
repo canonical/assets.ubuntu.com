@@ -1,5 +1,6 @@
 # System
 import math
+import os
 import re
 from distutils.util import strtobool
 from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
@@ -7,7 +8,7 @@ from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 # Packages
 import flask
 import yaml
-from flask import Blueprint
+from flask import Blueprint, get_flashed_messages
 from flask.globals import request
 
 # Local
@@ -118,7 +119,7 @@ def home():
             file_types=search_params.file_types,
         )
         is_search = True
-
+    get_flashed_messages()
     return flask.render_template(
         "index.html",
         assets=assets,
@@ -145,6 +146,9 @@ def create():
     created_assets = []
     existing_assets = []
     failed_assets = []
+    if os.getenv("READ_ONLY_MODE") == "true":
+        flask.flash("Read only mode is enabled", "negative")
+        return flask.render_template("create-readonly.html")
 
     if request.method == "POST":
         form_data = {

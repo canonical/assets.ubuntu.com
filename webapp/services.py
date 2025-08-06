@@ -1,5 +1,6 @@
 # System
 import imghdr
+import os
 from base64 import b64decode, b64encode
 from datetime import datetime, timezone
 from io import BytesIO
@@ -133,6 +134,9 @@ class AssetService:
         """
         Create a new asset
         """
+        if os.getenv("READ_ONLY_MODE") == "true":
+            raise ReadOnlyMode()
+
         # escape unicde characters
         friendly_name = clean_unicode(friendly_name)
         url_path = clean_unicode(url_path)
@@ -401,6 +405,12 @@ class AssetAlreadyExistException(Exception):
 class AssetNotFound(Exception):
     """
     Raised when the requested asset wasn't found
+    """
+
+
+class ReadOnlyMode(Exception):
+    """
+    Raised when the requested asset to create already exists
     """
 
 
