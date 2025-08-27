@@ -50,7 +50,9 @@ def get_asset(file_path: str):
 
     if redirect_record:
         # Cache permanent redirect longtime. Temporary, not so much.
-        max_age = "max-age=31556926" if redirect_record.permanent else "max-age=60"
+        max_age = (
+            "max-age=31556926" if redirect_record.permanent else "max-age=60"
+        )
         target_url = redirect_record.target_url + "?" + request_url.query
         response = redirect(target_url)
         response.headers["Cache-Control"] = max_age
@@ -128,7 +130,11 @@ def update_asset(file_path):
 
 @token_required
 def delete_asset(file_path):
-    asset = db_session.query(Asset).filter(Asset.file_path == file_path).one_or_none()
+    asset = (
+        db_session.query(Asset)
+        .filter(Asset.file_path == file_path)
+        .one_or_none()
+    )
 
     if not asset:
         abort(404)
@@ -145,7 +151,11 @@ def get_asset_info(file_path):
     """
     Data about an asset
     """
-    asset = db_session.query(Asset).filter(Asset.file_path == file_path).one_or_none()
+    asset = (
+        db_session.query(Asset)
+        .filter(Asset.file_path == file_path)
+        .one_or_none()
+    )
 
     if not asset:
         abort(404)
@@ -169,7 +179,9 @@ def get_assets():
         strtobool(request.values.get("include_deprecated", "false")) == 1
     )
     page = 1 if not page or page < 1 else page
-    per_page = 20 if not per_page or per_page < 1 or per_page > 100 else per_page
+    per_page = (
+        20 if not per_page or per_page < 1 or per_page > 100 else per_page
+    )
 
     if any(
         [
@@ -237,7 +249,9 @@ def create_asset():
             "",
         )
         language = request.values.get("language", "")
-        deprecated = request.values.get("deprecated", "false").lower() == "true"
+        deprecated = (
+            request.values.get("deprecated", "false").lower() == "true"
+        )
 
         # Process uploaded files
         try:
@@ -279,7 +293,9 @@ def create_asset():
 def get_tokens():
     tokens = db_session.query(Token).all()
     return (
-        jsonify([{"name": token.name, "token": token.token} for token in tokens]),
+        jsonify(
+            [{"name": token.name, "token": token.token} for token in tokens]
+        ),
         200,
     )
 
@@ -341,7 +357,9 @@ def get_redirect(redirect_path):
 @token_required
 def get_redirects():
     redirect_records = db_session.query(Redirect).all()
-    return jsonify([redirect_record.as_json() for redirect_record in redirect_records])
+    return jsonify(
+        [redirect_record.as_json() for redirect_record in redirect_records]
+    )
 
 
 @token_required
@@ -376,7 +394,9 @@ def create_redirect():
         return (
             jsonify(
                 {
-                    "message": ("Another redirect with that path already exists"),
+                    "message": (
+                        "Another redirect with that path already exists"
+                    ),
                     "redirect_path": redirect_path,
                     "code": 409,
                 }
@@ -454,7 +474,8 @@ def get_users(username: str):
     """
 
     headers = {
-        "Authorization": "token " + config.directory_api.token.get_secret_value()
+        "Authorization": "token "
+        + config.directory_api.token.get_secret_value()
     }
     response = requests.post(
         config.directory_api.url,

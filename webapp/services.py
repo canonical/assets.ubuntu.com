@@ -234,7 +234,9 @@ class AssetService:
         tag_names = list(
             set([self.normalize_tag_name(name) for name in tag_names if name]),
         )
-        existing_tags = db_session.query(Tag).filter(Tag.name.in_(tag_names)).all()
+        existing_tags = (
+            db_session.query(Tag).filter(Tag.name.in_(tag_names)).all()
+        )
         existing_tag_names = set([tag.name for tag in existing_tags])
         tag_names_to_create = [
             name for name in tag_names if name not in existing_tag_names
@@ -302,7 +304,9 @@ class AssetService:
                 # or a reversed first_name
                 last_name = first_name[::-1]
 
-        existing_author = db_session.query(Author).filter_by(email=email).first()
+        existing_author = (
+            db_session.query(Author).filter_by(email=email).first()
+        )
 
         if existing_author:
             return existing_author
@@ -333,7 +337,9 @@ class AssetService:
         language: str = "English",
     ):
         asset = (
-            db_session.query(Asset).filter(Asset.file_path == file_path).one_or_none()
+            db_session.query(Asset)
+            .filter(Asset.file_path == file_path)
+            .one_or_none()
         )
         if not asset:
             raise AssetNotFound(file_path)
@@ -367,7 +373,9 @@ class AssetService:
         Return a list of available extensions
         """
         # get distinct file_path only the 7 last characters
-        files = db_session.query(Asset.file_path).distinct(Asset.file_path).all()
+        files = (
+            db_session.query(Asset.file_path).distinct(Asset.file_path).all()
+        )
         extensions = set()
         for file in files:
             file_path = file[0]

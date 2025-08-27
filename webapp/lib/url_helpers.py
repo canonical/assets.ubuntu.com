@@ -33,6 +33,6 @@ def sanitize_filename(file_name: str) -> str:
 
     sanitized_base = re.sub(r"[^A-Za-z0-9]", "_", base)
     sanitized_base = re.sub(r"_+", "_", sanitized_base)  # collapse multiple _
-    sanitized_base = sanitized_base.strip("_")           # remove leading/trailing _
+    sanitized_base = sanitized_base.strip("_")  # remove leading/trailing _
 
     return f"{sanitized_base}{ext}"
