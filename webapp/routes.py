@@ -151,12 +151,9 @@ def create():
             "tags": request.form.get("tags", ""),
             "products": request.form.get("products", ""),
             "google_drive_link": request.form.get("google_drive_link", ""),
-            "salesforce_campaign_id": request.form.get(
-                "salesforce_campaign_id", ""
-            ),
+            "salesforce_campaign_id": request.form.get("salesforce_campaign_id", ""),
             "language": request.form.get("language", "") or "English",
-            "deprecated": request.form.get("deprecated", "false").lower()
-            == "true",
+            "deprecated": request.form.get("deprecated", "false").lower() == "true",
             "asset_type": request.form.get("asset_type", "") or "image",
             "author_email": request.form.get("author_email", ""),
             "author_first_name": request.form.get("author_first_name", ""),
@@ -202,9 +199,7 @@ def create():
                 if asset:
                     existing_assets.append(asset)
             except Exception as error:
-                failed_assets.append(
-                    {"file_path": filename, "error": str(error)}
-                )
+                failed_assets.append({"file_path": filename, "error": str(error)})
 
         # If submission was successful, clear session
         if not existing_assets and not failed_assets:
@@ -232,12 +227,15 @@ def create():
 @ui_blueprint.route("/update", methods=["GET", "POST"])
 @login_required
 def update():
-    file_path = request.args.get("file-path")
+    file_path = request.args.get("file_path")
 
     if request.method == "GET":
         asset = asset_service.find_asset(file_path)
         if not asset:
             flask.flash("Asset not found", "negative")
+            return flask.render_template(
+                "error.html", reason="Asset not found", code=404
+            )
 
     elif request.method == "POST":
         tags = request.form.get("tags").split(",")
@@ -272,7 +270,7 @@ def update():
             flask.flash("Asset updated", "positive")
         except AssetNotFound:
             flask.flash("Asset not found", "negative")
-        return flask.redirect("/manager/details?file-path=" + file_path)
+        return flask.redirect("/manager/details?file_path=" + file_path)
 
     return flask.render_template(
         "create-update.html", form_field_data=form_field_data, asset=asset
@@ -282,7 +280,7 @@ def update():
 @ui_blueprint.route("/details", methods=["GET"])
 @login_required
 def details():
-    file_path = request.args.get("file-path")
+    file_path = request.args.get("file_path")
 
     asset = asset_service.find_asset(file_path)
     if not asset:
@@ -298,9 +296,7 @@ def details():
 api_blueprint.add_url_rule("/", view_func=get_assets)
 api_blueprint.add_url_rule("/", view_func=create_asset, methods=["POST"])
 api_blueprint.add_url_rule("/<path:file_path>", view_func=get_asset)
-api_blueprint.add_url_rule(
-    "/<path:file_path>", view_func=update_asset, methods=["PUT"]
-)
+api_blueprint.add_url_rule("/<path:file_path>", view_func=update_asset, methods=["PUT"])
 api_blueprint.add_url_rule(
     "/<path:file_path>", view_func=delete_asset, methods=["DELETE"]
 )
@@ -318,12 +314,8 @@ api_blueprint.add_url_rule(
 
 # Redirects
 api_blueprint.add_url_rule("/redirects", view_func=get_redirects)
-api_blueprint.add_url_rule(
-    "/redirects", view_func=create_redirect, methods=["POST"]
-)
-api_blueprint.add_url_rule(
-    "/redirects/<path:redirect_path>", view_func=get_redirect
-)
+api_blueprint.add_url_rule("/redirects", view_func=create_redirect, methods=["POST"])
+api_blueprint.add_url_rule("/redirects/<path:redirect_path>", view_func=get_redirect)
 api_blueprint.add_url_rule(
     "/redirects/<path:redirect_path>",
     view_func=update_redirect,
