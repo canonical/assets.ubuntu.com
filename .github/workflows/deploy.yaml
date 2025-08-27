@@ -67,7 +67,7 @@ jobs:
           fi
 
   rockcraft-pack:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     needs: commit-check
     outputs:
       image_url: ${{ steps.image_url.outputs.image_url }}
@@ -77,19 +77,7 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ needs.commit-check.outputs.REF }}
-
-      # Cache the rock file for production rollout
-      - name: Cache rock
-        id: rock-cache
-        uses: actions/cache@v4
-        with:
-          path: ./*.rock
-          key: rock-${{ hashFiles('webapp', 'templates', 'static', '*.json', '*.yaml', '*.lock') }}
-
-      - name: Setup LXD
-        if: steps.rock-cache.outputs.cache-hit != 'true'
-        uses: canonical/setup-lxd@main
-
+          
       - name: Install rockcraft
         run: |
           sudo snap install --classic rockcraft
@@ -98,7 +86,7 @@ jobs:
         if: steps.rock-cache.outputs.cache-hit != 'true'
         id: rockcraft-pack
         run: |
-          sudo rockcraft pack  -v
+          sudo rockcraft pack --destructive-mode -v
 
       - name: Upload rock file
         uses: actions/upload-artifact@v4
