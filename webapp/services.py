@@ -14,7 +14,7 @@ from sqlalchemy import func, or_
 from webapp.database import db_session
 from webapp.lib.file_helpers import is_svg
 from webapp.lib.processors import ImageProcessor
-from webapp.lib.url_helpers import clean_unicode
+from webapp.lib.url_helpers import sanitize_filename
 from webapp.models import Asset, Author, Product, Tag
 from webapp.swift import file_manager
 from webapp.utils import lru_cache
@@ -134,8 +134,8 @@ class AssetService:
         Create a new asset
         """
         # escape unicde characters
-        friendly_name = clean_unicode(friendly_name)
-        url_path = clean_unicode(url_path)
+        friendly_name = sanitize_filename(friendly_name)
+        url_path = sanitize_filename(url_path)
 
         # First we ensure it is b64 encoded
         encoded_file_content = b64encode(file_content)
@@ -234,9 +234,7 @@ class AssetService:
         tag_names = list(
             set([self.normalize_tag_name(name) for name in tag_names if name]),
         )
-        existing_tags = (
-            db_session.query(Tag).filter(Tag.name.in_(tag_names)).all()
-        )
+        existing_tags = db_session.query(Tag).filter(Tag.name.in_(tag_names)).all()
         existing_tag_names = set([tag.name for tag in existing_tags])
         tag_names_to_create = [
             name for name in tag_names if name not in existing_tag_names
@@ -304,9 +302,7 @@ class AssetService:
                 # or a reversed first_name
                 last_name = first_name[::-1]
 
-        existing_author = (
-            db_session.query(Author).filter_by(email=email).first()
-        )
+        existing_author = db_session.query(Author).filter_by(email=email).first()
 
         if existing_author:
             return existing_author
@@ -337,9 +333,7 @@ class AssetService:
         language: str = "English",
     ):
         asset = (
-            db_session.query(Asset)
-            .filter(Asset.file_path == file_path)
-            .one_or_none()
+            db_session.query(Asset).filter(Asset.file_path == file_path).one_or_none()
         )
         if not asset:
             raise AssetNotFound(file_path)
@@ -373,9 +367,7 @@ class AssetService:
         Return a list of available extensions
         """
         # get distinct file_path only the 7 last characters
-        files = (
-            db_session.query(Asset.file_path).distinct(Asset.file_path).all()
-        )
+        files = db_session.query(Asset.file_path).distinct(Asset.file_path).all()
         extensions = set()
         for file in files:
             file_path = file[0]
