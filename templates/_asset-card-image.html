@@ -6,95 +6,95 @@
       {% endif %}
       <div class="u-sv1">
         <div class="p-section--shallow">
-          <a href="{% if details or created %}/v1/{{ asset.file_path }}{% else %}/manager/details?file-path={{ asset.file_path }}{% endif %}"
-             target="{% if details or created %}_blank{% else %}_self{% endif %}">
-            <div class="p-asset-card-image__container {% if asset.deprecated %}is-deprecated{% endif %}">
-              {% if asset.data.image %}
-                <img class="p-asset-card--thumbnail"
-                     alt=""
-                     src="/v1/{{ asset.file_path }}" />
-              {% elif asset.asset_type == 'whitepaper' %}
-                <img class="p-asset-card--thumbnail"
-                     alt=""
-                     src="https://assets.ubuntu.com/v1/b061c401-White+paper.svg" />
-              {% else %}
-                <img class="p-asset-card--thumbnail"
-                     alt=""
-                     src="https://assets.ubuntu.com/v1/fd84bbdc-Document-open.svg" />
-              {% endif %}
-            </div>
-          </a>
-        </div>
-        {% if asset.name %}
-          <p class="u-no-margin--bottom">
-            <strong>{{ asset.name }}</strong>
-          </p>
-        {% else %}
-          <p class="u-no-margin--bottom">
-            <strong>{{ asset.file_path.split(".")[0] }}</strong>
-          </p>
-        {% endif %}
-        <p class="u-no-margin--bottom">
-          File type: <strong>.{{ asset.file_type or asset.file_path.split(".")[-1].lower() }}</strong>
-        </p>
-        <p class="u-no-margin--bottom">
-          Resolution:
-          <strong>
-            {% if asset.data.width and asset.data.height %}{{ asset.data.width }} x {{ asset.data.height }}px{% endif %}
-          </strong>
-        </p>
-        <p class="u-no-margin--bottom">
-          Date added: <strong>{{ asset.created.strftime("%d %B %Y") }}</strong>
-        </p>
+          <a href="{% if details or created %} {{ url_for('api_blueprint.get_asset', file_path=asset.file_path) }} {% else %} {{ url_for('ui_blueprint.details', file_path=asset.file_path) }}
+          {% endif %}" target="{% if details or created %}_blank{% else %}_self{% endif %}">
+          <div class="p-asset-card-image__container {% if asset.deprecated %}is-deprecated{% endif %}">
+            {% if asset.data.image %}
+              <img class="p-asset-card--thumbnail"
+                   alt=""
+                   src="{{ url_for('api_blueprint.get_asset', file_path=asset.file_path) }}" />
+            {% elif asset.asset_type == 'whitepaper' %}
+              <img class="p-asset-card--thumbnail"
+                   alt=""
+                   src="https://assets.ubuntu.com/v1/b061c401-White+paper.svg" />
+            {% else %}
+              <img class="p-asset-card--thumbnail"
+                   alt=""
+                   src="https://assets.ubuntu.com/v1/fd84bbdc-Document-open.svg" />
+            {% endif %}
+          </div>
+        </a>
       </div>
-      <hr class="p-rule" />
-      <div class="p-section--shallow">
-        <span>Tags:&nbsp;</span>
-        {% for product in asset.products %}
-          <a href="/manager?tag={{ product.name }}"
-             class="p-chip is-inline is-dense">
-            <span class="p-chip__value">{{ product.name }}</span>
-          </a>
-        {% endfor %}
-        {% for tag in asset.tags %}
-          <a href="/manager?tag={{ tag.name }}" class="p-chip is-inline is-dense">
-            <span class="p-chip__value">{{ tag.name }}</span>
-          </a>
-        {% endfor %}
-      </div>
-      {% if details %}
-        <hr class="p-rule" />
-        {% include "shared/_asset-author.html" %}
+      {% if asset.name %}
         <p class="u-no-margin--bottom">
-          Language: <strong>{{ asset.language }}</strong>
-        </p>
-        <p class="u-no-margin--bottom">
-          Salesforce campaign ID: <strong>{{ asset.salesforce_campaign_id }}</strong>
-        </p>
-        <p class="u-no-margin--bottom">
-          Google Drive link:  <a href="{{ asset.google_drive_link }}">{{ asset.google_drive_link }}</a>
-        </p>
-      {% elif created %}
-        {% include "shared/_asset-card-actions.html" %}
-        <p>
-          <strong>Asset details</strong>
-        </p>
-        {% include "shared/_asset-author.html" %}
-        <p class="u-no-margin--bottom">
-          Created: <strong>{{ asset.created.strftime("%d %B %Y") }}</strong>
-        </p>
-        <p class="u-no-margin--bottom">
-          Language: <strong>{{ asset.language }}</strong>
-        </p>
-        <p class="u-no-margin--bottom">
-          Salesforce campaign ID: <strong>{{ asset.salesforce_campaign_id }}</strong>
-        </p>
-        <p class="u-no-margin--bottom">
-          Google Drive link:  <a href="{{ asset.google_drive_link }}">{{ asset.google_drive_link }}</a>
+          <strong>{{ asset.name }}</strong>
         </p>
       {% else %}
-        {% include "shared/_asset-card-actions.html" %}
+        <p class="u-no-margin--bottom">
+          <strong>{{ asset.file_path.split(".")[0] }}</strong>
+        </p>
       {% endif %}
+      <p class="u-no-margin--bottom">
+        File type: <strong>.{{ asset.file_type or asset.file_path.split(".")[-1] .lower() }}</strong>
+      </p>
+      <p class="u-no-margin--bottom">
+        Resolution:
+        <strong>
+          {% if asset.data.width and asset.data.height %}{{ asset.data.width }} x {{ asset.data.height }}px{% endif %}
+        </strong>
+      </p>
+      <p class="u-no-margin--bottom">
+        Date added: <strong>{{ asset.created.strftime("%d %B %Y") }}</strong>
+      </p>
     </div>
+    <hr class="p-rule" />
+    <div class="p-section--shallow">
+      <span>Tags:&nbsp;</span>
+      {% for product in asset.products %}
+        <a href="/manager?tag={{ product.name }}"
+           class="p-chip is-inline is-dense">
+          <span class="p-chip__value">{{ product.name }}</span>
+        </a>
+      {% endfor %}
+      {% for tag in asset.tags %}
+        <a href="/manager?tag={{ tag.name }}" class="p-chip is-inline is-dense">
+          <span class="p-chip__value">{{ tag.name }}</span>
+        </a>
+      {% endfor %}
+    </div>
+    {% if details %}
+      <hr class="p-rule" />
+      {% include "shared/_asset-author.html" %}
+      <p class="u-no-margin--bottom">
+        Language: <strong>{{ asset.language }}</strong>
+      </p>
+      <p class="u-no-margin--bottom">
+        Salesforce campaign ID: <strong>{{ asset.salesforce_campaign_id }}</strong>
+      </p>
+      <p class="u-no-margin--bottom">
+        Google Drive link:  <a href="{{ asset.google_drive_link }}">{{ asset.google_drive_link }}</a>
+      </p>
+    {% elif created %}
+      {% include "shared/_asset-card-actions.html" %}
+      <p>
+        <strong>Asset details</strong>
+      </p>
+      {% include "shared/_asset-author.html" %}
+      <p class="u-no-margin--bottom">
+        Created: <strong>{{ asset.created.strftime("%d %B %Y") }}</strong>
+      </p>
+      <p class="u-no-margin--bottom">
+        Language: <strong>{{ asset.language }}</strong>
+      </p>
+      <p class="u-no-margin--bottom">
+        Salesforce campaign ID: <strong>{{ asset.salesforce_campaign_id }}</strong>
+      </p>
+      <p class="u-no-margin--bottom">
+        Google Drive link:  <a href="{{ asset.google_drive_link }}">{{ asset.google_drive_link }}</a>
+      </p>
+    {% else %}
+      {% include "shared/_asset-card-actions.html" %}
+    {% endif %}
   </div>
+</div>
 </div>

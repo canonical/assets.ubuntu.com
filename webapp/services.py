@@ -14,7 +14,7 @@ from sqlalchemy import func, or_
 from webapp.database import db_session
 from webapp.lib.file_helpers import is_svg
 from webapp.lib.processors import ImageProcessor
-from webapp.lib.url_helpers import clean_unicode
+from webapp.lib.url_helpers import sanitize_filename
 from webapp.models import Asset, Author, Product, Tag
 from webapp.swift import file_manager
 from webapp.utils import lru_cache
@@ -134,8 +134,8 @@ class AssetService:
         Create a new asset
         """
         # escape unicde characters
-        friendly_name = clean_unicode(friendly_name)
-        url_path = clean_unicode(url_path)
+        friendly_name = sanitize_filename(friendly_name)
+        url_path = sanitize_filename(url_path)
 
         # First we ensure it is b64 encoded
         encoded_file_content = b64encode(file_content)

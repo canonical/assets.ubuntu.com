@@ -1,3 +1,7 @@
+import os
+from slugify import slugify
+
+
 try:
     from urllib.parse import quote_plus, unquote_plus
 except ImportError:
@@ -15,10 +19,22 @@ def normalize(url_to_normalize):
     return requoted_url
 
 
-def clean_unicode(file_name):
+def sanitize_filename(file_name: str) -> str:
     """
-    Given a file name, it will remove any unicode characters
-    that are not supported by the filesystem.
+    Sanitize file names using slugify:
+    - Keeps A-Z, a-z, 0-9
+    - Removes spaces
+    - Replaces any other character with '-'
+    Preserves the last '.' before the extension
     """
-    if file_name:
-        return file_name.encode("latin-1", "ignore").decode("latin-1")
+    if not file_name:
+        return ""
+
+    base, ext = os.path.splitext(file_name)
+
+    sanitized_base = slugify(base, separator="_")
+
+    if not sanitized_base:
+        sanitized_base = "file"
+
+    return f"{sanitized_base}{ext}"

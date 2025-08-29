@@ -7,7 +7,7 @@ from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 # Packages
 import flask
 import yaml
-from flask import Blueprint
+from flask import Blueprint, url_for
 from flask.globals import request
 
 # Local
@@ -232,12 +232,15 @@ def create():
 @ui_blueprint.route("/update", methods=["GET", "POST"])
 @login_required
 def update():
-    file_path = request.args.get("file-path")
+    file_path = request.args.get("file_path")
 
     if request.method == "GET":
         asset = asset_service.find_asset(file_path)
         if not asset:
             flask.flash("Asset not found", "negative")
+            return flask.render_template(
+                "error.html", reason="Asset not found", code=404
+            )
 
     elif request.method == "POST":
         tags = request.form.get("tags").split(",")
@@ -272,7 +275,9 @@ def update():
             flask.flash("Asset updated", "positive")
         except AssetNotFound:
             flask.flash("Asset not found", "negative")
-        return flask.redirect("/manager/details?file-path=" + file_path)
+        return flask.redirect(
+            url_for("ui_blueprint.details", file_path=file_path)
+        )
 
     return flask.render_template(
         "create-update.html", form_field_data=form_field_data, asset=asset
@@ -282,7 +287,7 @@ def update():
 @ui_blueprint.route("/details", methods=["GET"])
 @login_required
 def details():
-    file_path = request.args.get("file-path")
+    file_path = request.args.get("file_path")
 
     asset = asset_service.find_asset(file_path)
     if not asset:
