@@ -275,7 +275,9 @@ def update():
             flask.flash("Asset updated", "positive")
         except AssetNotFound:
             flask.flash("Asset not found", "negative")
-        return flask.redirect(url_for("ui_blueprint.details", file_path=file_path))
+        return flask.redirect(
+            url_for("ui_blueprint.details", file_path=file_path)
+        )
 
     return flask.render_template(
         "create-update.html", form_field_data=form_field_data, asset=asset

@@ -1,4 +1,3 @@
-import re
 import os
 from slugify import slugify
 
@@ -34,7 +33,7 @@ def sanitize_filename(file_name: str) -> str:
     base, ext = os.path.splitext(file_name)
 
     sanitized_base = slugify(base, separator="_")
-    
+
     if not sanitized_base:
         sanitized_base = "file"
 
