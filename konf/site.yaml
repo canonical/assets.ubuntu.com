@@ -51,7 +51,7 @@ env:
       name: directory-api
 
   - name: READ_ONLY_MODE
-    value: "false"
+    value: "true"
 
 extraHosts:
   - domain: manager.assets.ubuntu.com
