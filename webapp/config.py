@@ -29,6 +29,7 @@ class Config(BaseSettings):
     )
 
     secret_key: SecretStr
+    read_only_mode: bool = False
     database_url: SecretStr = Field(
         validation_alias=AliasChoices(
             "database_url",

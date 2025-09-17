@@ -11,6 +11,7 @@ from PIL import Image as PillowImage
 from sqlalchemy import func, or_
 
 # Local
+from webapp.config import config
 from webapp.database import db_session
 from webapp.lib.file_helpers import is_svg
 from webapp.lib.processors import ImageProcessor
@@ -133,6 +134,9 @@ class AssetService:
         """
         Create a new asset
         """
+        if config.read_only_mode:
+            raise ReadOnlyMode()
+
         # escape unicde characters
         friendly_name = sanitize_filename(friendly_name)
         url_path = sanitize_filename(url_path)
@@ -404,6 +408,12 @@ class AssetAlreadyExistException(Exception):
 class AssetNotFound(Exception):
     """
     Raised when the requested asset wasn't found
+    """
+
+
+class ReadOnlyMode(Exception):
+    """
+    Raised when the requested asset to create already exists
     """
 
 
