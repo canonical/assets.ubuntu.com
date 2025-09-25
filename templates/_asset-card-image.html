@@ -26,11 +26,11 @@
         </a>
       </div>
       {% if asset.name %}
-        <p class="u-no-margin--bottom">
+        <p class="u-no-margin--bottom u-truncate">
           <strong>{{ asset.name }}</strong>
         </p>
       {% else %}
-        <p class="u-no-margin--bottom">
+        <p class="u-no-margin--bottom u-truncate">
           <strong>{{ asset.file_path.split(".")[0] }}</strong>
         </p>
       {% endif %}
