@@ -2,9 +2,9 @@ import logging
 import sys
 
 import trino.auth
+from webapp.config import config
 from google.auth.transport import requests
 from google.oauth2 import service_account
-from pydantic_settings import BaseSettings
 from trino.dbapi import connect
 
 
@@ -12,27 +12,9 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 
-class TrinoConfig(BaseSettings):
-    type: str = "service_account"
-    universe_domain: str = "googleapis.com"
-    project_id: str
-    private_key_id: str
-    private_key: str
-    client_email: str
-    client_id: str
-    auth_uri: str = "https://accounts.google.com/o/oauth2/auth"
-    token_uri: str = "https://oauth2.googleapis.com/token"
-    auth_provider_x509_cert_url: str = (
-        "https://www.googleapis.com/oauth2/v1/certs"
-    )
-
-    class Config:
-        env_prefix = "TRINO_OIDC_"
-
-
 def get_service_account_token():
     try:
-        trino_service_account = TrinoConfig()
+        trino_service_account = config.trino_sf
         service_account_dict = trino_service_account.model_dump()
         credentials = service_account.Credentials.from_service_account_info(
             service_account_dict, scopes=["openid", "email"]
