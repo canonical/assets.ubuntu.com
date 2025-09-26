@@ -30,6 +30,7 @@ def get_service_account_token():
 token = get_service_account_token()
 if not token:
     logger.error("Failed to obtain service account token.")
+    trino_cur = None
 else:
     trino_conn = connect(
         host="candidate.trino.canonical.com",

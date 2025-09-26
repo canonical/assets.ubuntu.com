@@ -22,7 +22,10 @@ class DirectoryApiConfig(BaseSettings):
     url: str
     token: SecretStr
 
+
 # Salesforce Trino Config
+
+
 class TrinoSFConfig(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=ENV_FILES, extra="ignore", env_prefix="flask_trino_sf_"

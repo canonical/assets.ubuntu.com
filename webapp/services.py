@@ -466,6 +466,8 @@ def query_salesforce_campaigns(query: str) -> list[dict]:
         f"LIMIT 20"
     )
     all_results = []
+    if not trino_cur:
+        print("Failed to connect to trino service")
     try:
         trino_cur.execute(formed_query)
         fetch_results = trino_cur.fetchall()
