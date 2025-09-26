@@ -7,7 +7,9 @@ from urllib.parse import unquote, urlparse
 
 from webapp.config import config
 import requests
+import json
 
+# Packages
 from flask import Response, abort, jsonify, redirect, request
 
 from webapp.database import db_session
@@ -109,7 +111,10 @@ def update_asset(file_path):
     asset_type = request.values.get("asset-type", "")
     author = request.values.get("author", "")
     google_drive_link = request.values.get("google_drive_link", "")
-    salesforce_campaign_id = request.values.get("salesforce_campaign_id", "")
+    salesforce_campaigns_string = request.form.get(
+        "salesforce_campaigns", "[]"
+    )
+    salesforce_campaigns = json.loads(salesforce_campaigns_string)
     language = request.values.get("language", "")
     try:
         asset = asset_service.update_asset(
@@ -120,7 +125,7 @@ def update_asset(file_path):
             asset_type=asset_type,
             author=author,
             google_drive_link=google_drive_link,
-            salesforce_campaign_id=salesforce_campaign_id,
+            salesforce_campaigns=salesforce_campaigns,
             language=language,
         )
         return jsonify(asset.as_json())
@@ -191,7 +196,6 @@ def get_assets():
             search_params.name,
             search_params.start_date,
             search_params.end_date,
-            search_params.salesforce_campaign_id,
             search_params.language,
         ]
     ):
@@ -202,7 +206,6 @@ def get_assets():
             author_email=search_params.author_email,
             start_date=search_params.start_date,
             end_date=search_params.end_date,
-            salesforce_campaign_id=search_params.salesforce_campaign_id,
             language=search_params.language,
             file_types=[file_type],
             page=page,
@@ -244,10 +247,10 @@ def create_asset():
             "email": author_email,
         }
         google_drive_link = request.values.get("google_drive_link", "")
-        salesforce_campaign_id = request.values.get(
-            "salesforce_campaign_id",
-            "",
+        salesforce_campaigns_string = request.form.get(
+            "salesforce_campaigns", "[]"
         )
+        salesforce_campaigns = json.loads(salesforce_campaigns_string)
         language = request.values.get("language", "")
         deprecated = (
             request.values.get("deprecated", "false").lower() == "true"
@@ -266,7 +269,7 @@ def create_asset():
                     asset_type=asset_type,
                     author=_author,
                     google_drive_link=google_drive_link,
-                    salesforce_campaign_id=salesforce_campaign_id,
+                    salesforce_campaigns=salesforce_campaigns,
                     language=language,
                     deprecated=deprecated,
                 )

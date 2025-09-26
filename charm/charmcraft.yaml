@@ -36,3 +36,6 @@ config:
       type: boolean
       description: Enabling this will prevent users from creating new assets (useful during migration to a new server)
       default: false
+    trino-sf:
+      type: secret
+      description: Trino credentials, must contain (project-id, private-key-id, client-email, client-id, private-key)
