@@ -1,5 +1,6 @@
-from pydantic import AliasChoices, SecretStr, Field
+from pydantic import AliasChoices, SecretStr, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+import base64
 
 ENV_FILES = (".env", ".env.local")
 
@@ -43,6 +44,23 @@ class TrinoSFConfig(BaseSettings):
         "https://www.googleapis.com/oauth2/v1/certs"
     )
 
+    @field_validator("private_key", mode="before")
+    @classmethod
+    def decode_private_key(cls, v: str) -> str:
+        """
+        Automatically base64-decode the private_key if it looks base64-encoded.
+        Otherwise, leave as is.
+        """
+        if not v:
+            return v
+        try:
+            decoded_bytes = base64.b64decode(v, validate=True).replace(b"\\n", b"\n")
+            decoded_str = decoded_bytes.decode("utf-8")
+            if decoded_str.strip().startswith("-----BEGIN"):
+                return decoded_str
+        except Exception:
+            pass  
+        return v
 
 class Config(BaseSettings):
     model_config = SettingsConfigDict(
