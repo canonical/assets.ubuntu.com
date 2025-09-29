@@ -46,6 +46,29 @@ api_blueprint = Blueprint("api_blueprint", __name__, url_prefix="/v1")
 with open("form-field-data.yaml") as file:
     form_field_data = yaml.load(file, Loader=yaml.FullLoader)
 
+
+def sort_data(obj, parent_key=None):
+    if isinstance(obj, dict):
+        # Sort dict by keys and apply sorting recursively
+        return {k: sort_data(v, k) for k, v in sorted(obj.items())}
+    elif isinstance(obj, list):
+        if parent_key == "languages":
+            # Do not sort the 'languages' list
+            return [sort_data(i) for i in obj]
+        elif all(isinstance(i, dict) and "name" in i for i in obj):
+            # Sort list of dicts by 'name' key
+            return sorted(
+                [sort_data(i) for i in obj], key=lambda x: x["name"].lower()
+            )
+        else:
+            # Recursively sort list elements
+            return [sort_data(i) for i in obj]
+    else:
+        return obj
+
+
+sorted_data = sort_data(form_field_data)
+
 # Manager Routes
 # ===
 
@@ -96,6 +119,7 @@ def home():
             search_params.tag,
             search_params.asset_type,
             search_params.product_types,
+            search_params.categories,
             search_params.author_email,
             search_params.start_date,
             search_params.end_date,
@@ -107,6 +131,7 @@ def home():
             tag=search_params.tag,
             asset_type=search_params.asset_type,
             product_types=search_params.product_types,
+            categories=search_params.categories,
             author_email=search_params.author_email,
             start_date=search_params.start_date,
             end_date=search_params.end_date,
@@ -134,7 +159,7 @@ def home():
         order_by_fields=asset_service.order_by_fields(),
         include_deprecated=include_deprecated,
         query=search_params.tag,
-        form_field_data=form_field_data,
+        form_field_data=sorted_data,
         is_search=is_search,
     )
 
@@ -167,9 +192,11 @@ def create():
             "author_first_name": request.form.get("author_first_name", ""),
             "author_last_name": request.form.get("author_last_name", ""),
             "name": request.form.get("name", ""),
+            "categories": request.form.get("categories", ""),
         }
         form_data["tags"] = re.split(",|\\s", form_data["tags"])
         form_data["products"] = re.split(",|\\s", form_data["products"])
+        form_data["categories"] = re.split(",|\\s", form_data["categories"])
         author = {
             "email": form_data["author_email"],
             "first_name": form_data["author_first_name"],
@@ -193,6 +220,7 @@ def create():
                     optimize=optimize,
                     tags=form_data["tags"],
                     products=form_data["products"],
+                    categories=form_data["categories"],
                     asset_type=form_data["asset_type"],
                     author=author,
                     google_drive_link=form_data["google_drive_link"],
@@ -229,7 +257,7 @@ def create():
         form_data = flask.session.pop("form_data", {})
         return flask.render_template(
             "create-update.html",
-            form_field_data=form_field_data,
+            form_field_data=sorted_data,
             form_session_data=form_data,
         )
 
@@ -288,7 +316,7 @@ def update():
         )
 
     return flask.render_template(
-        "create-update.html", form_field_data=form_field_data, asset=asset
+        "create-update.html", form_field_data=sorted_data, asset=asset
     )
 
 

@@ -18,12 +18,12 @@ const updateQueryParams = document.querySelector(".js-asset-search");
 (function () {
   const productsSearchComponent = document.querySelector(".js-products-search");
   if (productsSearchComponent) {
-    const productSearchInput = productsSearchComponent.querySelector(".js-search-input");
+    const productSearchInput =
+      productsSearchComponent.querySelector(".js-search-input");
     if (productSearchInput) {
       // only open the options panel if there is a value in the input
-      productSearchInput.addEventListener("input", function (e) {
-        const shouldOpen = e.target.value.trim().length > 0;
-        openPanel(productsSearchComponent, shouldOpen);
+      productSearchInput.addEventListener("focus", function (e) {
+        openPanel(productsSearchComponent, true);
       });
       setUpProductSearchField();
     }
@@ -37,9 +37,9 @@ const updateQueryParams = document.querySelector(".js-asset-search");
  **/
 export default function handleProductsChip(targetChip) {
   if (targetChip.classList.contains("js-unselected")) {
-    selectProductsChip(targetChip.id);
+    selectProductsChip(targetChip);
   } else if (targetChip.classList.contains("js-selected")) {
-    deselectProductsChip(targetChip.dataset.id);
+    deselectProductsChip(targetChip);
   }
 }
 
@@ -110,26 +110,37 @@ function setupInputChangeListener(fuse, input) {
  * @param {Array} chip - The chip to show.
  * @param {HTMLElement} hiddenInput - The hidden input to store the selected chips value.
  **/
-function selectProductsChip(chipId) {
-  const unselectedChip = document.querySelector(
-    `.js-${chipId}-chip.js-unselected`
+function selectProductsChip(chip) {
+  const selectedChip = document.querySelector(
+    `.js-${chip.dataset.id}-chip.js-selected`
   );
-  const selectedChip = document.querySelector(`.js-${chipId}-chip.js-selected`);
-  unselectedChip.classList.add("u-hide");
+
   selectedChip.classList.remove("u-hide");
-  addValueToHiddenInput(
-    chipId,
-    document.querySelector(".js-products-search .js-hidden-field")
+
+  const unselectedChips = document.querySelectorAll(
+    `.p-chip.js-unselected[data-name='${chip.dataset.name}']`
   );
+
+  const hiddenProductInput = document.querySelector(
+    ".js-products-search .js-hidden-field"
+  );
+  const hiddenCategoryInput = document.querySelector(
+    "input[name='categories'].u-hide"
+  );
+  unselectedChips.forEach((unselectedChip) => {
+    unselectedChip.classList.add("is-readonly", "p-chip--disabled");
+    addValueToHiddenInput(unselectedChip.dataset.id, hiddenProductInput);
+    addValueToHiddenInput(unselectedChip.dataset.category, hiddenCategoryInput);
+  });
+
   // clear the entered value after selecting a chip
-  const inputField = document.querySelector(".js-products-search .js-search-input");
+  const inputField = document.querySelector(
+    ".js-products-search .js-search-input"
+  );
   inputField.value = "";
   inputField.focus();
-  // close the chips panel
-  const chipsPanel = document.querySelector(".js-products-search .js-chips-panel");
-  chipsPanel.setAttribute("aria-hidden", "true");
   if (updateQueryParams) {
-    addValueToQueryParams("product_types", chipId);
+    addValueToQueryParams("product_types", chip.dataset.id);
   }
 }
 
@@ -140,19 +151,46 @@ function selectProductsChip(chipId) {
  * @param {Array} chip - The chip to show.
  * @param {HTMLElement} hiddenInput - The hidden input to remove the selected chips value from.
  **/
-function deselectProductsChip(chipId) {
-  const unselectedChip = document.querySelector(
-    `.js-${chipId}-chip.js-unselected`
+function deselectProductsChip(chip) {
+  const selectedChip = document.querySelector(
+    `.js-${chip.dataset.id}-chip.js-selected`
   );
-  const selectedChip = document.querySelector(`.js-${chipId}-chip.js-selected`);
-  unselectedChip.classList.remove("u-hide");
   selectedChip.classList.add("u-hide");
-  removeValueFromHiddenInput(
-    chipId,
-    document.querySelector(".js-products-search .js-hidden-field")
+
+  const unselectedChips = document.querySelectorAll(
+    `.js-${chip.dataset.id}-chip.js-unselected`
   );
+
+  const hiddenProductInput = document.querySelector(
+    ".js-products-search .js-hidden-field"
+  );
+  const hiddenCategoryInput = document.querySelector(
+    "input[name='categories'].u-hide"
+  );
+
+  unselectedChips.forEach((unselectedChip) => {
+    unselectedChip.classList.remove("is-readonly", "p-chip--disabled");
+    removeValueFromHiddenInput(unselectedChip.dataset.id, hiddenProductInput);
+
+    // remove category only if no other chips from the same category are selected
+    var categoryEl = document.querySelector(
+      `.p-filter-panel-section__heading[data-id='${unselectedChip.dataset.category}']`
+    );
+    var categorySectionEl = categoryEl.closest(".p-filter-panel-section");
+    var selectedChipsInCategory = categorySectionEl.querySelector(
+      ".p-chip.is-readonly.p-chip--disabled"
+    );
+
+    if (!selectedChipsInCategory) {
+      removeValueFromHiddenInput(
+        unselectedChip.dataset.category,
+        hiddenCategoryInput
+      );
+    }
+  });
+
   if (updateQueryParams) {
-    removeValueFromQueryParams("product_types", chipId);
+    removeValueFromQueryParams("product_types", chip.dataset.id);
   }
 }
 
@@ -164,31 +202,34 @@ function deselectProductsChip(chipId) {
  * @param {String} query - The search query.
  **/
 function showAndHideProductChips(chips, query) {
-  const allChips = document.querySelectorAll(".p-chip.js-unselected");
-  // If no query, show all chips
+  const allCategories = document.querySelectorAll(".p-filter-panel-section");
   if (!query) {
-    allChips.forEach((chip) => {
-      chip.classList.remove("u-hide");
+    return allCategories.forEach((category) => {
+      category.classList.remove("u-hide");
+      category.querySelectorAll(".p-chip.js-unselected").forEach((chip) => {
+        chip.classList.remove("u-hide");
+      });
     });
-    return;
   }
-  // Start by hiding all chips
-  allChips.forEach((chip) => {
-    chip.classList.add("u-hide");
+
+  // start by hiding all categories and chips
+  allCategories.forEach((category) => {
+    category.classList.add("u-hide");
+    category.querySelectorAll(".p-chip.js-unselected").forEach((chip) => {
+      chip.classList.add("u-hide");
+    });
   });
+
   if (chips.length > 0) {
     document.querySelector(".js-no-results").classList.add("u-hide");
     chips.forEach((chip) => {
-      if (
-        document
-          .querySelector(`.js-${chip.id}-chip.js-selected`)
-          .classList.contains("u-hide")
-      ) {
-        const chipElement = document.querySelector(
-          `.js-${chip.id}-chip.js-unselected`
-        );
-        chipElement.classList.remove("u-hide");
-      }
+      // find the chip
+      var chipEl = document.querySelector(`.js-${chip.id}-chip.js-unselected`);
+      chipEl.classList.remove("u-hide");
+
+      // find the parent category of the chip
+      var categoryEl = chipEl.closest(".p-filter-panel-section");
+      categoryEl.classList.remove("u-hide");
     });
   } else {
     document.querySelector(".js-no-results").classList.remove("u-hide");

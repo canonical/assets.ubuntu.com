@@ -8,6 +8,7 @@ import handleCampaignChip from "./sf_campaign-search";
 
 import "./date-picker";
 import "./generic-fields";
+import "./search-and-filter-overflow";
 
 /*
  * Event delgation to handle the click event for search and filter.
@@ -84,6 +85,7 @@ export function removeValueFromHiddenInput(value, input) {
   let selectedChips = input.value.split(",").filter(Boolean);
   selectedChips = selectedChips.filter((id) => id !== value);
   input.setAttribute("value", selectedChips.join(","));
+
 }
 
 /*

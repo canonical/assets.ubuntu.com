@@ -1,7 +1,5 @@
 {% extends "_layout.html" %}
-
 {% block title %}Create assets{% endblock %}
-
 {% block content %}
   {% set is_update = request.path == "/manager/update" %}
   <div class="p-strip">
@@ -33,335 +31,345 @@
                              alt="" />
                       {% endif %}
                     </a>
-                  </p>
-                  <label for="depracted" class="p-heading--5">Deprecated:</label>
-                  <input type="checkbox"
-                         name="deprecated"
-                         {% if asset.deprecated %}checked{% endif %} />
-                </div>
-              {% else %}
-                <label class="p-heading--5 u-no-margin--bottom">Choose file(s) to upload</label>
-                <p class="u-text--muted u-no-padding--top">
-                  Please note, if an asset is already in the asset manager, it cannot be added again
-                </p>
-                <input id="input-files"
-                       type="file"
-                       multiple
-                       name="assets"
-                       aria-label="Choose files to upload"
-                       required />
-              {% endif %}
-            </div>
-            <div class="p-section--shallow">
-              <div class="js-multiselect">
-                <label class="p-heading--5 u-no-margin--bottom" id="asset-type">Type of asset</label>
-                <p class="u-text--muted u-no-padding--top">Choose the most relevant type</p>
-                <select id="asset-type-select"
-                        aria-label="Required field: Select asset type"
-                        required>
-                  {% for asset_type in form_field_data.asset_types %}
-                    {% set asset_value = asset_type.name|lower|replace(' ', '-') %}
-                    <option value="{{ asset_value }}"
-                            {% if (asset and asset_value in asset.asset_type) or (form_session_data and asset_value in form_session_data.asset_type) %}selected{% endif %}
-                            {% if asset_type.name == "-" %}disabled{% endif %}>{{ asset_type.name }}</option>
-                  {% endfor %}
-                </select>
-                <input type="text" class="u-hide js-hidden-field" name="asset_type" value="" />
-              </div>
-            </div>
-            <div class="p-section--shallow" data-name="assetName">
-              <label class="p-heading--5 u-no-margin--bottom" id="asset-name">Asset name</label>
-              <p class="u-text--muted u-no-padding--top">Use the relevant naming convention</p>
-              <input type="text"
-                     id="name"
-                     name="name"
-                     placeholder="For example ‘A guide to open source vulnerability management’"
-                     aria-labelledby="asset-name"
-                     value="{% if asset %}{{ asset.name }}{% endif %}" />
-            </div>
-            <div class="p-section--shallow" data-name="productTags">
-              {% set existing_products = [] %}
-              {% if asset and asset.products | length %}
-                {% for product in asset.products %}
-                  {% set _ = existing_products.append(product.name) %}
-                {% endfor %}
-              {% elif form_session_data and form_session_data.products | length %}
-                {% for product in form_session_data.products %}
-                  {% set _ = existing_products.append(product) %}
-                {% endfor %}
-              {% endif %}
-              <div class="p-search-and-filter js-products-search">
-                <label class="p-heading--5 u-no-margin--bottom" id="product-tags">Product or department tags</label>
-                <p class="u-text--muted u-no-padding--top">Add tags for the product or department of the asset</p>
-                <div class="p-search-and-filter__search-container" aria-expanded="false">
-                  {% for product in form_field_data.products %}
-                    <span class="p-chip js-{{ product.slug }}-chip js-selected {% if product.slug not in existing_products %}u-hide{% endif %}"
-                          data-id="{{ product.slug }}">
-                      <span class="p-chip__value">{{ product.name }}</span>
-                      <button class="p-chip__dismiss">Dismiss</button>
-                    </span>
-                  {% endfor %}
-                  <div class="p-search-and-filter__box" data-overflowing="false">
-                    <label class="u-hide" for="search">Search products</label>
-                    <input autocomplete="off"
-                           class="p-search-and-filter__input js-search-input"
-                           id="search"
-                           placeholder="Start typing a product name or department"
-                           type="text"
-                           value=""
-                           aria-labelledby="product-tags" />
-                    <input type="text"
-                           class="u-hide js-hidden-field"
-                           name="products"
-                           value=""
-                           tabindex="-1" />
+                    <label for="depracted" class="p-heading--5">Deprecated:</label>
+                    <input type="checkbox"
+                           name="deprecated"
+                           {% if asset.deprecated %}checked{% endif %} />
                   </div>
+                {% else %}
+                  <label class="p-heading--5 u-no-margin--bottom">Choose file(s) to upload</label>
+                  <p class="u-text--muted u-no-padding--top">
+                    Please note, if an asset is already in the asset manager, it cannot be added again
+                  </p>
+                  <input id="input-files"
+                         type="file"
+                         multiple
+                         name="assets"
+                         aria-label="Choose files to upload"
+                         required />
+                {% endif %}
+              </div>
+              <div class="p-section--shallow">
+                <div class="js-multiselect">
+                  <label class="p-heading--5 u-no-margin--bottom" id="asset-type">Type of asset</label>
+                  <p class="u-text--muted u-no-padding--top">Choose the most relevant type</p>
+                  <select id="asset-type-select"
+                          aria-label="Required field: Select asset type"
+                          required>
+                    {% for asset_type in form_field_data.asset_types %}
+                      {% set asset_value = asset_type.name|lower|replace(' ', '-') %}
+                      <option value="{{ asset_value }}"
+                              {% if (asset and asset_value in asset.asset_type) or (form_session_data and asset_value in form_session_data.asset_type) %}selected{% endif %}
+                              {% if asset_type.name == "-" %}disabled{% endif %}>{{ asset_type.name }}</option>
+                    {% endfor %}
+                  </select>
+                  <input type="text" class="u-hide js-hidden-field" name="asset_type" value="" />
                 </div>
-                <div class="p-search-and-filter__panel js-chips-panel" aria-hidden="true">
-                  <div class="p-filter-panel-section">
-                    <div class="p-filter-panel-section__header">
-                      <h4 class="p-filter-panel-section__heading p-heading--5">Tags</h4>
-                    </div>
-                    <div class="p-filter-panel-section__chips">
-                      {% for product in form_field_data.products %}
-                        <button class="p-chip js-{{ product.slug }}-chip js-unselected {% if product.slug in existing_products %}u-hide{% endif %}"
-                                id="{{ product.slug }}"
-                                data-name="{{ product.name }}"
-                                tabindex="-1">
-                          <span class="p-chip__value">{{ product.name }}</span>
-                        </button>
+              </div>
+              <div class="p-section--shallow" data-name="assetName">
+                <label class="p-heading--5 u-no-margin--bottom" id="asset-name">Asset name</label>
+                <p class="u-text--muted u-no-padding--top">Use the relevant naming convention</p>
+                <input type="text"
+                       id="name"
+                       name="name"
+                       placeholder="For example ‘A guide to open source vulnerability management’"
+                       aria-labelledby="asset-name"
+                       value="{% if asset %}{{ asset.name }}{% endif %}" />
+              </div>
+              <div class="p-section--shallow" data-name="productTags">
+                {% set existing_products = [] %}
+                {% if asset and asset.products | length %}
+                  {% for product in asset.products %}
+                    {% set _ = existing_products.append(product.name) %}
+                  {% endfor %}
+                {% elif form_session_data and form_session_data.products | length %}
+                  {% for product in form_session_data.products %}
+                    {% set _ = existing_products.append(product) %}
+                  {% endfor %}
+                {% endif %}
+                <div class="p-search-and-filter js-products-search">
+                  <label class="p-heading--5 u-no-margin--bottom" id="product-tags">Product or category tags</label>
+                  <p class="u-text--muted u-no-padding--top">Add tags for the product or category of the asset</p>
+                  <div class="p-search-and-filter__search-container" aria-expanded="false">
+                    {% for product in form_field_data.products %}
+                      {% for tag in product.tags %}
+                        <span class="p-chip js-{{ tag.slug }}-chip js-selected {% if tag.slug not in existing_products %}u-hide{% endif %}"
+                              data-id="{{ tag.slug }}"
+                              data-category="{{ product.slug }}">
+                          <span class="p-chip__value">{{ tag.name }}</span>
+                          <button class="p-chip__dismiss">Dismiss</button>
+                        </span>
                       {% endfor %}
+                    {% endfor %}
+                    <span class="p-search-and-filter__selected-count"
+                          role="button"
+                          tabindex="0"></span>
+                    <div class="p-search-and-filter__box" data-overflowing="false">
+                      <label class="u-hide" for="search">Search products</label>
+                      <input autocomplete="off"
+                             class="p-search-and-filter__input js-search-input"
+                             id="search"
+                             placeholder="Start typing a product name or category"
+                             type="text"
+                             value=""
+                             aria-labelledby="product-tags" />
+                      <input type="text"
+                             class="u-hide js-hidden-field"
+                             name="products"
+                             value=""
+                             tabindex="-1" />
+                      <input type="text" class="u-hide" name="categories" value="" tabindex="-1" />
+                    </div>
+                  </div>
+                  <div class="p-search-and-filter__panel js-chips-panel" aria-hidden="true">
+                    {% for product in form_field_data.products %}
+                      <div class="p-filter-panel-section">
+                        <div class="p-filter-panel-section__header">
+                          <h4 class="p-filter-panel-section__heading p-heading--5"
+                              data-id="{{ product.slug }}">{{ product.name }}</h4>
+                        </div>
+                        <div class="p-filter-panel-section__chips">
+                          {% for tag in product.tags %}
+                            <button class="p-chip js-{{ tag.slug }}-chip js-unselected {% if tag.slug in existing_products %}p-chip--disabled{% endif %}"
+                                    id="{{ tag.slug }}"
+                                    data-name="{{ tag.name }}"
+                                    data-id="{{ tag.slug }}"
+                                    data-category="{{ product.slug }}"
+                                    tabindex="-1">
+                              <span class="p-chip__value">{{ tag.name }}</span>
+                            </button>
+                          {% endfor %}
+                          <span class="p-filter-panel-section__selected-count"
+                                role="button"
+                                tabindex="0"></span>
+                        </div>
+                      </div>
                       <p class="js-no-results u-no-margin--bottom u-hide">
                         <strong>No results found...</strong>
                       </p>
-                    </div>
+                    {% endfor %}
                   </div>
                 </div>
               </div>
-            </div>
-            <div class="p-section--shallow" data-name="assetTags">
-              {% set existing_tags = [] %}
-              {% if asset %}
-                {% for tag in asset.tags %}
-                  {% set _ = existing_tags.append(tag.name) %}
-                {% endfor %}
-              {% endif %}
-              <label class="p-heading--5 u-no-margin--bottom" id="asset-tags">Asset tags</label>
-              <p class="u-text--muted u-no-padding--top">Add tags that will help you search and find the asset</p>
-              <div class="add-and-edit-chips">
-                <div class="added-chips">
-                  {% for tag in existing_tags %}<span class="u-hide">{{ tag }}</span>{% endfor %}
-                </div>
-                <div class="add-chips-input">
-                  <input type="text"
-                         id="assets-chips-input"
-                         placeholder="Enter tag and press enter" />
-                  <input type="text" class="u-hide js-hidden-field" name="tags" value="" />
-                </div>
-              </div>
-            </div>
-            {% if asset and asset.author and asset.author.email and asset.author.first_name and asset.author.last_name %}
-              {% set email = asset.author.email %}
-              {% set first_name = asset.author.first_name %}
-              {% set last_name = asset.author.last_name %}
-            {% elif form_session_data and form_session_data.author_email and form_session_data.author_first_name and form_session_data.author_last_name %}
-              {% set email = form_session_data.author_email %}
-              {% set first_name = form_session_data.author_first_name %}
-              {% set last_name = form_session_data.author_last_name %}
-            {% endif %}
-            <div data-name="author">
-              <label class="p-heading--5 u-no-margin--bottom" id="author">Author</label>
-              <p class="u-text--muted u-no-padding--top">Name the author of the file</p>
-              <div class="p-search-and-filter js-authors-search">
-                <div class="p-search-and-filter__search-container" aria-expanded="false">
-                  <span class="p-chip js-author-chip u-hide"
-                        data-email=""
-                        data-firstname=""
-                        data-lastname="">
-                    <span class="p-chip__value js-content"></span>
-                    <button class="p-chip__dismiss">Dismiss</button>
-                  </span>
-                  {% if email and first_name and last_name %}
-                    <span class="p-chip js-chip"
-                          data-email="{{ email }}"
-                          data-firstname="{{ first_name }}"
-                          data-lastname="{{ last_name }}">
-                      <span class="p-chip__value js-value">{{ first_name + " " + last_name }}</span>
-                      <button class="p-chip__dismiss">Dismiss</button>
-                    </span>
-                  {% endif %}
-                  <div class="p-search-and-filter__box" data-overflowing="false">
-                    <label class="u-hide" for="search">Search authors</label>
-                    <input autocomplete="off"
-                           class="p-search-and-filter__input js-authors-input"
-                           placeholder="Start typing the name of the Canonical team member"
-                           type="text"
-                           value=""
-                           aria-labelledby="author" />
-                    <input type="text"
-                           class="u-hide js-hidden-field-email"
-                           name="author_email"
-                           value="{% if email %}{{ email }}{% endif %}"
-                           tabindex="-1" />
-                    <input type="text"
-                           class="u-hide js-hidden-field-firstname"
-                           name="author_first_name"
-                           value="{% if first_name %}{{ first_name }}{% endif %}"
-                           tabindex="-1" />
-                    <input type="text"
-                           class="u-hide js-hidden-field-lastname"
-                           name="author_last_name"
-                           value="{% if last_name %}{{ last_name }}{% endif %}"
-                           tabindex="-1" />
-                    <button alt="search" class="u-off-screen" type="submit" tabindex="-1">Search</button>
-                  </div>
-                </div>
-                <div class="p-search-and-filter__panel js-chips-panel" aria-hidden="true">
-                  <div class="p-filter-panel-section">
-                    <div class="p-filter-panel-section__header">
-                      <h4 class="p-filter-panel-section__heading p-heading--5">Authors</h4>
-                    </div>
-                    <div class="p-filter-panel-section__chips js-authors-chip-container"
-                         aria-expanded="false">
-                      <p>
-                        <strong>No results found...</strong>
-                      </p>
-                    </div>
-                    <template id="author-unselected-chip-template">
-                      <button class="p-chip js-unselected" tabindex="-1">
-                        <span class="p-chip__value js-content"></span>
-                      </button>
-                    </template>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <hr class="p-rule" />
-      <div class="p-section">
-        <div class="grid-row">
-          <div class="grid-col-4 grid-col-medium-2">
-            <h2>Add optional information</h2>
-          </div>
-          <div class="grid-col-4 grid-col-medium-2">
-            <div class="p-section--shallow" data-name="googleDriveLink">
-              <label class="p-heading--5 u-no-margin--bottom">Google Drive link</label>
-              <span class="p-tooltip--right" aria-describedby="google-drive-link-info">
-                <i class="p-icon--information"></i> <span class="p-tooltip__message" role="tooltip" id="google-drive-link-info">This link is Canonical internal and should point to the asset's Google Doc</span>
-              </span>
-
-              <p class="u-text--muted u-no-padding--top">
-                Add the URL to the asset on Google Drive. For example, the link to a copydoc
-              </p>
-              <input type="text"
-                     id="google-drive-link"
-                     name="google_drive_link"
-                     placeholder="If applicable"
-                     value="{% if asset and asset.google_drive_link %}{{ asset.google_drive_link }}{% endif %}" />
-            </div>
-
-            <div class="p-section--shallow" data-name="salesforce_campaigns">
-              {% set existing_campaigns = [] %}
-              {% if asset and asset.salesforce_campaigns | length %}
-                {% for campaign in asset.salesforce_campaigns %}
-                  {% set _ = existing_campaigns.append({
-                                      "id": campaign.id,
-                                      "name": campaign.name
-                                    }) %}
-                {% endfor %}
-              {% elif form_session_data and form_session_data.salesforce_campaigns | length %}
-                {% for campaign in form_session_data.salesforce_campaigns %}
-                  {% set _ = existing_campaigns.append({
-                                      "id": campaign.id,
-                                      "name": campaign.name
-                                    }) %}
-                {% endfor %}
-              {% endif %}
-              <div class="p-search-and-filter js-campaign-search">
-                <label class="p-heading--5 u-no-margin--bottom" id="salesforceCampaigns">Salesforce Campaigns</label>
-                <p class="u-text--muted u-no-padding--top">Search and select the campaign names</p>
-                <div class="p-chips--selected_campaigns js-selected-campaigns">
-                  {% for campaign in existing_campaigns %}
-                    <span class="p-chip js-selected"
-                          tabindex="-1"
-                          data-name="{{ campaign.name }}"
-                          data-id="{{ campaign.id }}">
-                      <span class="p-chip__value js-content">{{ campaign.name }}</span>
-                      <button class="p-chip__dismiss">Dismiss</button>
-                    </span>
+              <div class="p-section--shallow" data-name="assetTags">
+                {% set existing_tags = [] %}
+                {% if asset %}
+                  {% for tag in asset.tags %}
+                    {% set _ = existing_tags.append(tag.name) %}
                   {% endfor %}
-                </div>
-                <div class="p-search-and-filter__search-container" aria-expanded="false">
-                  <div class="p-search-and-filter__box" data-overflowing="false">
-                    <label class="u-hide" for="search">Search Campaign names</label>
-                    <input autocomplete="off"
-                           class="p-search-and-filter__input js-campaign-input"
-                           id="search"
-                           placeholder="Start typing a campaign name"
-                           type="text"
-                           value=""
-                           aria-labelledby="salesforceCampaigns" />
+                {% endif %}
+                <label class="p-heading--5 u-no-margin--bottom" id="asset-tags">Asset tags</label>
+                <p class="u-text--muted u-no-padding--top">Add tags that will help you search and find the asset</p>
+                <div class="add-and-edit-chips">
+                  <div class="added-chips">
+                    {% for tag in existing_tags %}<span class="u-hide">{{ tag }}</span>{% endfor %}
+                  </div>
+                  <div class="add-chips-input">
                     <input type="text"
-                           class="u-hide js-hidden-field"
-                           name="salesforce_campaigns"
-                           value='{{ existing_campaigns | tojson }}'
-                           tabindex="-1" />
+                           id="assets-chips-input"
+                           placeholder="Enter tag and press enter" />
+                    <input type="text" class="u-hide js-hidden-field" name="tags" value="" />
                   </div>
                 </div>
-                <div class="p-search-and-filter__panel js-chips-panel" aria-hidden="true">
-                  <div class="p-filter-panel-section">
-                    <div class="p-filter-panel-section__chips js-campaign-chip-container"
-                         style="overflow-y:auto">Loading...</div>
+              </div>
+              {% if asset and asset.author and asset.author.email and asset.author.first_name and asset.author.last_name %}
+                {% set email = asset.author.email %}
+                {% set first_name = asset.author.first_name %}
+                {% set last_name = asset.author.last_name %}
+              {% elif form_session_data and form_session_data.author_email and form_session_data.author_first_name and form_session_data.author_last_name %}
+                {% set email = form_session_data.author_email %}
+                {% set first_name = form_session_data.author_first_name %}
+                {% set last_name = form_session_data.author_last_name %}
+              {% endif %}
+              <div data-name="author">
+                <label class="p-heading--5 u-no-margin--bottom" id="author">Author</label>
+                <p class="u-text--muted u-no-padding--top">Name the author of the file</p>
+                <div class="p-search-and-filter js-authors-search">
+                  <div class="p-search-and-filter__search-container" aria-expanded="false">
+                    <span class="p-chip js-author-chip u-hide"
+                          data-email=""
+                          data-firstname=""
+                          data-lastname="">
+                      <span class="p-chip__value js-content"></span>
+                      <button class="p-chip__dismiss">Dismiss</button>
+                    </span>
+                    {% if email and first_name and last_name %}
+                      <span class="p-chip js-chip"
+                            data-email="{{ email }}"
+                            data-firstname="{{ first_name }}"
+                            data-lastname="{{ last_name }}">
+                        <span class="p-chip__value js-value">{{ first_name + " " + last_name }}</span>
+                        <button class="p-chip__dismiss">Dismiss</button>
+                      </span>
+                    {% endif %}
+                    <div class="p-search-and-filter__box" data-overflowing="false">
+                      <label class="u-hide" for="search">Search authors</label>
+                      <input autocomplete="off"
+                             class="p-search-and-filter__input js-authors-input"
+                             placeholder="Start typing the name of the Canonical team member"
+                             type="text"
+                             value=""
+                             aria-labelledby="author" />
+                      <input type="text"
+                             class="u-hide js-hidden-field-email"
+                             name="author_email"
+                             value="{% if email %}{{ email }}{% endif %}"
+                             tabindex="-1" />
+                      <input type="text"
+                             class="u-hide js-hidden-field-firstname"
+                             name="author_first_name"
+                             value="{% if first_name %}{{ first_name }}{% endif %}"
+                             tabindex="-1" />
+                      <input type="text"
+                             class="u-hide js-hidden-field-lastname"
+                             name="author_last_name"
+                             value="{% if last_name %}{{ last_name }}{% endif %}"
+                             tabindex="-1" />
+                      <button alt="search" class="u-off-screen" type="submit" tabindex="-1">Search</button>
+                    </div>
+                  </div>
+                  <div class="p-search-and-filter__panel js-chips-panel" aria-hidden="true">
+                    <div class="p-filter-panel-section">
+                      <div class="p-filter-panel-section__header">
+                        <h4 class="p-filter-panel-section__heading p-heading--5">Authors</h4>
+                      </div>
+                      <div class="p-filter-panel-section__chips js-authors-chip-container"
+                           aria-expanded="false">
+                        <p>
+                          <strong>No results found...</strong>
+                        </p>
+                      </div>
+                      <template id="author-unselected-chip-template">
+                        <button class="p-chip js-unselected" tabindex="-1">
+                          <span class="p-chip__value js-content"></span>
+                        </button>
+                      </template>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-
-            <!-- template for unselected campaign chips -->
-            <template id="campaign-unselected-chip-template">
-              <button class="p-chip js-unselected" tabindex="-1" data-name="" data-id="">
-                <span class="p-chip__value js-content"></span>
-              </button>
-            </template>
-
-            <div class="p-section--shallow js-multiselect" data-name="language">
-              <label class="p-heading--5 u-no-margin--bottom" id="language">Language</label>
-              <p class="u-text--muted u-no-padding--top">Choose the primary language</p>
-              <select id="language-select" aria-label="language">
-                {% for language in form_field_data.languages %}
-                  <option value="{{ language.name }}"
-                          {% if asset and asset.language and language.name in asset.language %}selected{% endif %}
-                          {% if language.name == "-" %}disabled{% endif %}>{{ language.name }}</option>
-                {% endfor %}
-              </select>
-              <input type="text" class="u-hide js-hidden-field" name="language" />
-            </div>
           </div>
         </div>
-      </div>
-      <hr class="p-rule" />
-      <div class="p-section--deep">
-        <div class="grid-row">
-          <div class="grid-col-4 grid-col-medium-2">
-            <h2>Check the information is correct</h2>
-          </div>
-          <div class="grid-col-4 grid-col-medium-2">
-            <div class="p-strip is-shallow">
-              <button class="p-button--positive" type="submit">
-                {% if is_update %}
-                  Update
-                {% else %}
-                  Upload
+        <hr class="p-rule" />
+        <div class="p-section">
+          <div class="grid-row">
+            <div class="grid-col-4 grid-col-medium-2">
+              <h2>Add optional information</h2>
+            </div>
+            <div class="grid-col-4 grid-col-medium-2">
+              <div class="p-section--shallow" data-name="googleDriveLink">
+                <label class="p-heading--5 u-no-margin--bottom">Google Drive link</label>
+                <span class="p-tooltip--right" aria-describedby="google-drive-link-info">
+                  <i class="p-icon--information"></i> <span class="p-tooltip__message" role="tooltip" id="google-drive-link-info">This link is Canonical internal and should point to the asset's Google Doc</span>
+                </span>
+                <p class="u-text--muted u-no-padding--top">
+                  Add the URL to the asset on Google Drive. For example, the link to a copydoc
+                </p>
+                <input type="text"
+                       id="google-drive-link"
+                       name="google_drive_link"
+                       placeholder="If applicable"
+                       value="{% if asset and asset.google_drive_link %}{{ asset.google_drive_link }}{% endif %}" />
+              </div>
+              <div class="p-section--shallow" data-name="salesforce_campaigns">
+                {% set existing_campaigns = [] %}
+                {% if asset and asset.salesforce_campaigns | length %}
+                  {% for campaign in asset.salesforce_campaigns %}
+                    {% set _ = existing_campaigns.append({
+                                          "id": campaign.id,
+                                          "name": campaign.name
+                                        }) %}
+                  {% endfor %}
+                {% elif form_session_data and form_session_data.salesforce_campaigns | length %}
+                  {% for campaign in form_session_data.salesforce_campaigns %}
+                    {% set _ = existing_campaigns.append({
+                                          "id": campaign.id,
+                                          "name": campaign.name
+                                        }) %}
+                  {% endfor %}
                 {% endif %}
-                asset
-              </button>
+                <div class="p-search-and-filter js-campaign-search">
+                  <label class="p-heading--5 u-no-margin--bottom" id="salesforceCampaigns">Salesforce Campaigns</label>
+                  <p class="u-text--muted u-no-padding--top">Search and select the campaign names</p>
+                  <div class="p-chips--selected_campaigns js-selected-campaigns">
+                    {% for campaign in existing_campaigns %}
+                      <span class="p-chip js-selected"
+                            tabindex="-1"
+                            data-name="{{ campaign.name }}"
+                            data-id="{{ campaign.id }}">
+                        <span class="p-chip__value js-content">{{ campaign.name }}</span>
+                        <button class="p-chip__dismiss">Dismiss</button>
+                      </span>
+                    {% endfor %}
+                  </div>
+                  <div class="p-search-and-filter__search-container" aria-expanded="false">
+                    <div class="p-search-and-filter__box" data-overflowing="false">
+                      <label class="u-hide" for="search">Search Campaign names</label>
+                      <input autocomplete="off"
+                             class="p-search-and-filter__input js-campaign-input"
+                             id="search"
+                             placeholder="Start typing a campaign name"
+                             type="text"
+                             value=""
+                             aria-labelledby="salesforceCampaigns" />
+                      <input type="text"
+                             class="u-hide js-hidden-field"
+                             name="salesforce_campaigns"
+                             value='{{ existing_campaigns | tojson }}'
+                             tabindex="-1" />
+                    </div>
+                  </div>
+                  <div class="p-search-and-filter__panel js-chips-panel" aria-hidden="true">
+                    <div class="p-filter-panel-section">
+                      <div class="p-filter-panel-section__chips js-campaign-chip-container"
+                           style="overflow-y:auto">Loading...</div>
+                    </div>
+                  </div>
+                  <!-- template for unselected campaign chips -->
+                  <template id="campaign-unselected-chip-template">
+                    <button class="p-chip js-unselected" tabindex="-1" data-name="" data-id="">
+                      <span class="p-chip__value js-content"></span>
+                    </button>
+                  </template>
+                </div>
+              </div>
+              <div class="p-section--shallow js-multiselect" data-name="language">
+                <label class="p-heading--5 u-no-margin--bottom" id="language">Language</label>
+                <p class="u-text--muted u-no-padding--top">Choose the primary language</p>
+                <select id="language-select" aria-label="language">
+                  {% for language in form_field_data.languages %}
+                    <option value="{{ language.name }}"
+                            {% if asset and asset.language and language.name in asset.language %}selected{% endif %}
+                            {% if language.name == "-" %}disabled{% endif %}>{{ language.name }}</option>
+                  {% endfor %}
+                </select>
+                <input type="text" class="u-hide js-hidden-field" name="language" />
+              </div>
+            </div>
+          </div>
+        </div>
+        <hr class="p-rule" />
+        <div class="p-section--deep">
+          <div class="grid-row">
+            <div class="grid-col-4 grid-col-medium-2">
+              <h2>Check the information is correct</h2>
+            </div>
+            <div class="grid-col-4 grid-col-medium-2">
+              <div class="p-strip is-shallow">
+                <button class="p-button--positive" type="submit">
+                  {% if is_update %}
+                    Update
+                  {% else %}
+                    Upload
+                  {% endif %}
+                  asset
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </form>
-</div>
+    </form>
+  </div>
 {% endblock %}

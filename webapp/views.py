@@ -198,12 +198,15 @@ def get_assets():
             search_params.start_date,
             search_params.end_date,
             search_params.language,
+            search_params.language,
+            search_params.product_types,
         ]
     ):
         assets, total = asset_service.find_assets(
             tag=search_params.tag,
             asset_type=search_params.asset_type,
             product_types=search_params.product_types,
+            categories=search_params.categories,
             author_email=search_params.author_email,
             start_date=search_params.start_date,
             end_date=search_params.end_date,
