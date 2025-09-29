@@ -43,10 +43,11 @@ function setUpCampaignSearchField() {
           );
           if (response.ok) {
             const data = await response.json();
-            updateSearchResults(data);
+            updateSearchResults(data.campaigns);
           }
         } catch (error) {
           console.error("Error fetching campaign data:", error);
+          alert("Failed to fetch campaign data");
         }
       } else {
         updateSearchResults([]);

@@ -14,6 +14,8 @@ from flask import Response, abort, jsonify, redirect, request
 
 from webapp.database import db_session
 from webapp.decorators import token_required
+from webapp.lib.python_helpers import sanitize_like_input
+from webapp.integrations.trino_service import trino_cur
 from webapp.param_parser import parse_asset_search_params
 from webapp.sso import login_required
 from webapp.lib.file_helpers import get_mimetype, remove_filename_hash
@@ -495,3 +497,26 @@ def get_users(username: str):
         users = response.json().get("data", {}).get("employees", [])
         return jsonify(list(users))
     return jsonify({"error": "Failed to fetch users"}), 500
+
+@login_required
+def get_salesforce_campaigns(query: str):
+    safe_query = sanitize_like_input(query.strip())
+
+    # Add '%' wildcards safely
+    like_pattern = f"%{safe_query}%"
+
+    formed_query = (
+        f"SELECT Id, Name FROM Campaign "
+        f"WHERE Name LIKE '{like_pattern}' ESCAPE '\\' "
+        f"LIMIT 20"
+    )
+    if trino_cur is None:
+            return jsonify({"error": "Failed to connect to service"}), 503
+    try:
+        trino_cur.execute(formed_query)
+        rows = trino_cur.fetchall()
+        campaigns = [{"id": row[0], "name": row[1]} for row in rows]
+
+        return jsonify({"campaigns": campaigns}), 200
+    except Exception as exc:
+        return jsonify({"error": f"Failed to fetch campaigns"}), 500
