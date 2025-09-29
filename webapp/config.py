@@ -1,5 +1,6 @@
 from pydantic import AliasChoices, SecretStr, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from webapp.lib.python_helpers import is_pem_private_key
 import base64
 
 ENV_FILES = (".env", ".env.local")
@@ -57,9 +58,8 @@ class TrinoSFConfig(BaseSettings):
             decoded_bytes = base64.b64decode(v, validate=True).replace(
                 b"\\n", b"\n"
             )
-            decoded_str = decoded_bytes.decode("utf-8")
-            if decoded_str.strip().startswith("-----BEGIN"):
-                return decoded_str
+            if is_pem_private_key(decoded_bytes):
+                return decoded_bytes
         except Exception:
             pass
         return v

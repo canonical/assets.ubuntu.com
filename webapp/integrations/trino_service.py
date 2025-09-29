@@ -26,9 +26,9 @@ class TrinoClient:
             )
             credentials.refresh(self._request)
             return credentials.token
-        except Exception:
+        except Exception as e:
             logger.exception(
-                "Unable to refresh Trino service account token: ", Exception
+                "Unable to refresh Trino service account token: ", e
             )
             return None
 
@@ -36,16 +36,20 @@ class TrinoClient:
         token = self._get_token()
         if not token:
             return None
-        conn = connect(
-            host="candidate.trino.canonical.com",
-            port=443,
-            http_scheme="https",
-            auth=trino.auth.JWTAuthentication(token),
-            verify=True,
-            catalog="salesforce",
-            schema="canonical",
-        )
-        return conn.cursor()
+        try:
+            conn = connect(
+                host="candidate.trino.canonical.com",
+                port=443,
+                http_scheme="https",
+                auth=trino.auth.JWTAuthentication(token),
+                verify=True,
+                catalog="salesforce",
+                schema="canonical",
+            )
+            return conn.cursor()
+        except Exception as e:
+            logger.exception("Unable to connect to Trino: ", e)
+            return None
 
 
 trino_client = TrinoClient()
