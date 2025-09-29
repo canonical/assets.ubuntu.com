@@ -18,9 +18,11 @@ class TrinoClient:
     def _get_token(self) -> Optional[str]:
         try:
             service_account_dict = config.trino_sf.model_dump()
-            credentials = service_account.Credentials.from_service_account_info(
-                service_account_dict,
-                scopes=self.scopes,
+            credentials = (
+                service_account.Credentials.from_service_account_info(
+                    service_account_dict,
+                    scopes=self.scopes,
+                )
             )
             credentials.refresh(self._request)
             return credentials.token

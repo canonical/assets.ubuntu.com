@@ -54,13 +54,16 @@ class TrinoSFConfig(BaseSettings):
         if not v:
             return v
         try:
-            decoded_bytes = base64.b64decode(v, validate=True).replace(b"\\n", b"\n")
+            decoded_bytes = base64.b64decode(v, validate=True).replace(
+                b"\\n", b"\n"
+            )
             decoded_str = decoded_bytes.decode("utf-8")
             if decoded_str.strip().startswith("-----BEGIN"):
                 return decoded_str
         except Exception:
-            pass  
+            pass
         return v
+
 
 class Config(BaseSettings):
     model_config = SettingsConfigDict(

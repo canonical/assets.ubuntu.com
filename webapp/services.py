@@ -450,5 +450,3 @@ class ReadOnlyMode(Exception):
 
 
 asset_service = AssetService()
-
-
