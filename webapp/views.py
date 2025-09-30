@@ -462,7 +462,6 @@ def delete_redirect(redirect_path):
     return jsonify({}), 204
 
 
-@login_required
 def get_users(username: str):
     query = """
     query($name: String!) {
@@ -499,7 +498,6 @@ def get_users(username: str):
     return jsonify({"error": "Failed to fetch users"}), 500
 
 
-@login_required
 def get_salesforce_campaigns(query: str):
     safe_query = sanitize_like_input(query.strip())
 

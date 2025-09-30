@@ -47,7 +47,6 @@ function setUpCampaignSearchField() {
           }
         } catch (error) {
           console.error("Error fetching campaign data:", error);
-          alert("Failed to fetch campaign data");
         }
       } else {
         updateSearchResults([]);
