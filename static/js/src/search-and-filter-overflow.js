@@ -18,8 +18,12 @@ export const overflowingChipsCount = (chips, overflowRowLimit) => {
 };
 
 export const setOverflowCounter = (overflowCount, overflowCountEl) => {
-  if (!(overflowCount && overflowCountEl)) return;
-  overflowCountEl.textContent = `+${overflowCount}`;
+  if (!overflowCountEl) return;
+  if (overflowCount && overflowCount > 0) {
+    overflowCountEl.textContent = `+${overflowCount}`;
+    return;
+  }
+  overflowCountEl.textContent = "";
 };
 
 export const updateFlowCount = function (chipsContainerRef) {
@@ -60,8 +64,8 @@ export const updateFlowCount = function (chipsContainerRef) {
 
       // Configure the observer
       const config = {
-        subtree: true, 
-        attributeFilter: ["class"], 
+        subtree: true,
+        attributeFilter: ["class"],
       };
 
       // Start observing
@@ -81,30 +85,35 @@ export const updateFlowCount = function (chipsContainerRef) {
     }
   });
 
-[].slice
-  .call(document.querySelectorAll(".p-filter-panel-section"))
-  .forEach(function (section) {
-    var overflowCountEl = section.querySelector(
-      ".p-filter-panel-section__selected-count"
-    );
+export const setupOverflowingProductPanels = () => {
+  [].slice
+    .call(document.querySelectorAll(".p-filter-panel-section"))
+    .forEach(function (section) {
+      var overflowCountEl = section.querySelector(
+        ".p-filter-panel-section__selected-count"
+      );
 
-    var container = section.querySelector(".p-filter-panel-section__chips");
+      var container = section.querySelector(".p-filter-panel-section__chips");
 
-    const chips = container.querySelectorAll(".p-chip.js-unselected");
-    const overflowCount = overflowingChipsCount(chips, 1);
+      const chips = container.querySelectorAll(
+        ".p-chip.js-unselected:not(.u-hide)"
+      );
 
-    if (overflowCount && overflowCountEl) {
-      setOverflowCounter(overflowCount, overflowCountEl);
+      const overflowCount = overflowingChipsCount(chips, 1);
 
-      container.style.overflow = "hidden";
-      container.style.height = "2.5rem";
+      if (overflowCountEl) {
+        setOverflowCounter(overflowCount, overflowCountEl);
 
-      overflowCountEl.addEventListener("click", function (event) {
-        container.style.height = "auto";
-        overflowCountEl.classList.add("u-hide");
-      });
-    }
-  });
+        container.style.overflow = "hidden";
+        container.style.height = "2.5rem";
+
+        overflowCountEl.addEventListener("click", function (event) {
+          container.style.height = "auto";
+          overflowCountEl.classList.add("u-hide");
+        });
+      }
+    });
+};
 
 document
   .querySelectorAll(".p-search-and-filter__selected-count")
@@ -119,3 +128,5 @@ document
       }
     });
   });
+
+setupOverflowingProductPanels();

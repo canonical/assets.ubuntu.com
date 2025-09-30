@@ -7,6 +7,7 @@ import {
   removeValueFromQueryParams,
   sanitizeInput,
 } from "./main.js";
+import { setupOverflowingProductPanels } from "./search-and-filter-overflow.js";
 
 // Define whether we are in search and thus need to update query params
 const updateQueryParams = document.querySelector(".js-asset-search");
@@ -21,7 +22,6 @@ const updateQueryParams = document.querySelector(".js-asset-search");
     const productSearchInput =
       productsSearchComponent.querySelector(".js-search-input");
     if (productSearchInput) {
-      // only open the options panel if there is a value in the input
       productSearchInput.addEventListener("focus", function (e) {
         openPanel(productsSearchComponent, true);
       });
@@ -35,12 +35,12 @@ const updateQueryParams = document.querySelector(".js-asset-search");
  * It checks if the chip is selected or unselected and calls the specific function.
  * @param {HTMLElement} targetChip - The chip that was clicked.
  **/
-export default function handleProductsChip(targetChip) {
-  if (targetChip.classList.contains("js-unselected")) {
-    selectProductsChip(targetChip);
-  } else if (targetChip.classList.contains("js-selected")) {
-    deselectProductsChip(targetChip);
-  }
+export default function handleProductsChip(chip) {
+  const selected =
+    chip.classList.contains("js-selected") ||
+    chip.classList.contains("p-chip--selected");
+
+  selected ? deselectProductsChip(chip) : selectProductsChip(chip);
 }
 
 /*
@@ -101,6 +101,7 @@ function setupInputChangeListener(fuse, input) {
       result.map((item) => item.item),
       query
     );
+    setupOverflowingProductPanels();
   });
 }
 
@@ -128,7 +129,7 @@ function selectProductsChip(chip) {
     "input[name='categories'].u-hide"
   );
   unselectedChips.forEach((unselectedChip) => {
-    unselectedChip.classList.add("is-readonly", "p-chip--disabled");
+    unselectedChip.classList.add("is-readonly", "p-chip--selected");
     addValueToHiddenInput(unselectedChip.dataset.id, hiddenProductInput);
     addValueToHiddenInput(unselectedChip.dataset.category, hiddenCategoryInput);
   });
@@ -137,8 +138,12 @@ function selectProductsChip(chip) {
   const inputField = document.querySelector(
     ".js-products-search .js-search-input"
   );
-  inputField.value = "";
-  inputField.focus();
+  if (inputField?.value) {
+    inputField.value = "";
+    inputField.focus();
+    showAndHideProductChips([], null);
+    setupOverflowingProductPanels();
+  }
   if (updateQueryParams) {
     addValueToQueryParams("product_types", chip.dataset.id);
   }
@@ -169,7 +174,7 @@ function deselectProductsChip(chip) {
   );
 
   unselectedChips.forEach((unselectedChip) => {
-    unselectedChip.classList.remove("is-readonly", "p-chip--disabled");
+    unselectedChip.classList.remove("is-readonly", "p-chip--selected");
     removeValueFromHiddenInput(unselectedChip.dataset.id, hiddenProductInput);
 
     // remove category only if no other chips from the same category are selected
@@ -178,7 +183,7 @@ function deselectProductsChip(chip) {
     );
     var categorySectionEl = categoryEl.closest(".p-filter-panel-section");
     var selectedChipsInCategory = categorySectionEl.querySelector(
-      ".p-chip.is-readonly.p-chip--disabled"
+      ".p-chip.is-readonly.p-chip--selected"
     );
 
     if (!selectedChipsInCategory) {
@@ -209,6 +214,11 @@ function showAndHideProductChips(chips, query) {
       category.querySelectorAll(".p-chip.js-unselected").forEach((chip) => {
         chip.classList.remove("u-hide");
       });
+      category
+        .querySelectorAll(".p-filter-panel-section__selected-count")
+        .forEach((count) => {
+          count.classList.remove("u-hide");
+        });
     });
   }
 

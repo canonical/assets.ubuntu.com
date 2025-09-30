@@ -137,8 +137,6 @@ products:
         slug: "big-data"
       - name: "PostgreSQL"
         slug: "postgresql"
-      - name: "MySQL"
-        slug: "mysql"
       - name: "Data Platform"
         slug: "data-platform"
       - name: "Databases"

@@ -130,7 +130,7 @@
                         </div>
                         <div class="p-filter-panel-section__chips">
                           {% for tag in product.tags %}
-                            <button class="p-chip js-{{ tag.slug }}-chip js-unselected {% if tag.slug in existing_products %}p-chip--disabled{% endif %}"
+                            <button class="p-chip js-{{ tag.slug }}-chip js-unselected {% if tag.slug in existing_products %}p-chip--selected{% endif %}"
                                     id="{{ tag.slug }}"
                                     data-name="{{ tag.name }}"
                                     data-id="{{ tag.slug }}"
