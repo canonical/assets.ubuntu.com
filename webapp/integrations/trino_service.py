@@ -25,14 +25,14 @@ class TrinoClient:
     def _get_token(self) -> Optional[str]:
         try:
             service_account_dict = config.trino_sf.model_dump()
-            credentials = service_account.Credentials.from_service_account_info(
+            creds = service_account.Credentials.from_service_account_info(
                 service_account_dict,
                 scopes=self.scopes,
             )
-            credentials.refresh(self._request)
-            return credentials.token
+            creds.refresh(self._request)
+            return creds.token
         except Exception as e:
-            logger.exception("Unable to refresh Trino service account token: %s", e)
+            logger.exception("Unable to refresh Trino account token: %s", e)
             return None
 
     def get_cursor(self):
