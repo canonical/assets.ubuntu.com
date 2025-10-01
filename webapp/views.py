@@ -247,7 +247,7 @@ def create_asset():
         optimize = strtobool(request.values.get("optimize", "false"))
         tags = request.values.get("tags", "").split(",")
         products = request.values.get("products", "").split(",")
-        categories= request.values.get("categories", "").split(",")
+        categories = request.values.get("categories", "").split(",")
         url_path = request.values.get("url-path", "").strip("/")
         asset_type = request.values.get("asset-type", "")
         author_email = request.values.get("author", "")
