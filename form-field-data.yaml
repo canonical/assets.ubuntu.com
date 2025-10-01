@@ -1,20 +1,19 @@
-products:
+categories:
   - name: "Internet of Things"
     slug: "internet-of-things"
     tags:
       - name: "Embedded"
         slug: "embedded"
-        tags:
-          - name: "IoT Management"
-            slug: "iot-management"
-          - name: "IoT Gateways"
-            slug: "iot-gateways"
-          - name: "IoT app stores"
-            slug: "iot-app-stores"
-          - name: "Real-Time Kernel"
-            slug: "real-time-kernel"
-          - name: "Ubuntu Pro for Devices"
-            slug: "ubuntu-pro-for-devices"
+      - name: "IoT Management"
+        slug: "iot-management"
+      - name: "IoT Gateways"
+        slug: "iot-gateways"
+      - name: "IoT app stores"
+        slug: "iot-app-stores"
+      - name: "Real-Time Kernel"
+        slug: "real-time-kernel"
+      - name: "Ubuntu Pro for Devices"
+        slug: "ubuntu-pro-for-devices"
   - name: "Security & Compliance"
     slug: "security-and-compliance"
     tags:

@@ -91,11 +91,11 @@
                   <label class="p-heading--5 u-no-margin--bottom" id="product-tags">Product or category tags</label>
                   <p class="u-text--muted u-no-padding--top">Add tags for the product or category of the asset</p>
                   <div class="p-search-and-filter__search-container" aria-expanded="false">
-                    {% for product in form_field_data.products %}
-                      {% for tag in product.tags %}
+                    {% for category in form_field_data.categories %}
+                      {% for tag in category.tags %}
                         <span class="p-chip js-{{ tag.slug }}-chip js-selected {% if tag.slug not in existing_products %}u-hide{% endif %}"
                               data-id="{{ tag.slug }}"
-                              data-category="{{ product.slug }}">
+                              data-category="{{ category.slug }}">
                           <span class="p-chip__value">{{ tag.name }}</span>
                           <button class="p-chip__dismiss">Dismiss</button>
                         </span>
@@ -122,19 +122,19 @@
                     </div>
                   </div>
                   <div class="p-search-and-filter__panel js-chips-panel" aria-hidden="true">
-                    {% for product in form_field_data.products %}
+                    {% for category in form_field_data.categories %}
                       <div class="p-filter-panel-section">
                         <div class="p-filter-panel-section__header">
                           <h4 class="p-filter-panel-section__heading p-heading--5"
-                              data-id="{{ product.slug }}">{{ product.name }}</h4>
+                              data-id="{{ category.slug }}">{{ category.name }}</h4>
                         </div>
                         <div class="p-filter-panel-section__chips">
-                          {% for tag in product.tags %}
+                          {% for tag in category.tags %}
                             <button class="p-chip js-{{ tag.slug }}-chip js-unselected {% if tag.slug in existing_products %}p-chip--selected{% endif %}"
                                     id="{{ tag.slug }}"
                                     data-name="{{ tag.name }}"
                                     data-id="{{ tag.slug }}"
-                                    data-category="{{ product.slug }}"
+                                    data-category="{{ category.slug }}"
                                     tabindex="-1">
                               <span class="p-chip__value">{{ tag.name }}</span>
                             </button>

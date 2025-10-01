@@ -114,7 +114,7 @@ class Asset(DateTimeMixin):
             "tags": ", ".join([tag.name for tag in self.tags]),
             "products": ", ".join([product.name for product in self.products]),
             "categories": ", ".join(
-                [product.name for product in self.products]
+                [category.name for category in self.categories]
             ),
             "deprecated": self.deprecated,
             "asset_type": self.asset_type,
