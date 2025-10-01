@@ -17,7 +17,6 @@ from webapp.decorators import token_required
 from webapp.lib.python_helpers import sanitize_like_input
 from webapp.integrations.trino_service import trino_cur
 from webapp.param_parser import parse_asset_search_params
-from webapp.sso import login_required
 from webapp.lib.file_helpers import get_mimetype, remove_filename_hash
 from webapp.lib.http_helpers import set_headers_for_type
 from webapp.lib.processors import ImageProcessor
