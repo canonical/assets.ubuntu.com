@@ -6,6 +6,7 @@ import {
   addValueToQueryParams,
   removeValueFromQueryParams,
   sanitizeInput,
+  closePanels,
 } from "./main.js";
 import { setupOverflowingProductPanels } from "./search-and-filter-overflow.js";
 
@@ -24,7 +25,11 @@ const updateQueryParams = document.querySelector(".js-asset-search");
     if (productSearchInput) {
       productSearchInput.addEventListener("focus", function (e) {
         openPanel(productsSearchComponent, true);
+
+        // close other panels
+        closePanels([".js-authors-search", ".js-campaign-search"]);
       });
+
       setUpProductSearchField();
     }
   }

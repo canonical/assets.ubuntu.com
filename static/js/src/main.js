@@ -62,6 +62,17 @@ export function openPanel(searchComponent, opening = "false") {
 }
 
 /*
+ * Generic function to close all open panels.
+ * @param {Array} searchInputs - An array of search input selectors to close.
+ **/
+export function closePanels(searchInputs = []) {
+  searchInputs.forEach((searchInput) => {
+    const searchComponent = document.querySelector(searchInput);
+    if (searchComponent) openPanel(searchComponent, false);
+  });
+}
+
+/*
  * Generic function to add the value of a selected chip, to the value of a hidden input.
  * We have to do this as the chips will not be submitted with the form.
  * @param {String} value - The value of the chip.
@@ -85,7 +96,6 @@ export function removeValueFromHiddenInput(value, input) {
   let selectedChips = input.value.split(",").filter(Boolean);
   selectedChips = selectedChips.filter((id) => id !== value);
   input.setAttribute("value", selectedChips.join(","));
-
 }
 
 /*
