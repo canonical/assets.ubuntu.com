@@ -19,3 +19,4 @@ pydantic-settings==2.10.1
 python-slugify==8.0.4
 trino==0.335.0
 google-auth==2.40.3
+cryptography==46.0.1

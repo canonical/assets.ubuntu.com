@@ -18,7 +18,6 @@ from webapp.services import (
     AssetAlreadyExistException,
     AssetNotFound,
     asset_service,
-    query_salesforce_campaigns,
 )
 from webapp.sso import login_required
 from webapp.views import (
@@ -36,6 +35,7 @@ from webapp.views import (
     get_token,
     get_tokens,
     get_users,
+    get_salesforce_campaigns,
     update_asset,
     update_redirect,
 )
@@ -307,7 +307,7 @@ def details():
 @ui_blueprint.route("/salesforce_campaigns/<query>", methods=["GET"])
 @login_required
 def campaign_operations(query):
-    return query_salesforce_campaigns(query)
+    return get_salesforce_campaigns(query)
 
 
 # API Routes

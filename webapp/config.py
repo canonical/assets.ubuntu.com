@@ -1,5 +1,7 @@
-from pydantic import AliasChoices, SecretStr, Field
+from pydantic import AliasChoices, SecretStr, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from webapp.lib.python_helpers import is_pem_private_key
+import base64
 
 ENV_FILES = (".env", ".env.local")
 
@@ -42,6 +44,25 @@ class TrinoSFConfig(BaseSettings):
     auth_provider_x509_cert_url: str = (
         "https://www.googleapis.com/oauth2/v1/certs"
     )
+
+    @field_validator("private_key", mode="before")
+    @classmethod
+    def decode_private_key(cls, v: str) -> str:
+        """
+        Automatically base64-decode the private_key if it looks base64-encoded.
+        Otherwise, leave as is.
+        """
+        if not v:
+            return v
+        try:
+            decoded_bytes = base64.b64decode(v, validate=True).replace(
+                b"\\n", b"\n"
+            )
+            if is_pem_private_key(decoded_bytes):
+                return decoded_bytes
+        except Exception:
+            pass
+        return v
 
 
 class Config(BaseSettings):
