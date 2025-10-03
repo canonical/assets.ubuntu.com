@@ -16,7 +16,6 @@ from webapp.database import db_session
 from webapp.lib.file_helpers import is_svg
 from webapp.lib.processors import ImageProcessor
 from webapp.lib.url_helpers import sanitize_filename
-from webapp.lib.python_helpers import sanitize_like_input
 from webapp.models import (
     Asset,
     Author,
