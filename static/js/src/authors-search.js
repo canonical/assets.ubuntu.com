@@ -5,6 +5,7 @@ import {
   addValueToQueryParams,
   removeValueFromQueryParams,
   debounce,
+  closePanels,
 } from "./main.js";
 
 // Define whether we are in search and thus need to update query params
@@ -23,6 +24,9 @@ const updateQueryParams = document.querySelector(".js-asset-search");
       authorsSearchInput.addEventListener("input", function (e) {
         const shouldOpen = e.target.value.trim().length > 0;
         openPanel(authorsSearchComponent, shouldOpen);
+      });
+      authorsSearchInput.addEventListener("focus", function () {
+        closePanels([".js-products-search", ".js-campaign-search"]);
       });
       setUpAuthorSearchField();
     }

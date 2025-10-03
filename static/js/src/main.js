@@ -8,6 +8,7 @@ import handleCampaignChip from "./sf_campaign-search";
 
 import "./date-picker";
 import "./generic-fields";
+import "./search-and-filter-overflow";
 
 /*
  * Event delgation to handle the click event for search and filter.
@@ -58,6 +59,17 @@ export function openPanel(searchComponent, opening = "false") {
       }
     }
   }
+}
+
+/*
+ * Generic function to close all open panels.
+ * @param {Array} searchInputs - An array of search input selectors to close.
+ **/
+export function closePanels(searchInputs = []) {
+  searchInputs.forEach((searchInput) => {
+    const searchComponent = document.querySelector(searchInput);
+    if (searchComponent) openPanel(searchComponent, false);
+  });
 }
 
 /*

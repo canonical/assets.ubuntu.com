@@ -108,6 +108,7 @@ def get_asset(file_path: str):
 def update_asset(file_path):
     tags = request.values.get("tags", "").split(",")
     products = request.values.get("products", "").split(",")
+    categories = request.values.get("categories", "").split(",")
     deprecated = strtobool(request.values.get("deprecated", "false"))
     asset_type = request.values.get("asset-type", "")
     author = request.values.get("author", "")
@@ -123,6 +124,7 @@ def update_asset(file_path):
             tags=tags,
             deprecated=deprecated,
             products=products,
+            categories=categories,
             asset_type=asset_type,
             author=author,
             google_drive_link=google_drive_link,
@@ -198,12 +200,16 @@ def get_assets():
             search_params.start_date,
             search_params.end_date,
             search_params.language,
+            search_params.language,
+            search_params.product_types,
+            search_params.categories,
         ]
     ):
         assets, total = asset_service.find_assets(
             tag=search_params.tag,
             asset_type=search_params.asset_type,
             product_types=search_params.product_types,
+            categories=search_params.categories,
             author_email=search_params.author_email,
             start_date=search_params.start_date,
             end_date=search_params.end_date,
@@ -241,6 +247,7 @@ def create_asset():
         optimize = strtobool(request.values.get("optimize", "false"))
         tags = request.values.get("tags", "").split(",")
         products = request.values.get("products", "").split(",")
+        categories = request.values.get("categories", "").split(",")
         url_path = request.values.get("url-path", "").strip("/")
         asset_type = request.values.get("asset-type", "")
         author_email = request.values.get("author", "")
@@ -266,6 +273,7 @@ def create_asset():
                     optimize=optimize,
                     tags=tags,
                     products=products,
+                    categories=categories,
                     url_path=url_path,
                     asset_type=asset_type,
                     author=_author,

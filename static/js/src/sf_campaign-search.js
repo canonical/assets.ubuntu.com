@@ -1,4 +1,4 @@
-import { openPanel, debounce } from "./main.js";
+import { openPanel, debounce, closePanels } from "./main.js";
 
 const template = document.querySelector("#campaign-unselected-chip-template");
 const selectedChipContainer = document.querySelector(".js-selected-campaigns");
@@ -19,6 +19,9 @@ const chipContainer = document.querySelector(".js-campaign-chip-container");
       campaignsSearchInput.addEventListener("input", function (e) {
         const shouldOpen = e.target.value.trim().length > 0;
         openPanel(campaignsSearchComponent, shouldOpen);
+      });
+      campaignsSearchInput.addEventListener("focus", function () {
+        closePanels([".js-products-search", ".js-authors-search"]);
       });
       setUpCampaignSearchField();
     }

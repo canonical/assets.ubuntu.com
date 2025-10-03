@@ -16,7 +16,14 @@ from webapp.database import db_session
 from webapp.lib.file_helpers import is_svg
 from webapp.lib.processors import ImageProcessor
 from webapp.lib.url_helpers import sanitize_filename
-from webapp.models import Asset, Author, Product, Tag, Salesforce_Campaign
+from webapp.models import (
+    Asset,
+    Author,
+    Product,
+    Category,
+    Tag,
+    Salesforce_Campaign,
+)
 from webapp.swift import file_manager
 from webapp.utils import lru_cache
 
@@ -38,6 +45,7 @@ class AssetService:
         start_date: str = "",
         end_date: str = "",
         language: str = "",
+        categories: list = [],
         page=1,
         per_page=16,
         order_by=Asset.created,
@@ -75,9 +83,15 @@ class AssetService:
 
         if end_date and start_date:
             conditions.append(Asset.created.between(start_date, end_date))
+
         if product_types:
             conditions.append(
                 Asset.products.any(Product.name.in_(product_types)),
+            )
+
+        if categories:
+            conditions.append(
+                Asset.categories.any(Category.name.in_(categories)),
             )
 
         if file_types:
@@ -115,6 +129,7 @@ class AssetService:
         url_path: str = None,
         tags: List[str] = [],
         products: List[str] = [],
+        categories: List[str] = [],
         asset_type: str = "image",
         author: dict = None,
         google_drive_link: str = None,
@@ -197,6 +212,7 @@ class AssetService:
             salesforce_campaigns = self.create_campaigns_if_not_exist(
                 salesforce_campaigns
             )
+            categories = self.create_categories_if_not_exists(categories)
             _author = self.create_author_if_not_exist(author)
 
             # Save file info in Postgres
@@ -207,6 +223,7 @@ class AssetService:
                 tags=tags,
                 created=datetime.now(tz=timezone.utc),
                 products=products,
+                categories=categories,
                 asset_type=asset_type,
                 author=_author,
                 google_drive_link=google_drive_link,
@@ -307,6 +324,32 @@ class AssetService:
 
         db_session.commit()
         return product_objects
+
+    def create_categories_if_not_exists(self, category_names):
+        """
+        Create the category objects and return the
+        object from the database
+        """
+        if category_names == [""]:
+            return []
+
+        category_objects = []
+        for category_name in category_names:
+            existing_category = (
+                db_session.query(Category)
+                .filter_by(name=category_name)
+                .first()
+            )
+
+            if existing_category:
+                category_objects.append(existing_category)
+            else:
+                category = Category(name=category_name, assets=[])
+                category_objects.append(category)
+                db_session.add(category)
+
+        db_session.commit()
+        return category_objects
 
     def create_author_if_not_exist(
         self,

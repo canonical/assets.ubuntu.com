@@ -54,6 +54,13 @@ asset_product_association_table = Table(
     Column("product_name", ForeignKey("product.name"), primary_key=True),
 )
 
+asset_category_association_table = Table(
+    "asset_category_association",
+    Base.metadata,
+    Column("asset_id", ForeignKey("asset.id"), primary_key=True),
+    Column("category_name", ForeignKey("category.name"), primary_key=True),
+)
+
 
 class Author(Base):
     __tablename__ = "author"
@@ -91,6 +98,11 @@ class Asset(DateTimeMixin):
         secondary=asset_campaign_association_table,
         back_populates="assets",
     )
+    categories = relationship(
+        "Category",
+        secondary=asset_category_association_table,
+        back_populates="assets",
+    )
     file_type = Column(String, nullable=True)
     deprecated = Column(Boolean, nullable=False, default=False)
 
@@ -101,6 +113,9 @@ class Asset(DateTimeMixin):
             "file_path": self.file_path,
             "tags": ", ".join([tag.name for tag in self.tags]),
             "products": ", ".join([product.name for product in self.products]),
+            "categories": ", ".join(
+                [category.name for category in self.categories]
+            ),
             "deprecated": self.deprecated,
             "asset_type": self.asset_type,
             "name": self.name,
@@ -164,6 +179,22 @@ class Product(DateTimeMixin):
         "Asset",
         secondary=asset_product_association_table,
         back_populates="products",
+    )
+
+    def as_json(self):
+        return {
+            "name": self.name,
+            "assets": ", ".join(self.assets),
+        }
+
+
+class Category(DateTimeMixin):
+    __tablename__ = "category"
+    name = Column(String, primary_key=True)
+    assets = relationship(
+        "Asset",
+        secondary=asset_category_association_table,
+        back_populates="categories",
     )
 
     def as_json(self):

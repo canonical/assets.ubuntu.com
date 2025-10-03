@@ -45,11 +45,11 @@
             <strong>Category</strong>
           </label>
         </p>
-        <select id="product-select" aria-labelledby="product" name="product_types">
-          <option value="">All products or departments</option>
-          {% for product in form_field_data.products %}
-            <option value="{{ product.slug }}"
-                    {% if product.slug in params.product_types %}selected{% endif %}>{{ product.name }}</option>
+        <select id="category-select" aria-labelledby="category" name="categories">
+          <option value="">All categories</option>
+          {% for category in form_field_data.categories %}
+            <option value="{{ category.slug }}"
+                    {% if category.slug in params.categories %}selected{% endif %}>{{ category.name }}</option>
           {% endfor %}
         </select>
       </div>

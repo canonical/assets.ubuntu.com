@@ -1,6 +1,11 @@
 @import "vanilla-framework";
 @include vanilla;
 
+@include vf-p-chip;
+@include vf-p-search-box;
+@include vf-p-search-and-filter;
+@include vf-u-off-screen;
+
 @import "icons";
 
 .p-label a {
@@ -61,9 +66,6 @@
   }
 }
 
-.p-filter-panel-section__chips {
-  max-height: 10rem;
-}
 .p-filter-panel-section__header {
   display: flex;
   justify-content: space-between;
@@ -104,6 +106,28 @@ a.p-chip {
     padding-right: 2rem;
   }
   .p-button {
-    margin-left:0.5rem;
+    margin-left: 0.5rem;
   }
+}
+
+.p-search-and-filter__panel.js-chips-panel {
+  max-height: 30rem;
+  overflow-y: scroll;
+}
+
+.p-filter-panel-section__chips {
+  padding-right: 2rem !important;
+}
+
+.p-chip--selected {
+  background-color: rgba(0, 0, 0, 0.1);
+  border: 1.5px solid var(--vf-color-border-neutral) !important;
+}
+
+.p-filter-panel-section__selected-count {
+  color: var(--vf-color-link-default);
+  cursor: pointer;
+  position: absolute;
+  right: 0.5rem;
+  top: 0.3rem;
 }

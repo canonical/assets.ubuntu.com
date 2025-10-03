@@ -26,11 +26,11 @@
         </a>
       </div>
       {% if asset.name %}
-        <p class="u-no-margin--bottom">
+        <p class="u-no-margin--bottom u-truncate">
           <strong>{{ asset.name }}</strong>
         </p>
       {% else %}
-        <p class="u-no-margin--bottom">
+        <p class="u-no-margin--bottom u-truncate">
           <strong>{{ asset.file_path.split(".")[0] }}</strong>
         </p>
       {% endif %}
@@ -52,12 +52,15 @@
       <span>Tags:&nbsp;</span>
       {% for product in asset.products %}
         <a href="/manager?tag={{ product.name }}"
-           class="p-chip is-inline is-dense">
+           class="p-chip is-inline is-dense"
+           onclick="window.location.href = this.href; return true;"
+           >
           <span class="p-chip__value">{{ product.name }}</span>
         </a>
       {% endfor %}
       {% for tag in asset.tags %}
-        <a href="/manager?tag={{ tag.name }}" class="p-chip is-inline is-dense">
+        <a href="/manager?tag={{ tag.name }}" class="p-chip is-inline is-dense" 
+           onclick="window.location.href = this.href; return true;">
           <span class="p-chip__value">{{ tag.name }}</span>
         </a>
       {% endfor %}
