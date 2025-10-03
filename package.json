@@ -33,6 +33,6 @@
   },
   "devDependencies": {
     "concurrently": "8.0.1",
-    "esbuild": "0.24.0"
+    "esbuild": "0.25.0"
   }
 }
