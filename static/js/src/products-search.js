@@ -68,9 +68,9 @@ function setUpProductSearchField() {
  */
 function handleExistingChips(productsPanel) {
   const existingChips = Array.from(
-    productsPanel.querySelectorAll(".p-chip.js-unselected.u-hide")
+    productsPanel.querySelectorAll(".p-chip.js-selected:not(.u-hide)")
   );
-  existingChips.forEach((chip) => selectProductsChip(chip.id));
+  existingChips.forEach((chip) => selectProductsChip(chip));
 }
 /*
  * Setup fuse.js, as fuzzy search specfically for the products and return the instance.
@@ -133,11 +133,20 @@ function selectProductsChip(chip) {
   const hiddenCategoryInput = document.querySelector(
     "input[name='categories'].u-hide"
   );
-  unselectedChips.forEach((unselectedChip) => {
-    unselectedChip.classList.add("is-readonly", "p-chip--selected");
-    addValueToHiddenInput(unselectedChip.dataset.id, hiddenProductInput);
-    addValueToHiddenInput(unselectedChip.dataset.category, hiddenCategoryInput);
-  });
+
+  if (unselectedChips && unselectedChips.length > 0) {
+    unselectedChips.forEach((unselectedChip) => {
+      unselectedChip.classList.add("is-readonly", "p-chip--selected");
+      addValueToHiddenInput(unselectedChip.dataset.id, hiddenProductInput);
+      addValueToHiddenInput(
+        unselectedChip.dataset.category,
+        hiddenCategoryInput
+      );
+    });
+  } else {
+    addValueToHiddenInput(chip.dataset.id, hiddenProductInput);
+    addValueToHiddenInput(chip.dataset.category, hiddenCategoryInput);
+  }
 
   // clear the entered value after selecting a chip
   const inputField = document.querySelector(
@@ -239,12 +248,15 @@ function showAndHideProductChips(chips, query) {
     document.querySelector(".js-no-results").classList.add("u-hide");
     chips.forEach((chip) => {
       // find the chip
-      var chipEl = document.querySelector(`.js-${chip.id}-chip.js-unselected`);
-      chipEl.classList.remove("u-hide");
-
-      // find the parent category of the chip
-      var categoryEl = chipEl.closest(".p-filter-panel-section");
-      categoryEl.classList.remove("u-hide");
+      var chipEl = document.querySelectorAll(
+        `.js-${chip.id}-chip.js-unselected`
+      );
+      chipEl.forEach((el) => {
+        el.classList.remove("u-hide");
+        // find the parent category of the chip
+        var categoryEl = el.closest(".p-filter-panel-section");
+        categoryEl.classList.remove("u-hide");
+      });
     });
   } else {
     document.querySelector(".js-no-results").classList.remove("u-hide");

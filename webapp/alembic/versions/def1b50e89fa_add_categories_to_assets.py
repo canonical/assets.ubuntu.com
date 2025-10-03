@@ -1,4 +1,4 @@
-"""empty message
+"""add categories to assets
 
 Revision ID: def1b50e89fa
 Revises: 7059dcc76605
