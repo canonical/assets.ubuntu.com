@@ -220,7 +220,11 @@ def get_assets():
             include_deprecated=include_deprecated,
         )
     else:
-        assets = asset_service.find_all_assets()
+        assets, total = asset_service.find_all_assets(
+            page=page,
+            per_page=per_page,
+            include_deprecated=include_deprecated,
+        )
 
     return jsonify(
         {

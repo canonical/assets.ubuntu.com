@@ -29,12 +29,28 @@ from webapp.utils import lru_cache
 
 
 class AssetService:
-    def find_all_assets(self):
+    def find_all_assets(
+        self,
+        page: int = 1,
+        per_page: int = 16,
+        include_deprecated=False,
+    ):
         """
         Return all assets in the database as a list
         """
-        assets = db_session.query(Asset).all()
-        return assets
+        conditions = []
+        if not include_deprecated:
+            conditions.append(Asset.deprecated.is_(False))
+        assets_query = (
+            db_session.query(Asset)
+            .filter(*conditions)
+            .offset((page - 1) * per_page)
+            .yield_per(100)
+        )
+
+        assets = assets_query.limit(per_page).all()
+        total = db_session.query(Asset).filter(*conditions).count()
+        return assets, total
 
     def find_assets(
         self,
