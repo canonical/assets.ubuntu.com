@@ -132,6 +132,7 @@ class AssetService:
             )
             .order_by(order_col.desc() if desc_order else order_col)
             .offset((page - 1) * per_page)
+            .yield_per(100)
         )
 
         assets = assets_query.limit(per_page).all()
@@ -191,10 +192,9 @@ class AssetService:
             data["optimized"] = False
 
         # Only open raster images with Pillow (skip SVG)
-        is_raster = (
-            imghdr.what(None, h=file_content) is not None and not is_svg(
-                file_content)
-        )
+        is_raster = imghdr.what(
+            None, h=file_content
+        ) is not None and not is_svg(file_content)
         if is_raster:
             try:
                 # Use Pillow to open the image and get dimensions
