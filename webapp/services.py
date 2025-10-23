@@ -206,7 +206,8 @@ class AssetService:
                 data["width"] = None
                 data["height"] = None
         else:
-            # For SVG or non-raster, do not attempt Pillow; dimensions may be None
+            # For SVG or non-raster, do not attempt Pillow;
+            # dimensions may be None
             data.setdefault("width", None)
             data.setdefault("height", None)
 

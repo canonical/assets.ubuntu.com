@@ -200,7 +200,6 @@ def get_assets():
             search_params.start_date,
             search_params.end_date,
             search_params.language,
-            search_params.language,
             search_params.product_types,
             search_params.categories,
         ]
