@@ -9,6 +9,7 @@ from PIL import Image as PillowImage
 
 # Packages
 from sqlalchemy import func, or_
+from sqlalchemy.orm import selectinload
 
 # Local
 from webapp.config import config
@@ -44,8 +45,14 @@ class AssetService:
         assets_query = (
             db_session.query(Asset)
             .filter(*conditions)
+            .options(
+                selectinload(Asset.tags),
+                selectinload(Asset.products),
+                selectinload(Asset.categories),
+                selectinload(Asset.salesforce_campaigns),
+                selectinload(Asset.author),
+            )
             .offset((page - 1) * per_page)
-            .yield_per(100)
         )
 
         assets = assets_query.limit(per_page).all()
@@ -116,9 +123,15 @@ class AssetService:
         assets_query = (
             db_session.query(Asset)
             .filter(*conditions)
+            .options(
+                selectinload(Asset.tags),
+                selectinload(Asset.products),
+                selectinload(Asset.categories),
+                selectinload(Asset.salesforce_campaigns),
+                selectinload(Asset.author),
+            )
             .order_by(order_col.desc() if desc_order else order_col)
             .offset((page - 1) * per_page)
-            .yield_per(100)
         )
 
         assets = assets_query.limit(per_page).all()
@@ -176,7 +189,13 @@ class AssetService:
         else:
             # As it's not an image, there is no need for optimization
             data["optimized"] = False
-        if data.get("image"):
+
+        # Only open raster images with Pillow (skip SVG)
+        is_raster = (
+            imghdr.what(None, h=file_content) is not None and not is_svg(
+                file_content)
+        )
+        if is_raster:
             try:
                 # Use Pillow to open the image and get dimensions
                 with PillowImage.open(BytesIO(decoded_file_content)) as img:
@@ -186,6 +205,10 @@ class AssetService:
                 print(f"Error opening image with Pillow: {e}")
                 data["width"] = None
                 data["height"] = None
+        else:
+            # For SVG or non-raster, do not attempt Pillow; dimensions may be None
+            data.setdefault("width", None)
+            data.setdefault("height", None)
 
         # Try to optimize the asset if it's an image
         if data.get("image") and optimize:

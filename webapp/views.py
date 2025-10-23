@@ -180,7 +180,7 @@ def get_assets():
     """
     search_params = parse_asset_search_params()
 
-    file_type = request.values.get("type", "")
+    file_type = request.values.get("type", "").strip()
     page = request.values.get("page", type=int)
     per_page = request.values.get("per_page", type=int)
     include_deprecated = (
@@ -214,7 +214,7 @@ def get_assets():
             start_date=search_params.start_date,
             end_date=search_params.end_date,
             language=search_params.language,
-            file_types=[file_type],
+            file_types=[file_type] if file_type else [],
             page=page,
             per_page=per_page,
             include_deprecated=include_deprecated,
