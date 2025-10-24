@@ -170,8 +170,7 @@ curl https://assets.ubuntu.com/v1/?token={your-api-token}
 
 You can also filter the assets by:
 
-- `tag`: Filter the assets by a specific tag
-- `q`: A query string to filter the assets by filename, e.g. `q=ubuntu` will return all the assets with `ubuntu` in their filename
+- `tag`: Filter the assets by a specific tag or by a query string to filter the assets by filename, e.g. `tag=ubuntu` will return all the assets with `ubuntu` in their filename
 - `type`: The type of the asset, e.g. `type=png` will return all the assets with the `png` extension
 - `include_deprecated`: Whether to include or not the deprecated assets. Default is `false`
 

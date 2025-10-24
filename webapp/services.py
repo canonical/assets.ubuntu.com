@@ -9,6 +9,7 @@ from PIL import Image as PillowImage
 
 # Packages
 from sqlalchemy import func, or_
+from sqlalchemy.orm import selectinload
 
 # Local
 from webapp.config import config
@@ -29,12 +30,34 @@ from webapp.utils import lru_cache
 
 
 class AssetService:
-    def find_all_assets(self):
+    def find_all_assets(
+        self,
+        page: int = 1,
+        per_page: int = 16,
+        include_deprecated=False,
+        file_types: list = [],
+    ):
         """
         Return all assets in the database as a list
         """
-        assets = db_session.query(Asset).all()
-        return assets
+        conditions = []
+        if not include_deprecated:
+            conditions.append(Asset.deprecated.is_(False))
+        if file_types:
+            conditions.append(Asset.file_type.in_(file_types))
+
+        base_query = db_session.query(Asset).filter(*conditions)
+        assets_query = base_query.options(
+            selectinload(Asset.tags),
+            selectinload(Asset.products),
+            selectinload(Asset.categories),
+            selectinload(Asset.salesforce_campaigns),
+            selectinload(Asset.author),
+        ).offset((page - 1) * per_page)
+
+        assets = assets_query.limit(per_page).all()
+        total = base_query.count()
+        return assets, total
 
     def find_assets(
         self,
@@ -97,9 +120,15 @@ class AssetService:
         if file_types:
             conditions.append(Asset.file_type.in_(file_types))
 
+        base_query = db_session.query(Asset).filter(*conditions)
         assets_query = (
-            db_session.query(Asset)
-            .filter(*conditions)
+            base_query.options(
+                selectinload(Asset.tags),
+                selectinload(Asset.products),
+                selectinload(Asset.categories),
+                selectinload(Asset.salesforce_campaigns),
+                selectinload(Asset.author),
+            )
             .order_by(order_col.desc() if desc_order else order_col)
             .offset((page - 1) * per_page)
             .yield_per(100)
@@ -107,7 +136,7 @@ class AssetService:
 
         assets = assets_query.limit(per_page).all()
 
-        total = db_session.query(Asset).filter(*conditions).count()
+        total = base_query.count()
         return assets, total
 
     def find_asset(self, file_path):
@@ -160,7 +189,12 @@ class AssetService:
         else:
             # As it's not an image, there is no need for optimization
             data["optimized"] = False
-        if data.get("image"):
+
+        # Only open raster images with Pillow (skip SVG)
+        is_raster = imghdr.what(
+            None, h=file_content
+        ) is not None and not is_svg(file_content)
+        if is_raster:
             try:
                 # Use Pillow to open the image and get dimensions
                 with PillowImage.open(BytesIO(decoded_file_content)) as img:
@@ -170,6 +204,11 @@ class AssetService:
                 print(f"Error opening image with Pillow: {e}")
                 data["width"] = None
                 data["height"] = None
+        else:
+            # For SVG or non-raster, do not attempt Pillow;
+            # dimensions may be None
+            data.setdefault("width", None)
+            data.setdefault("height", None)
 
         # Try to optimize the asset if it's an image
         if data.get("image") and optimize:

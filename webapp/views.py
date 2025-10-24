@@ -180,7 +180,7 @@ def get_assets():
     """
     search_params = parse_asset_search_params()
 
-    file_type = request.values.get("type", "")
+    file_type = request.values.get("type", "").strip()
     page = request.values.get("page", type=int)
     per_page = request.values.get("per_page", type=int)
     include_deprecated = (
@@ -190,6 +190,7 @@ def get_assets():
     per_page = (
         20 if not per_page or per_page < 1 or per_page > 100 else per_page
     )
+    file_types = [file_type] if file_type else []
 
     if any(
         [
@@ -200,13 +201,12 @@ def get_assets():
             search_params.start_date,
             search_params.end_date,
             search_params.language,
-            search_params.language,
             search_params.product_types,
             search_params.categories,
         ]
     ):
         assets, total = asset_service.find_assets(
-            tag=search_params.tag,
+            tag=search_params.tag or search_params.name,
             asset_type=search_params.asset_type,
             product_types=search_params.product_types,
             categories=search_params.categories,
@@ -214,13 +214,18 @@ def get_assets():
             start_date=search_params.start_date,
             end_date=search_params.end_date,
             language=search_params.language,
-            file_types=[file_type],
+            file_types=file_types,
             page=page,
             per_page=per_page,
             include_deprecated=include_deprecated,
         )
     else:
-        assets = asset_service.find_all_assets()
+        assets, total = asset_service.find_all_assets(
+            page=page,
+            per_page=per_page,
+            include_deprecated=include_deprecated,
+            file_types=file_types,
+        )
 
     return jsonify(
         {

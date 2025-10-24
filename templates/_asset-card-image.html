@@ -11,6 +11,7 @@
           <div class="p-asset-card-image__container {% if asset.deprecated %}is-deprecated{% endif %}">
             {% if asset.data.image %}
               <img class="p-asset-card--thumbnail"
+                   loading="lazy"
                    alt=""
                    src="{{ url_for('api_blueprint.get_asset', file_path=asset.file_path) }}" />
             {% elif asset.asset_type == 'whitepaper' %}
