@@ -35,6 +35,7 @@ class AssetService:
         page: int = 1,
         per_page: int = 16,
         include_deprecated=False,
+        file_types: list = [],
     ):
         """
         Return all assets in the database as a list
@@ -42,6 +43,8 @@ class AssetService:
         conditions = []
         if not include_deprecated:
             conditions.append(Asset.deprecated.is_(False))
+        if file_types:
+            conditions.append(Asset.file_type.in_(file_types))
 
         base_query = db_session.query(Asset).filter(*conditions)
         assets_query = base_query.options(
