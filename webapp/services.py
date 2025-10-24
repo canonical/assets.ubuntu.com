@@ -42,21 +42,18 @@ class AssetService:
         conditions = []
         if not include_deprecated:
             conditions.append(Asset.deprecated.is_(False))
-        assets_query = (
-            db_session.query(Asset)
-            .filter(*conditions)
-            .options(
-                selectinload(Asset.tags),
-                selectinload(Asset.products),
-                selectinload(Asset.categories),
-                selectinload(Asset.salesforce_campaigns),
-                selectinload(Asset.author),
-            )
-            .offset((page - 1) * per_page)
-        )
+
+        base_query = db_session.query(Asset).filter(*conditions)
+        assets_query = base_query.options(
+            selectinload(Asset.tags),
+            selectinload(Asset.products),
+            selectinload(Asset.categories),
+            selectinload(Asset.salesforce_campaigns),
+            selectinload(Asset.author),
+        ).offset((page - 1) * per_page)
 
         assets = assets_query.limit(per_page).all()
-        total = db_session.query(Asset).filter(*conditions).count()
+        total = base_query.count()
         return assets, total
 
     def find_assets(
@@ -120,10 +117,9 @@ class AssetService:
         if file_types:
             conditions.append(Asset.file_type.in_(file_types))
 
+        base_query = db_session.query(Asset).filter(*conditions)
         assets_query = (
-            db_session.query(Asset)
-            .filter(*conditions)
-            .options(
+            base_query.options(
                 selectinload(Asset.tags),
                 selectinload(Asset.products),
                 selectinload(Asset.categories),
@@ -137,7 +133,7 @@ class AssetService:
 
         assets = assets_query.limit(per_page).all()
 
-        total = db_session.query(Asset).filter(*conditions).count()
+        total = base_query.count()
         return assets, total
 
     def find_asset(self, file_path):
