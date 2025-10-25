@@ -1,4 +1,5 @@
 import functools
+import os
 
 import flask
 from django_openid_auth.teams import TeamsRequest, TeamsResponse
@@ -48,6 +49,13 @@ def login_required(func):
 
     @functools.wraps(func)
     def is_user_logged_in(*args, **kwargs):
+        disable_auth = os.getenv("FLASK_DISABLE_AUTH_FOR_TESTS").lower() in (
+            "1",
+            "true",
+        )
+        if disable_auth:
+            return func(*args, **kwargs)
+
         if "openid" not in flask.session:
             return flask.redirect("/login?next=" + flask.request.path)
         response = flask.make_response(func(*args, **kwargs))

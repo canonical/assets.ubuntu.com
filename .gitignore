@@ -65,3 +65,7 @@ env[23]/
 
 # Project-specific ignores
 django-error.log
+
+# [playwright] Playwright test artifacts
+/playwright-report/
+/test-results/
