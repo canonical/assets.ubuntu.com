@@ -44,7 +44,7 @@ class TrinoSFConfig(BaseSettings):
     auth_provider_x509_cert_url: str = (
         "https://www.googleapis.com/oauth2/v1/certs"
     )
-    host: str = "trino.ps6.canonical.com"
+    host: str = "trino.canonical.com"
     connection_port: int = 443
     http_scheme: str = "https"
     catalog: str = "salesforce"
