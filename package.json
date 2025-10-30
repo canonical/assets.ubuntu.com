@@ -9,6 +9,9 @@
     "lint": "yarn run lint-scss && yarn run lint-python",
     "format-python": "black --line-length 79 webapp tests",
     "test-python": "python3 -m unittest discover tests",
+    "test-e2e": "playwright test",
+    "test-e2e-ui": "playwright test --ui",
+    "test-e2e-headed": "playwright test --headed",
     "build": "yarn run build-css && yarn run build-js",
     "build-css": "sass static/sass/main.scss static/css/main.css --load-path=node_modules --style=compressed && postcss --use autoprefixer --replace 'static/css/**/*.css' --no-map",
     "build-js": "node build.js",
@@ -16,6 +19,7 @@
     "watch-css": "watch -p 'static/sass/**/*.scss' -c 'yarn run build-css'",
     "watch-js": "watch -p 'static/js/**/*.js' -c 'yarn run build-js'",
     "serve": "./entrypoint 0.0.0.0:${PORT}",
+    "serve:test": "DISABLE_AUTH_FOR_TESTS=1 ./entrypoint 0.0.0.0:${PORT}",
     "test": "yarn run lint-scss && yarn run lint-python && yarn run test-python",
     "start": "yarn run build && concurrently --raw 'yarn run watch' 'yarn run serve'",
     "clean": "rm -rf node_modules yarn-error.log css static/css *.log *.sqlite _site/ build/ .jekyll-metadata .bundle"
@@ -32,7 +36,10 @@
     "watch-cli": "0.2.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.56.1",
+    "@types/node": "^24.9.1",
     "concurrently": "8.0.1",
-    "esbuild": "0.24.0"
+    "esbuild": "0.24.0",
+    "typescript": "^5.9.3"
   }
 }
