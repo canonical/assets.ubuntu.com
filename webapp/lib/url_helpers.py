@@ -1,5 +1,5 @@
-import os
 from slugify import slugify
+from pathlib import Path
 
 
 try:
@@ -25,12 +25,14 @@ def sanitize_filename(file_name: str) -> str:
     - Keeps A-Z, a-z, 0-9
     - Removes spaces
     - Replaces any other character with '-'
-    Preserves the last '.' before the extension
+    Preserves `.` characters in the file extension.
     """
     if not file_name:
         return ""
 
-    base, ext = os.path.splitext(file_name)
+    p = Path(file_name)
+    ext = "".join(p.suffixes)
+    base = file_name.removesuffix(ext)
 
     sanitized_base = slugify(base, separator="_")
 
