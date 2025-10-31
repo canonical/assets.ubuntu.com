@@ -61,9 +61,9 @@ jobs:
 
       - name: Test site
         env:
-          FLASK_DISABLE_AUTH_FOR_TESTS: true
+          FLASK_DISABLE_AUTH_FOR_TESTS: "true"
         run: |
-          FLASK_DISABLE_AUTH_FOR_TESTS=true nohup dotrun > server.log 2>&1 &
+          FLASK_DISABLE_AUTH_FOR_TESTS=true  dotrun & sleep 5
           echo "Waiting for server to start..."
           curl --head --fail --retry-delay 1 --retry 30 --retry-connrefused http://localhost:8017
 
