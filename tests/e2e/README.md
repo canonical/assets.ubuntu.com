@@ -13,8 +13,8 @@ End-to-end tests for the Assets Manager application.
    Note: It is recommended to start fr
    ```bash
    # Start your Docker containers
-   docker-compose down -v
-   docker-compose up -d --build
+   docker compose down -v
+   docker compose up -d --build
 
    
    # Start the app with auth disabled for testing

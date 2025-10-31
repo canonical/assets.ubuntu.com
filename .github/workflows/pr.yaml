@@ -68,6 +68,33 @@ jobs:
       - name: Run unit tests with coverage
         run: dotrun exec coverage run --source=. --module unittest discover tests && bash <(curl -s https://codecov.io/bash) -cF python
 
+      - name: Install Playwright
+        run: |
+          dotrun exec pip3 install playwright pytest-playwright
+          dotrun exec playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        run: dotrun exec playwright test --reporter=line,html
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: e2e-test-results
+          path: |
+            test-results/
+            screenshots/
+            playwright-report/
+          retention-days: 30
+
+      - name: Upload Playwright trace
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: playwright-traces
+          path: test-results/
+          retention-days: 30
+
   lint-scss:
     runs-on: ubuntu-latest
 
