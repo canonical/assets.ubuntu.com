@@ -69,12 +69,10 @@ jobs:
         run: dotrun exec coverage run --source=. --module unittest discover tests && bash <(curl -s https://codecov.io/bash) -cF python
 
       - name: Install Playwright
-        run: |
-          dotrun exec pip3 install playwright pytest-playwright
-          dotrun exec playwright install --with-deps chromium
+        run: yarn playwright install --with-deps
 
       - name: Run E2E tests
-        run: dotrun exec playwright test --reporter=line,html
+        run: yarn playwright test --reporter=line,html
 
       - name: Upload test results
         if: always()
