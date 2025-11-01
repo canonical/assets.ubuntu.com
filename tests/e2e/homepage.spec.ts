@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Homepage - Manager Page', () => {
+test.describe('Index page loading test', () => {
   test('should load the manager homepage', async ({ page }) => {
     await page.goto('/manager');
 
