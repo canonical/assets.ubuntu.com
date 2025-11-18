@@ -9,7 +9,7 @@ export default defineConfig({
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 4 : 2,
-  workers: process.env.CI ? 1 : 1,
+  workers: process.env.CI ? 1 : 4,
   reporter: 'html',
 
   use: {

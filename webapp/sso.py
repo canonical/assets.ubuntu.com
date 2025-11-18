@@ -55,9 +55,7 @@ def login_required(func):
             "1",
             "true",
         )
-        print(os.getenv("FLASK_DISABLE_AUTH_FOR_TESTS"))
-        print("FLASK_DISABLE_AUTH_FOR_TESTS =", disable_auth)
-        if True:
+        if disable_auth:
             return func(*args, **kwargs)
 
         if "openid" not in flask.session:
