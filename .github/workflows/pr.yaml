@@ -64,7 +64,7 @@ jobs:
         env:
           FLASK_DISABLE_AUTH_FOR_TESTS: "1"
         run: |
-          dotrun & sleep 25
+          FLASK_DISABLE_AUTH_FOR_TESTS=1 dotrun & sleep 25
           echo "Waiting for server to start..."
           curl --head --fail --retry-delay 1 --retry 30 --retry-connrefused http://localhost:8017
 
@@ -80,7 +80,7 @@ jobs:
       - name: Run E2E tests
         env:
           FLASK_DISABLE_AUTH_FOR_TESTS: "1"
-        run: yarn playwright test --reporter=line,html
+        run: FLASK_DISABLE_AUTH_FOR_TESTS=1 yarn playwright test --reporter=line,html
 
       - name: Upload test results
         if: always()
