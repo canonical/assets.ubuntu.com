@@ -77,6 +77,8 @@ jobs:
         run: yarn playwright install --with-deps
 
       - name: Run E2E tests
+        env:
+          FLASK_DISABLE_AUTH_FOR_TESTS: "true"
         run: yarn playwright test --reporter=line,html
 
       - name: Upload test results
