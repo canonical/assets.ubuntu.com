@@ -55,7 +55,7 @@ def login_required(func):
             "1",
             "true",
         )
-        if True:
+        if disable_auth:
             return func(*args, **kwargs)
 
         if "openid" not in flask.session:
