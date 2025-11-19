@@ -32,7 +32,8 @@ jobs:
 
   run-tests:
     runs-on: ubuntu-latest
-
+    env:
+      FLASK_DISABLE_AUTH_FOR_TESTS: "1"
     services:
       postgres:
         image: postgres
@@ -60,8 +61,6 @@ jobs:
         run: dotrun build
 
       - name: Test site
-        env:
-          FLASK_DISABLE_AUTH_FOR_TESTS: "true"
         run: |
           dotrun & sleep 25
           echo "Waiting for server to start..."
@@ -77,8 +76,6 @@ jobs:
         run: yarn playwright install --with-deps
 
       - name: Run E2E tests
-        env:
-          FLASK_DISABLE_AUTH_FOR_TESTS: "true"
         run: yarn playwright test --reporter=line,html
 
       - name: Upload test results
