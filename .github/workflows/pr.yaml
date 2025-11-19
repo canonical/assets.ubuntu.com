@@ -54,6 +54,8 @@ jobs:
         run: |
           sudo pip3 install dotrun requests==2.31.0 # requests version is pinned to avoid breaking changes, can be removed once issue is resolved: https://github.com/docker/docker-py/issues/3256
           chmod -R 777 .
+          echo "FLASK_DISABLE_AUTH_FOR_TESTS=true" >> .env
+
       - name: Install dependencies
         run: dotrun install
 
