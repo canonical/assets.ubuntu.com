@@ -1,5 +1,7 @@
 import { test as base, Page } from '@playwright/test';
-import path from 'path';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as os from 'os';
 
 type TestAssets = {
     asset1: { name: string; type: string; tags: string[] };
@@ -9,6 +11,34 @@ type TestAssets = {
 type WorkerFixtures = {
     testAssets: TestAssets;
 };
+
+// Temp directory for worker-scoped file generation
+let workerTempDir: string | null = null;
+
+function ensureTempDir(): string {
+    if (!workerTempDir) {
+        workerTempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'playwright-worker-'));
+    }
+    return workerTempDir;
+}
+
+function createTempFile(fileName: string, content: string): string {
+    const tempDir = ensureTempDir();
+    const filePath = path.join(tempDir, fileName);
+    fs.writeFileSync(filePath, content, 'utf-8');
+    return filePath;
+}
+
+function cleanupTempDir(): void {
+    if (workerTempDir && fs.existsSync(workerTempDir)) {
+        const files = fs.readdirSync(workerTempDir);
+        files.forEach((file) => {
+            fs.unlinkSync(path.join(workerTempDir!, file));
+        });
+        fs.rmdirSync(workerTempDir);
+        workerTempDir = null;
+    }
+}
 
 // Fixture to create assets before search
 export const test = base.extend<{}, WorkerFixtures>({
@@ -31,9 +61,13 @@ export const test = base.extend<{}, WorkerFixtures>({
             },
         };
 
+        // Create temporary test files
+        const file1Path = createTempFile('pre_test_asset_1.txt', 'pre test asset 1 content');
+        const file2Path = createTempFile('pre_test_asset_2.txt', 'pre test asset 2 content');
+
         // Create first test asset
         await createAsset(page, {
-            fileName: 'pre_test_asset_1.txt',
+            filePath: file1Path,
             assetType: 'guide',
             assetName: assets.asset1.name,
             productTagSearch: 'digital',
@@ -46,7 +80,7 @@ export const test = base.extend<{}, WorkerFixtures>({
 
         // Create second test asset
         await createAsset(page, {
-            fileName: 'pre_test_asset_2.txt',
+            filePath: file2Path,
             assetType: 'image',
             assetName: assets.asset2.name,
             productTagSearch: 'amd',
@@ -58,6 +92,9 @@ export const test = base.extend<{}, WorkerFixtures>({
         console.log(`Created ${assets.asset2.name}`);
 
         await context.close();
+        
+        // Cleanup temporary files
+        cleanupTempDir();
     }, { scope: 'worker' }],
 });
 
@@ -67,7 +104,7 @@ export { expect } from '@playwright/test';
 async function createAsset(
     page: Page,
     options: {
-        fileName: string;
+        filePath: string;
         assetType: string;
         assetName: string;
         productTagSearch: string;
@@ -79,10 +116,9 @@ async function createAsset(
     await page.goto('/manager/create');
 
     // Upload file
-    const filePath = path.resolve(__dirname, `../test_upload_files/${options.fileName}`);
     await page
         .getByRole('button', { name: 'Choose files to upload' })
-        .setInputFiles(filePath);
+        .setInputFiles(options.filePath);
 
     // Set asset type
     await page.locator('#asset-type-select').selectOption(options.assetType);

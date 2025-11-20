@@ -13,8 +13,8 @@ End-to-end tests for the Assets Manager application.
    Note: It is recommended to start fr
    ```bash
    # Start your Docker containers
-   docker-compose down -v
-   docker-compose up -d --build
+   docker compose down -v
+   docker compose up -d --build
 
    
    # Start the app with auth disabled for testing
@@ -52,13 +52,17 @@ npx playwright test search_assets.spec.ts
 - `create_assets.spec.ts` - Tests asset creation (single and multiple)
 - `search_assets.spec.ts` - Tests search and filter functionality (uses fixtures for test data)
 - `fixtures/test-assets.fixture.ts` - Fixture that creates test assets for search tests
+- `fixtures/temp-files.fixture.ts` - Fixture for creating temporary test files dynamically
 
+## Test Files
+
+All test files are generated **dynamically** at runtime. There are no static test files checked into the repository. This is achieved via `temp-files.fixture.ts`.
 
 ## Writing Tests
 
 Test files should follow the pattern `*.spec.ts` and be placed in `tests/e2e/`.
 
-Example:
+### Basic Example:
 ```typescript
 import { test, expect } from '@playwright/test';
 

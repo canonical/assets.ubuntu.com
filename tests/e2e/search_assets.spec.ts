@@ -1,4 +1,4 @@
-import { test, expect } from './fixtures/test-assets.fixture';
+import { test, expect } from './fixtures/create-test-assets.fixture';
 import { Page } from '@playwright/test';
 
 // So that all the tests run in a single worker and fixtures are only run once

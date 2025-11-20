@@ -1,14 +1,11 @@
-import { test, expect, Page, Locator } from '@playwright/test';
-import path from 'path';
+import { test, expect } from './fixtures/temp-files.fixture';
+import { Page, Locator } from '@playwright/test';
 
 async function navigateToCreatePage(page: Page) {
     await page.goto('/manager/create');
 }
 
-async function uploadFiles(page: Page, fileNames: string[]) {
-    const filePaths = fileNames.map((name) =>
-        path.resolve(__dirname, `./test_upload_files/${name}`)
-    );
+async function uploadFiles(page: Page, filePaths: string[]) {
     const uploadButton = page.getByRole('button', {
         name: 'Choose files to upload',
     });
@@ -76,11 +73,14 @@ async function verifyAssetContent(page: Page, pageElement: Locator, expectedText
 }
 
 test.describe('Asset creation flow', () => {
-    test('single asset creation', async ({ page }) => {
+    test('single asset creation', async ({ page, tempFiles }) => {
+        // Create temporary test file
+        const file1Path = tempFiles.createFile('test_upload_1.txt', 'test upload 1');
+        
         await navigateToCreatePage(page);
 
         // Upload single file
-        await uploadFiles(page, ['test_upload_1.txt']);
+        await uploadFiles(page, [file1Path]);
 
         // Fill metadata
         await fillAssetMetadata(page, {
@@ -112,11 +112,15 @@ test.describe('Asset creation flow', () => {
         await verifyAssetContent(page, assetCardThumbnail, 'test upload 1');
     });
 
-    test('multiple assets creation', async ({ page }) => {
+    test('multiple assets creation', async ({ page, tempFiles }) => {
+        // Create temporary test files
+        const file2Path = tempFiles.createFile('test_upload_2.txt', 'test upload 2');
+        const file3Path = tempFiles.createFile('test_upload_3.txt', 'test upload 3');
+        
         await navigateToCreatePage(page);
 
         // Upload multiple files
-        await uploadFiles(page, ['test_upload_2.txt', 'test_upload_3.txt']);
+        await uploadFiles(page, [file2Path, file3Path]);
 
         // Fill metadata
         await fillAssetMetadata(page, {

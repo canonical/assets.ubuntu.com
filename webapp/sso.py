@@ -49,7 +49,9 @@ def login_required(func):
 
     @functools.wraps(func)
     def is_user_logged_in(*args, **kwargs):
-        disable_auth = os.getenv("FLASK_DISABLE_AUTH_FOR_TESTS").lower() in (
+        disable_auth = str(
+            os.getenv("FLASK_DISABLE_AUTH_FOR_TESTS", "")
+        ).lower() in (
             "1",
             "true",
         )
