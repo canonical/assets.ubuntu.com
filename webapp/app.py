@@ -1,7 +1,7 @@
 import errno
 import http.client
 from typing import Optional
-import os
+
 import flask
 from canonicalwebteam.flask_base.app import FlaskBase
 from flask import redirect
@@ -29,8 +29,6 @@ csrf.init_app(app)
 csrf.exempt(api_blueprint)
 init_sso(app)
 
-print("App initialized")
-print( "os variable" , os.getenv("FLASK_DISABLE_AUTH_FOR_TESTS"))
 
 # Error pages
 # ===
