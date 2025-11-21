@@ -29,7 +29,7 @@ RUN --mount=type=cache,target=/root/.cache/pip python3 -m venv .venv \
 
 # Build stage: Install yarn dependencies
 # ===
-FROM node:20 AS yarn-dependencies
+FROM node:25 AS yarn-dependencies
 WORKDIR /srv
 ADD . .
 RUN --mount=type=cache,target=/usr/local/share/.cache/yarn yarn install
