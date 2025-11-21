@@ -10,9 +10,12 @@ End-to-end tests for the Assets Manager application.
    ```
 
 2. Make sure your application is running with all required Docker containers:
+   Note: It is recommended to start fr
    ```bash
    # Start your Docker containers
-   docker-compose up -d
+   docker compose down -v
+   docker compose up -d --build
+
    
    # Start the app with auth disabled for testing
    FLASK_DISABLE_AUTH_FOR_TESTS=true
@@ -32,7 +35,10 @@ yarn run test-e2e-ui
 yarn run test-e2e-headed
 
 # Run specific test file
-npx playwright test homepage.spec.js
+npx playwright test homepage.spec.ts
+
+# Run only search tests (fixtures create data automatically)
+npx playwright test search_assets.spec.ts
 ```
 
 ## Configuration
@@ -40,11 +46,23 @@ npx playwright test homepage.spec.js
 - Test directory: `tests/e2e/`
 - Configuration file: `playwright.config.ts`
 
+## Test Structure
+
+- `homepage.spec.ts` - Tests homepage and navigation
+- `create_assets.spec.ts` - Tests asset creation (single and multiple)
+- `search_assets.spec.ts` - Tests search and filter functionality (uses fixtures for test data)
+- `fixtures/test-assets.fixture.ts` - Fixture that creates test assets for search tests
+- `fixtures/temp-files.fixture.ts` - Fixture for creating temporary test files dynamically
+
+## Test Files
+
+All test files are generated **dynamically** at runtime. There are no static test files checked into the repository. This is achieved via `temp-files.fixture.ts`.
+
 ## Writing Tests
 
 Test files should follow the pattern `*.spec.ts` and be placed in `tests/e2e/`.
 
-Example:
+### Basic Example:
 ```typescript
 import { test, expect } from '@playwright/test';
 
