@@ -32,7 +32,6 @@ jobs:
 
   run-tests:
     runs-on: ubuntu-latest
-
     services:
       postgres:
         image: postgres
@@ -53,6 +52,8 @@ jobs:
         run: |
           sudo pip3 install dotrun requests==2.31.0 # requests version is pinned to avoid breaking changes, can be removed once issue is resolved: https://github.com/docker/docker-py/issues/3256
           chmod -R 777 .
+          echo "FLASK_DISABLE_AUTH_FOR_TESTS=true" >> .env
+
       - name: Install dependencies
         run: dotrun install
 
@@ -60,13 +61,41 @@ jobs:
         run: dotrun build
 
       - name: Test site
-        run: dotrun & curl --head --fail --retry-delay 1 --retry 30 --retry-connrefused http://localhost:8017
+        run: |
+          dotrun & sleep 25
+          echo "Waiting for server to start..."
+          curl --head --fail --retry-delay 1 --retry 30 --retry-connrefused http://localhost:8017
 
       - name: Install additional dependencies
         run: dotrun exec pip3 install coverage
 
       - name: Run unit tests with coverage
         run: dotrun exec coverage run --source=. --module unittest discover tests && bash <(curl -s https://codecov.io/bash) -cF python
+
+      - name: Install Playwright
+        run: yarn playwright install --with-deps
+
+      - name: Run E2E tests
+        run: yarn playwright test --reporter=line,html
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-test-results
+          path: |
+            test-results/
+            screenshots/
+            playwright-report/
+          retention-days: 30
+
+      - name: Upload Playwright trace
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: test-results/
+          retention-days: 30
 
   lint-scss:
     runs-on: ubuntu-latest
