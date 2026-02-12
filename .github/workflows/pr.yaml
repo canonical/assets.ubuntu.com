@@ -43,6 +43,8 @@ jobs:
           sudo pip3 install dotrun requests==2.31.0 # requests version is pinned to avoid breaking changes, can be removed once issue is resolved: https://github.com/docker/docker-py/issues/3256
           chmod -R 777 .
           echo "FLASK_DISABLE_AUTH_FOR_TESTS=true" >> .env
+          echo "FLASK_DATABASE_URL=postgresql://assets:password@localhost:5432/assets" >> .env
+          echo "FLASK_OS_AUTH_URL=http://localhost:8080/auth/v1.0" >> .env
 
       - name: Install dependencies
         run: dotrun install
