@@ -23,8 +23,9 @@ services:
   app:
     build: .
     env_file:
-      - .env
-      - .env.local
+      - path: .env
+      - path: .env.local
+        required: false
     ports:
       - "${PORT}:80"
     volumes:
@@ -35,6 +36,12 @@ services:
         condition: service_healthy
       swift:
         condition: service_started
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/manager"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
 volumes:
   postgres-data:
   swift-data:
