@@ -22,3 +22,13 @@ tasks:
     desc: "Rebuild the project. Only run this if you have made changes to the Docker related files (Dockerfile, docker-compose.yaml)."
     cmds:
       - docker compose up -d --build
+
+  format-python:
+    desc: "Format python code"
+    cmds:
+      - docker exec assetsubuntucom-app-1 yarn format-python
+
+  lint:
+    desc: "Run code linters"
+    cmds:
+      - docker exec assetsubuntucom-app-1 yarn lint
