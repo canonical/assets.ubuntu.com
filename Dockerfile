@@ -43,13 +43,23 @@ RUN yarn build
 # ===
 FROM python-dependencies AS production
 
+# Install Node.js and yarn for running lint and format commands
+RUN apt-get update && apt-get install --no-install-recommends --yes \
+    curl gnupg \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install --no-install-recommends --yes nodejs \
+    && npm install -g yarn \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 # Set up environment
 WORKDIR /srv
+ENV PATH="/srv/.venv/bin:$PATH"
 
 # Import code, build assets and mirror list
-RUN rm -rf package.json yarn.lock requirements.txt
+RUN rm -rf requirements.txt
 COPY --from=build /srv/static/css static/css
 COPY --from=build /srv/static/js/dist static/js/dist
+COPY --from=yarn-dependencies /srv/node_modules node_modules
 
 # Set revision ID
 ARG BUILD_ID

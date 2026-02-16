@@ -4,31 +4,21 @@ on: pull_request
 jobs:
   run-image:
     runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgres
-        env:
-          POSTGRES_DB: assets
-          POSTGRES_USER: assets
-          POSTGRES_PASSWORD: password
-        ports:
-          - 5432:5432
-      swift:
-        image: bouncestorage/swift-aio
-        ports:
-          - 8080:8080
     steps:
       - uses: actions/checkout@v3
 
-      - name: Build image
-        run: DOCKER_BUILDKIT=1 docker build --tag assets-ubuntu-com .
+      - name: Install Taskfile
+        uses: arduino/setup-task@v2
+        with:
+          version: 3.x
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Run image
+      - name: Run project
+        run: task && sleep 60
+
+      - name: Ping application and verify it's running
         run: |
-          docker run --detach --env-file .env --network host assets-ubuntu-com
-          sleep 1
-          curl --head --fail --retry-delay 1 --retry 30 --retry-connrefused http://localhost
+          curl --head --fail --retry-delay 1 --retry 30 --retry-connrefused http://localhost:8017
 
   run-tests:
     runs-on: ubuntu-latest
@@ -53,6 +43,8 @@ jobs:
           sudo pip3 install dotrun requests==2.31.0 # requests version is pinned to avoid breaking changes, can be removed once issue is resolved: https://github.com/docker/docker-py/issues/3256
           chmod -R 777 .
           echo "FLASK_DISABLE_AUTH_FOR_TESTS=true" >> .env
+          echo "FLASK_DATABASE_URL=postgresql://assets:password@localhost:5432/assets" >> .env
+          echo "FLASK_OS_AUTH_URL=http://localhost:8080/auth/v1.0" >> .env
 
       - name: Install dependencies
         run: dotrun install
@@ -121,7 +113,7 @@ jobs:
       - name: Install python dependencies
         run: |
           python3 -m pip install --upgrade pip
-          sudo pip3 install flake8 black
+          sudo pip3 install flake8 black==25.1.0
 
       - name: Lint python
         run: yarn lint-python

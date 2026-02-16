@@ -1,0 +1,61 @@
+version: "3"
+
+dotenv: [".env", ".env.local"]
+
+tasks:
+  default:
+    desc: "Start the project"
+    cmds:
+      - docker compose up -d
+
+  stop:
+    desc: "Stop the project"
+    cmds:
+      - docker compose down
+
+  cleanup:
+    desc: "Stop containers and remove volumes"
+    cmds:
+      - docker compose down -v
+
+  rebuild:
+    desc: "Rebuild the project. Only run this if you have made changes to the Docker related files (Dockerfile, docker-compose.yaml)."
+    cmds:
+      - docker compose up -d --build
+
+  format-python:
+    desc: "Format python code"
+    cmds:
+      - docker exec assetsubuntucom-app-1 yarn format-python
+
+  lint:
+    desc: "Run code linters"
+    cmds:
+      - docker exec assetsubuntucom-app-1 yarn lint
+
+  test-python:
+    desc: "Run tests"
+    cmds:
+      - docker exec assetsubuntucom-app-1 yarn test-python
+
+  test-e2e:
+    desc: "Run end-to-end tests"
+    cmds:
+      - docker exec assetsubuntucom-app-1 yarn playwright install
+      - docker exec assetsubuntucom-app-1 yarn test-e2e
+
+  build:
+    desc: "Build the project"
+    cmds:
+      - docker exec assetsubuntucom-app-1 yarn build
+
+  watch:
+    desc: "Watch the project"
+    cmds:
+      - docker exec assetsubuntucom-app-1 yarn watch
+
+  test:
+    desc: "Run all tests"
+    cmds:
+      - task: lint
+      - task: test-python
