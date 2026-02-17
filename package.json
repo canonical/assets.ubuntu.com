@@ -28,7 +28,7 @@
     "autoprefixer": "10.4.14",
     "flatpickr": "4.6.13",
     "fuse.js": "7.0.0",
-    "postcss": "8.4.21",
+    "postcss": "8.4.31",
     "postcss-cli": "10.1.0",
     "sass": "1.79.0",
     "sass-lint": "1.13.1",
