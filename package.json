@@ -29,7 +29,7 @@
     "flatpickr": "4.6.13",
     "fuse.js": "7.0.0",
     "postcss": "8.4.21",
-    "postcss-cli": "10.1.0",
+    "postcss-cli": "11.0.1",
     "sass": "1.79.0",
     "sass-lint": "1.13.1",
     "vanilla-framework": "4.34.1",
@@ -38,7 +38,7 @@
   "devDependencies": {
     "@playwright/test": "^1.56.1",
     "@types/node": "^24.9.1",
-    "concurrently": "8.0.1",
+    "concurrently": "9.2.1",
     "esbuild": "0.24.0",
     "typescript": "^5.9.3"
   }
