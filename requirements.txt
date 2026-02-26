@@ -20,6 +20,6 @@ python-slugify==8.0.4
 trino==0.335.0
 google-auth==2.40.3
 cryptography==46.0.1
-setuptools==79.0.1
-black==25.1.0
+setuptools==82.0.0
+black==26.1.0
 flake8==7.1.1
