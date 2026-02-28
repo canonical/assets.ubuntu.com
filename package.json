@@ -25,12 +25,12 @@
     "clean": "rm -rf node_modules yarn-error.log css static/css *.log *.sqlite _site/ build/ .jekyll-metadata .bundle"
   },
   "dependencies": {
-    "autoprefixer": "10.4.14",
+    "autoprefixer": "10.4.27",
     "flatpickr": "4.6.13",
-    "fuse.js": "7.0.0",
+    "fuse.js": "7.1.0",
     "postcss": "8.4.21",
     "postcss-cli": "10.1.0",
-    "sass": "1.79.0",
+    "sass": "1.97.3",
     "sass-lint": "1.13.1",
     "vanilla-framework": "4.34.1",
     "watch-cli": "0.2.3"
@@ -38,7 +38,7 @@
   "devDependencies": {
     "@playwright/test": "^1.56.1",
     "@types/node": "^24.9.1",
-    "concurrently": "8.0.1",
+    "concurrently": "8.2.2",
     "esbuild": "0.24.0",
     "typescript": "^5.9.3"
   }
