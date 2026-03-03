@@ -1847,10 +1847,10 @@ util@^0.10.3:
   dependencies:
     inherits "2.0.3"
 
-vanilla-framework@4.34.1:
-  version "4.34.1"
-  resolved "https://registry.npmjs.org/vanilla-framework/-/vanilla-framework-4.34.1.tgz"
-  integrity sha512-ycuVdn0yYsDuRbMD7mTbGPQ2r8y0FtL601Sa0id5ozHS24wzBd7Yp1w1TLYprvP5q7dCO5r6fne/k/bw08e0tg==
+vanilla-framework@4.45.0:
+  version "4.45.0"
+  resolved "https://registry.yarnpkg.com/vanilla-framework/-/vanilla-framework-4.45.0.tgz#87eb579d6252b4ab7f7ba1cb5ce6f433bb555ad8"
+  integrity sha512-u+dnT5B13heYc1mjU81tt8lzoqjIXKdCFnUQe+hj6DvRB8BMChH6MDbtkQqRSfWPALGBvEXPU8siAbmjXFPY9A==
 
 verbalize@^0.1.2:
   version "0.1.2"
