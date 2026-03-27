@@ -27,17 +27,20 @@ services:
       - path: .env.local
         required: false
     ports:
-      - "${PORT}:80"
+      - "${PORT}:${PORT}"
     volumes:
       - .:/srv
       - /srv/.venv
+      - /srv/node_modules
+    command: ["yarn", "start"]
+    entrypoint: []
     depends_on:
       postgres:
         condition: service_healthy
       swift:
         condition: service_started
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80/manager"]
+      test: ["CMD", "curl", "-f", "http://localhost:${PORT}/manager"]
       interval: 5s
       timeout: 5s
       retries: 30

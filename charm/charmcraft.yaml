@@ -39,3 +39,6 @@ config:
     trino-sf:
       type: secret
       description: Trino credentials, must contain (project-id, private-key-id, client-email, client-id, private-key)
+    sso:
+      type: secret
+      description: SSO credentials, must contain (client-id, client-secret, provider)
