@@ -1,6 +1,6 @@
 import functools
 import os
-from urllib.parse import urlparse
+from urllib.parse import urljoin, urlparse
 
 import flask
 from authlib.integrations.flask_client import OAuth
@@ -12,10 +12,32 @@ SSO_TEAM = "canonical-content-people"
 LAUNCHPAD_API_URL = "https://api.launchpad.net/1.0"
 
 
-def _safe_redirect_url(target):
-    if target and urlparse(target).netloc == "":
-        return target
-    return "/manager"
+def is_safe_url(target):
+    if not target:
+        return False
+
+    # Security: Prevent "///" or "\\\" bypasses
+    # that some browsers interpret as absolute URLs
+    if target.startswith(("\\", "//")):
+        return False
+
+    ref_url = urlparse(flask.request.host_url)
+    test_url = urlparse(urljoin(flask.request.host_url, target))
+
+    return (
+        test_url.scheme in ("http", "https")
+        and ref_url.netloc == test_url.netloc
+    )
+
+
+def _safe_redirect():
+    # .get() returns None if missing, which is_safe_url handles
+    target = flask.request.args.get("next")
+
+    if not is_safe_url(target):
+        return flask.redirect("/manager")
+
+    return flask.redirect(target)
 
 
 def init_sso(app):
@@ -36,9 +58,7 @@ def init_sso(app):
     @app.route("/login")
     def login():
         if "openid" in flask.session:
-            return flask.redirect(
-                _safe_redirect_url(flask.request.args.get("next"))
-            )
+            return _safe_redirect()
 
         redirect_uri = flask.url_for("oauth_callback", _external=True)
         return oauth.canonical.authorize_redirect(redirect_uri)
@@ -77,10 +97,7 @@ def init_sso(app):
             "email": token["userinfo"]["email"],
             "fullname": token["userinfo"]["name"],
         }
-
-        return flask.redirect(
-            _safe_redirect_url(flask.request.args.get("next"))
-        )
+        return _safe_redirect()
 
 
 def login_required(func):
