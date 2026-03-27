@@ -9,6 +9,7 @@ Pillow==10.4.0
 psycopg2-binary==2.9.9
 python-keystoneclient==5.4.0
 python-swiftclient==4.6.0
+gunicorn<22.0.0
 requests==2.32.3
 scour==0.38.2
 sh==2.0.7
