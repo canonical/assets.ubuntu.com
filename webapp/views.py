@@ -474,20 +474,21 @@ def delete_redirect(redirect_path):
     return jsonify({}), 204
 
 
-def get_users(username: str):
+def get_users_data(username: str):
     query = """
-    query($name: String!) {
-        employees(filter: { contains: { name: $name }}) {
-            id
-            firstName
-            surname
-            email
-            team
-            department
-            jobTitle
+        query($name: String!) {
+            employees(filter: { contains: { name: $name }}) {
+                id
+                firstName
+                surname
+                email
+                team
+                department
+                jobTitle
+                launchpadId
+            }
         }
-    }
-    """
+        """
 
     headers = {
         "Authorization": "token "
@@ -506,6 +507,14 @@ def get_users(username: str):
 
     if response.status_code == 200:
         users = response.json().get("data", {}).get("employees", [])
+        return users, 200
+
+    return None, response.status_code
+
+
+def get_users(username: str):
+    users, status_code = get_users_data(username)
+    if status_code == 200:
         return jsonify(list(users))
     return jsonify({"error": "Failed to fetch users"}), 500
 
