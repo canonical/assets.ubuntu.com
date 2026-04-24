@@ -60,7 +60,9 @@ def init_sso(app):
     @app.route("/auth/callback")
     def oauth_callback():
         token = oauth.canonical.authorize_access_token()
-
+        user_email = token["userinfo"]["email"]
+        if not user_email.endswith("@canonical.com"):
+          flask.abort(403, description="Canonical employees only")
         flask.session["openid"] = {
             "identity_url": token["userinfo"]["iss"],
             "email": token["userinfo"]["email"],
