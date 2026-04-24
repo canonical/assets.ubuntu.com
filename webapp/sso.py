@@ -4,12 +4,6 @@ from urllib.parse import urljoin, urlparse
 
 import flask
 from authlib.integrations.flask_client import OAuth
-import requests
-
-from webapp.views import get_users_data
-
-SSO_TEAM = "canonical-content-people"
-LAUNCHPAD_API_URL = "https://api.launchpad.net/1.0"
 
 
 def is_safe_url(target):
@@ -66,32 +60,9 @@ def init_sso(app):
     @app.route("/auth/callback")
     def oauth_callback():
         token = oauth.canonical.authorize_access_token()
-        users, status_code = get_users_data(token["userinfo"]["name"])
-
-        if status_code != 200 or not users:
-            flask.abort(
-                403, description="Failed to fetch user data from directory."
-            )
-
-        response = requests.get(
-            f"{LAUNCHPAD_API_URL}/~{users[0]['launchpadId']}/super_teams",
-        )
-
-        if response.status_code != 200:
-            flask.abort(
-                403, description="Failed to fetch Launchpad team memberships."
-            )
-
-        memberships = response.json().get("entries", [])
-        if SSO_TEAM not in [team["name"] for team in memberships]:
-            flask.abort(
-                403,
-                description=(
-                    "Please make sure you are a member of the "
-                    "canonical-content-people team on Launchpad."
-                ),
-            )
-
+        user_email = token["userinfo"]["email"]
+        if not user_email.endswith("@canonical.com"):
+            flask.abort(403, description="Canonical employees only")
         flask.session["openid"] = {
             "identity_url": token["userinfo"]["iss"],
             "email": token["userinfo"]["email"],
