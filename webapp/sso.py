@@ -62,7 +62,7 @@ def init_sso(app):
         token = oauth.canonical.authorize_access_token()
         user_email = token["userinfo"]["email"]
         if not user_email.endswith("@canonical.com"):
-          flask.abort(403, description="Canonical employees only")
+            flask.abort(403, description="Canonical employees only")
         flask.session["openid"] = {
             "identity_url": token["userinfo"]["iss"],
             "email": token["userinfo"]["email"],
