@@ -39,7 +39,7 @@
     "@playwright/test": "^1.56.1",
     "@types/node": "^24.9.1",
     "concurrently": "8.0.1",
-    "esbuild": "0.24.0",
+    "esbuild": "0.25.0",
     "typescript": "^5.9.3"
   }
 }
