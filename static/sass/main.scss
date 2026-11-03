@@ -36,6 +36,7 @@
   overflow: hidden;
   display: grid;
   place-items: center;
+  align-content: center;
 
   &.is-deprecated img {
     opacity: 0.5;
